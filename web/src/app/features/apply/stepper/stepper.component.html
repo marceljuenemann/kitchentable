@@ -1,0 +1,207 @@
+<mat-toolbar color="primary">
+  <span>Kitchentable</span>
+  <span class="spacer"></span>
+  @if (userEmail()) {
+    <span class="email">{{ userEmail() }}</span>
+  }
+  <button mat-button (click)="signOut()">Sign out</button>
+</mat-toolbar>
+
+@if (loading()) {
+  <div class="loading">
+    <mat-spinner diameter="32" />
+  </div>
+} @else {
+  <div class="apply-page">
+    @switch (profile()?.application_status) {
+      @case ('pending') {
+        <div class="status-banner status-pending">
+          Your application is under review. You can still make changes below.
+        </div>
+      }
+      @case ('approved') {
+        <div class="status-banner status-approved">
+          You're approved! The rest of Kitchentable is coming soon.
+        </div>
+      }
+      @case ('rejected') {
+        <div class="status-banner status-rejected">
+          Your application wasn't approved. Feel free to update it and submit again.
+        </div>
+      }
+    }
+
+    <mat-stepper #stepper orientation="vertical" linear [selectedIndex]="initialStepIndex()">
+      <mat-step [stepControl]="locationForm" label="Location">
+        <form [formGroup]="locationForm" (ngSubmit)="saveLocationAndNext()">
+          <p>Kitchentable is currently for the London ENM community.</p>
+          <mat-radio-group formControlName="isLondon" class="radio-group">
+            <mat-radio-button value="london">I'm based in London</mat-radio-button>
+            <mat-radio-button value="other">Somewhere else</mat-radio-button>
+          </mat-radio-group>
+
+          @if (locationForm.controls.isLondon.value === 'other') {
+            <mat-form-field appearance="outline">
+              <mat-label>Where are you based?</mat-label>
+              <input matInput formControlName="otherLocation" />
+            </mat-form-field>
+          }
+
+          <div class="step-actions">
+            <button mat-flat-button color="primary" type="submit" [disabled]="locationForm.invalid || saving()">
+              Next
+            </button>
+          </div>
+        </form>
+      </mat-step>
+
+      <mat-step [stepControl]="aboutForm" label="About you">
+        <form [formGroup]="aboutForm" (ngSubmit)="saveAboutAndNext()">
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Pronouns</mat-label>
+            <input matInput formControlName="pronouns" placeholder="e.g. she/her" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Tagline</mat-label>
+            <input matInput formControlName="tagline" placeholder="A one-liner about you" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Gender</mat-label>
+            <mat-select formControlName="gender" multiple>
+              @for (option of genderOptions; track option.key) {
+                <mat-option [value]="option.key">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Sexuality</mat-label>
+            <mat-select formControlName="sexuality" multiple>
+              @for (option of sexualityOptions; track option.key) {
+                <mat-option [value]="option.key">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <div class="birth-fields">
+            <mat-form-field appearance="outline">
+              <mat-label>Birth year</mat-label>
+              <mat-select formControlName="birthYear">
+                @for (year of years; track year) {
+                  <mat-option [value]="year">{{ year }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Birth month</mat-label>
+              <mat-select formControlName="birthMonth">
+                @for (month of months; track month.value) {
+                  <mat-option [value]="month.value">{{ month.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline">
+            <mat-label>What connections are you looking for?</mat-label>
+            <mat-select formControlName="lookingFor" multiple>
+              @for (option of lookingForOptions; track option.key) {
+                <mat-option [value]="option.key">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <div class="step-actions">
+            <button mat-button type="button" matStepperPrevious>Back</button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="aboutForm.invalid || saving()">
+              Next
+            </button>
+          </div>
+        </form>
+      </mat-step>
+
+      <mat-step [stepControl]="bioForm" label="Bio">
+        <form [formGroup]="bioForm" (ngSubmit)="saveBioAndNext()">
+          <mat-form-field appearance="outline">
+            <mat-label>Tell people about yourself</mat-label>
+            <textarea matInput formControlName="bio" rows="6"></textarea>
+          </mat-form-field>
+
+          <div class="step-actions">
+            <button mat-button type="button" matStepperPrevious>Back</button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="bioForm.invalid || saving()">
+              Next
+            </button>
+          </div>
+        </form>
+      </mat-step>
+
+      <mat-step [completed]="photos().length > 0" label="Photos">
+        <p>Add at least one photo.</p>
+
+        <div class="photo-grid">
+          @for (photo of photos(); track photo.id) {
+            <div class="photo-tile">
+              <img [src]="photo.url" alt="" />
+              <button mat-icon-button type="button" (click)="removePhoto(photo)" aria-label="Remove photo">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+
+        <input type="file" accept="image/*" (change)="onFileSelected($event)" #fileInput hidden />
+        <button mat-stroked-button type="button" (click)="fileInput.click()">Add photo</button>
+
+        @if (uploadError()) {
+          <p class="error">{{ uploadError() }}</p>
+        }
+
+        <div class="step-actions">
+          <button mat-button type="button" matStepperPrevious>Back</button>
+          <button mat-flat-button color="primary" type="button" [disabled]="photos().length === 0" matStepperNext>
+            Next
+          </button>
+        </div>
+      </mat-step>
+
+      <mat-step [stepControl]="questionsForm" label="Consent & ENM">
+        <form [formGroup]="questionsForm" (ngSubmit)="submitApplication()">
+          <mat-form-field appearance="outline">
+            <mat-label>What is consent and why is it important?</mat-label>
+            <textarea matInput formControlName="consentAnswer" rows="4"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>What does ENM mean to you, and what's your level of experience?</mat-label>
+            <textarea matInput formControlName="enmAnswer" rows="4"></textarea>
+          </mat-form-field>
+
+          @if (submitError()) {
+            <p class="error">{{ submitError() }}</p>
+          }
+
+          <div class="step-actions">
+            <button mat-button type="button" matStepperPrevious>Back</button>
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="questionsForm.invalid || photos().length === 0 || saving()"
+            >
+              {{ profile()?.application_status === 'rejected' ? 'Resubmit application' : 'Submit application' }}
+            </button>
+          </div>
+        </form>
+      </mat-step>
+    </mat-stepper>
+  </div>
+}

@@ -1,0 +1,49 @@
+<div class="start-page">
+  <mat-card class="start-card">
+    @if (!sent()) {
+      <h1>Apply to join Kitchentable</h1>
+      <p class="intro">
+        Kitchentable is currently invite-only for the London ENM community. You'll need an
+        invite code to apply.
+      </p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email" />
+          @if (form.controls.email.hasError('email')) {
+            <mat-error>Enter a valid email address</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Invite code</mat-label>
+          <input matInput formControlName="inviteCode" />
+        </mat-form-field>
+
+        @if (errorMessage()) {
+          <p class="error">{{ errorMessage() }}</p>
+        }
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="form.invalid || submitting()"
+        >
+          @if (submitting()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Send me a login link
+          }
+        </button>
+      </form>
+    } @else {
+      <h1>Check your email</h1>
+      <p class="intro">
+        We've sent a login link to {{ form.controls.email.value }}. Open it on this device to
+        continue your application.
+      </p>
+    }
+  </mat-card>
+</div>

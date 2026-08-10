@@ -1,0 +1,25 @@
+.start-page {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
+
+.start-card {
+  max-width: 28rem;
+  width: 100%;
+  padding: 2rem;
+}
+
+.intro {
+  margin-bottom: 1.5rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.error {
+  color: var(--mat-sys-error);
+}

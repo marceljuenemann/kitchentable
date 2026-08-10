@@ -1,0 +1,11 @@
+{
+  "name": "kitchentable",
+  "private": true,
+  "description": "An open-source, non-profit dating app, starting with a focus on the ENM (ethically non-monogamous) community in London.",
+  "scripts": {
+    "supabase": "supabase"
+  },
+  "devDependencies": {
+    "supabase": "^2.113.0"
+  }
+}
