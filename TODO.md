@@ -1,5 +1,6 @@
 # TODO
 
+- Add Terms & Conditions and Privacy Policy
 - Add database documentation
 - Review code under web/
 - Application fields to JSON?

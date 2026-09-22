@@ -122,3 +122,24 @@
     width: 100%;
   }
 }
+
+.site-footer {
+  margin-top: 56px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 14px;
+  padding-bottom: 24px;
+
+  a {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--kt-muted);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--kt-ink);
+    }
+  }
+}
