@@ -1,4 +1,4 @@
-# Kitchentable
+# Kitchen Table
 
 An open-source, non-profit dating app, starting with a focus on the ENM (ethically non-monogamous) community in London.
 

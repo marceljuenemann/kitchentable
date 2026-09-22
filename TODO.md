@@ -1,5 +1,10 @@
 # TODO
 
+- Application fields to JSON?
+- Profile not updateable? Stored procedure only? Constraints on fields?
+- Recreate database (single migration)
+- GitHub workflow
+
 ## Testing
 
 - **No automated frontend/e2e test suite yet.** The application flow (invite → magic link → apply stepper → submission) was verified manually with a throwaway Playwright script during development, not checked into the repo. Worth adding a real Playwright test suite once the UI stabilizes, covering at least: invite gating, the full apply flow with autosave/resume, and photo upload.
