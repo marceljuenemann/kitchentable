@@ -6,6 +6,8 @@ See [PRODUCT.md](PRODUCT.md) for the full mission, principles, business model, a
 
 Status: early-stage. The invite-gated application flow (magic-link sign-in, London check, profile, photos, consent/ENM questions, submission) is built; browse, connections, and messaging are not yet.
 
+A redesign of the onboarding/application flow is specced (not yet built) as a design handoff in [prototype/onboarding](prototype/onboarding/README.md) — open `design/Onboarding.dc.html` in a browser to click through it.
+
 ## Local development
 
 **Prerequisites:** Node.js, Docker (for the local Supabase stack).

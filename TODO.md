@@ -1,5 +1,7 @@
 # TODO
 
+- Add database documentation
+- Review code under web/
 - Application fields to JSON?
 - Profile not updateable? Stored procedure only? Constraints on fields?
 - Recreate database (single migration)

@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;600;700;800&amp;family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;1,6..12,400&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+--violet:oklch(0.29 0.15 300.5);--violet-soft:oklch(0.42 0.19 300);--violet-container:oklch(0.925 0.032 300);
+--sky:oklch(0.48 0.12 233);--sky-container:oklch(0.925 0.043 233);
+--magenta:oklch(0.5 0.216 341);--magenta-container:oklch(0.935 0.038 341);
+--gold:oklch(0.48 0.12 68);--gold-container:oklch(0.935 0.05 84);
+--bg:oklch(0.995 0.004 95);--ink:oklch(0.21 0.095 300);--muted:oklch(0.42 0.045 300);
+--raised:oklch(1 0 0);--sunken:oklch(0.958 0.008 95);
+--cream:oklch(0.955 0.032 88);--cream-strong:oklch(0.925 0.048 86);
+--outline:oklch(0.55 0.03 300);--outline-soft:oklch(0.885 0.012 95);--input:oklch(0.855 0.016 95);
+--shadow-soft:0 1px 2px oklch(0.3 0.12 300 / .07), 0 10px 26px -14px oklch(0.3 0.12 300 / .22);
+--shadow-lift:0 2px 6px oklch(0.3 0.12 300 / .1), 0 22px 46px -20px oklch(0.3 0.12 300 / .3);
+--display:"Baloo Bhaijaan 2","Trebuchet MS",sans-serif;
+--sans:"Nunito Sans",system-ui,sans-serif;
+}
+body{margin:0;background:oklch(0.9 0.01 300);color:oklch(0.21 0.095 300);font-family:"Nunito Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;display:flex;justify-content:center}
+a{color:oklch(0.42 0.19 300)}a:hover{color:oklch(0.29 0.15 300.5)}
+*{box-sizing:border-box}
+</style>
+</helmet>
+
+<div style="position:relative;width:min(600px,100vw);height:844px;max-height:100vh;margin:0 auto;background:var(--bg);box-shadow:0 0 0 1px oklch(0.29 0.15 300.5 / .08), var(--shadow-lift);font-family:var(--sans);color:var(--ink);display:flex;flex-direction:column;overflow:hidden">
+
+<sc-if value="{{ showStepper }}" hint-placeholder-val="{{ false }}">
+<header style="flex:none;padding:14px 16px 12px;display:flex;flex-direction:column;gap:12px;background:var(--raised)">
+<div style="display:flex;align-items:center;justify-content:center;gap:9px">
+<svg viewBox="0 0 360 360" width="30" height="30" role="img" aria-label="Kitchen Table" style="flex:none"><g transform="translate(180 180)" fill="none" stroke-width="30" stroke-linecap="round"><circle r="58" stroke="#3B176F"></circle><path d="M-109.5 -23.3A112 112 0 0 1 -23.3 -109.5" stroke="#70C4EC"></path><path d="M23.3 -109.5A112 112 0 0 1 109.5 -23.3" stroke="#C83897"></path><path d="M109.5 23.3A112 112 0 0 1 23.3 109.5" stroke="#E3AF47"></path><path d="M-23.3 109.5A112 112 0 0 1 -109.5 23.3" stroke="#6C3AB2"></path></g></svg>
+<span style="font-family:var(--display);font-size:14px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--violet)">Kitchen Table</span>
+</div>
+<div style="display:flex;align-items:center;gap:12px">
+<sc-if value="{{ showBack }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ back }}" aria-label="Back" style="width:44px;height:44px;flex:none;border:0;border-radius:99px;background:var(--sunken);color:var(--violet);cursor:pointer;display:inline-flex;align-items:center;justify-content:center">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</button>
+</sc-if>
+<div style="flex:1 1 auto;height:6px;border-radius:99px;background:var(--outline-soft);overflow:hidden">
+<div style="height:100%;border-radius:99px;background:var(--violet);width:{{ progressPct }};transition:width .3s ease-out"></div>
+</div>
+</div>
+</header>
+</sc-if>
+
+
+
+<div onClick="{{ closeSheet }}" style="position: absolute; inset: 0; z-index: 60; background: oklch(0.29 0.15 300.5 / .4); transition: opacity .3s; opacity: {{ sheetScrim }}; pointer-events: {{ sheetEvents }}; left: -104px; top: -57px"></div>
+<div data-ob-scroll="1" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; background: {{ contentBg }}; padding: {{ contentPad }}; top: 657px">
+
+<sc-if value="{{ isStep0 }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:430px;margin:0 auto">
+<div style="position:relative;padding:40px 0 0;display:flex;align-items:center;gap:13px">
+<svg viewBox="0 0 360 360" width="60" height="60" role="img" aria-label="Kitchen Table" style="position:relative;flex:none"><g transform="translate(180 180)" fill="none" stroke-width="24" stroke-linecap="round"><circle r="70" stroke="#3B176F"></circle><path d="M-101.73 -21.62A104 104 0 0 1 -21.62 -101.73" stroke="#70C4EC"></path><path d="M21.62 -101.73A104 104 0 0 1 101.73 -21.62" stroke="#C83897"></path><path d="M101.73 21.62A104 104 0 0 1 21.62 101.73" stroke="#E3AF47"></path><path d="M-21.62 101.73A104 104 0 0 1 -101.73 21.62" stroke="#6C3AB2"></path></g><path transform="translate(180 180) scale(.9) translate(0 8)" fill="#E3AF47" d="M0 26C-22 8-38-4-38-20c0-13 10-22 21-22 8 0 14 5 17 11 3-6 9-11 17-11 11 0 21 9 21 22C38-4 22 8 0 26Z"></path></svg><span style="position:relative;font-family:var(--display);font-size:23px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--violet)">Kitchen Table</span>
+
+</div>
+
+<h1 style="margin:34px 0 0;font-family:var(--display);font-size:42px;font-weight:800;line-height:1.03;letter-spacing:-.02em;color:var(--violet);text-wrap:balance">Let's fix ENM dating.</h1>
+
+<p style="margin:16px 0 0;font-size:17.5px;line-height:1.5;color:var(--muted);text-wrap:pretty">Kitchen Table is a new dating community for non-monogamous folks in London.</p>
+
+<ul style="list-style:none;margin:26px 0 0;padding:0;display:flex;flex-direction:column;gap:13px">
+<li style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start">
+<span style="width:9px;height:9px;flex:none;border-radius:99px;background:var(--sky);margin-top:7px"></span>
+<span style="min-width:0;font-size:15.5px;line-height:1.5;text-wrap:pretty"><b>Non-profit.</b>&nbsp;No need to pay just to see who likes you</span>
+</li>
+<li style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start">
+<span style="width:9px;height:9px;flex:none;border-radius:99px;background:var(--magenta);margin-top:7px"></span>
+<span style="min-width:0;font-size:15.5px;line-height:1.5;text-wrap:pretty"><b>Invite-only. </b>Only vetted members, no fake profiles</span>
+</li>
+<li style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start">
+<span style="width:9px;height:9px;flex:none;border-radius:99px;background:var(--gold);margin-top:7px"></span>
+<span style="min-width:0;font-size:15.5px;line-height:1.5;text-wrap:pretty"><b>Community-driven.</b>&nbsp;Contribute to guidelines, product decisions, or the open-source code</span>
+</li>
+</ul>
+
+<sc-if value="{{ emailSent }}" hint-placeholder-val="{{ false }}">
+<div style="margin:28px 0 8px;border-radius:24px;border:1px solid var(--cream-strong);background:var(--cream);padding:24px 20px">
+<div style="display:flex;align-items:center;gap:12px">
+<span style="flex:none;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:99px;background:var(--raised)">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--violet)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 7.5h17v10h-17z"></path><path d="M3.5 8l8.5 6 8.5-6"></path></svg>
+</span>
+<h2 style="margin:0;min-width:0;font-family:var(--display);font-size:20px;font-weight:700;color:var(--violet)">Don't check your inbox yet</h2>
+</div>
+<p style="margin:14px 0 0;font-size:15px;line-height:1.55;color:var(--ink);text-wrap:pretty">In the real implementation an email would be sent to <b style="overflow-wrap:anywhere">{{ email }}</b> at this point. For now, just click the button below to carry on.</p>
+<button onClick="{{ next }}" style="margin-top:18px;width:100%;height:52px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16.5px;font-weight:700;cursor:pointer">Continue the flow</button>
+<p style="margin:14px 0 0;text-align:center">
+<button onClick="{{ backToSignUp }}" style="border:0;background:transparent;padding:6px 0;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--muted);text-decoration:underline;cursor:pointer">Use a different email</button>
+</p>
+</div>
+</sc-if>
+
+<sc-if value="{{ showSignUp }}" hint-placeholder-val="{{ true }}">
+<div style="margin:28px 0 8px;border-radius:24px;border:1px solid var(--outline-soft);background:var(--bg);padding:24px 20px">
+<h2 style="margin:0;font-family:var(--display);font-size:20px;font-weight:700;color:var(--violet)">Sign Up</h2>
+
+<label for="ob-email" style="display:block;margin-top:16px;font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Email</label>
+<input id="ob-email" type="email" value="{{ email }}" onChange="{{ setEmail }}" placeholder="you@example.com" style="margin-top:8px;height:52px;width:100%;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:0 16px;font-family:var(--sans);font-size:16px;color:var(--ink)">
+
+<div style="margin-top:18px;display:flex;align-items:flex-start;gap:11px">
+<button onClick="{{ toggleAgree }}" role="checkbox" aria-checked="{{ agree }}" aria-label="I agree to the Terms and Privacy Policy" style="width:24px;height:24px;flex:none;padding:0;border-radius:8px;border:2px solid {{ agreeBorder }};background:{{ agreeBg }};display:inline-flex;align-items:center;justify-content:center;margin-top:-1px;cursor:pointer">
+<sc-if value="{{ agree }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="oklch(0.995 0.004 95)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5.2 5.2L20 7"></path></svg>
+</sc-if>
+</button>
+<span style="min-width:0;font-size:14.5px;line-height:1.5;color:var(--ink)">
+<span onClick="{{ toggleAgree }}" style="cursor:pointer">I agree to the </span><a href="#" onClick="{{ stopLink }}">Terms</a><span onClick="{{ toggleAgree }}" style="cursor:pointer"> and </span><a href="#" onClick="{{ stopLink }}">Privacy Policy</a><span onClick="{{ toggleAgree }}" style="cursor:pointer">.</span>
+</span>
+</div>
+
+<button onClick="{{ sendLink }}" disabled="{{ step0Disabled }}" style="margin-top:20px;width:100%;height:52px;border:0;border-radius:99px;background:{{ step0Bg }};color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16.5px;font-weight:700;cursor:{{ step0Cursor }}">Sign up</button>
+
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ false }}">
+<div>
+<p style="margin:18px 0 0;font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--magenta)">{{ stepLabel }}</p>
+<h1 style="margin:6px 0 0;font-family:var(--display);font-size:26px;font-weight:700;color:var(--violet)">Create profile</h1>
+
+<label for="ob-name" style="display:block;margin-top:22px;font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Name</label>
+<input id="ob-name" value="{{ name }}" onChange="{{ setName }}" placeholder="What should people call you?" style="margin-top:8px;height:52px;width:100%;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:0 16px;font-family:var(--sans);font-size:16px;color:var(--ink)">
+
+<div style="margin-top:20px;display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ fieldRows }}" as="r" hint-placeholder-count="3">
+<button onClick="{{ r.open }}" style="min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-radius:14px;border:{{ r.border }};background:{{ r.bg }};font-family:var(--sans);text-align:left;cursor:pointer">
+<span style="min-width:0;display:flex;flex-direction:column;gap:2px">
+<span style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">{{ r.label }}<span style="font-weight:600;letter-spacing:0;text-transform:none;opacity:.7">{{ r.optional }}</span></span>
+<span style="font-size:15.5px;font-weight:700;line-height:1.35;color:{{ r.valueColor }};text-wrap:pretty">{{ r.value }}</span>
+</span>
+<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+</sc-for>
+</div>
+
+<p style="margin:20px 0 9px;font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Location</p>
+<div style="display:flex;gap:8px">
+<sc-for list="{{ locationOptions }}" as="l" hint-placeholder-count="2">
+<button onClick="{{ l.pick }}" aria-pressed="{{ l.on }}" style="flex:1 1 0;min-height:52px;display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:14px;border:{{ l.border }};background:{{ l.bg }};color:{{ l.color }};font-family:var(--sans);font-size:15.5px;font-weight:700;cursor:pointer">
+<span style="width:20px;height:20px;flex:none;border-radius:99px;border:2px solid {{ l.dotBorder }};display:inline-flex;align-items:center;justify-content:center">
+<span style="width:10px;height:10px;border-radius:99px;background:{{ l.dotFill }}"></span>
+</span>
+{{ l.label }}
+</button>
+</sc-for>
+</div>
+
+<sc-if value="{{ isOtherLocation }}" hint-placeholder-val="{{ false }}">
+<div>
+<div style="margin-top:12px;border-radius:16px;border:1px solid var(--cream-strong);background:var(--cream);padding:15px 16px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--gold)" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="margin-top:1px;flex:none"><path d="M12 4.5 21 19.5H3z"></path><path d="M12 10.5v3.4M12 16.6v.3"></path></svg>
+<p style="margin:0;min-width:0;font-size:14.5px;line-height:1.55;color:var(--ink);text-wrap:pretty"><b>We've only launched in London so far.</b> Leave your city and we'll email you when Kitchen Table opens where you are — you won't appear in search until then.</p>
+</div>
+<label for="ob-loc-other" style="display:block;margin-top:14px;font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Where are you?</label>
+<input id="ob-loc-other" value="{{ locationOther }}" onChange="{{ setLocationOther }}" placeholder="e.g. Manchester, Berlin" style="margin-top:8px;height:52px;width:100%;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:0 16px;font-family:var(--sans);font-size:16px;color:var(--ink)">
+</div>
+</sc-if>
+
+<button onClick="{{ next }}" disabled="{{ step1Disabled }}" style="margin-top:26px;width:100%;height:52px;border:0;border-radius:99px;background:{{ step1Bg }};color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16.5px;font-weight:700;cursor:{{ step1Cursor }}">Continue</button>
+
+
+</div>
+</sc-if>
+
+<sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+<div>
+<p style="margin:18px 0 0;font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--magenta)">{{ stepLabel }}</p>
+<h1 style="margin:6px 0 0;font-family:var(--display);font-size:26px;font-weight:700;color:var(--violet)">About you</h1>
+
+<label for="ob-tagline" style="display:block;margin-top:22px;font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Tagline</label>
+<input id="ob-tagline" maxlength="60" value="{{ tagline }}" onChange="{{ setTagline }}" placeholder="One line summary that people see first" style="margin-top:9px;height:52px;width:100%;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:0 16px;font-family:var(--sans);font-size:16px;color:var(--ink)">
+<p style="margin:3px 2px 0;text-align:right;font-size:11px;font-weight:600;color:var(--outline)">{{ taglineCount }}</p>
+
+<label for="ob-about" style="display:block;margin-top:14px;font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">About you</label>
+<textarea id="ob-about" rows="7" value="{{ aboutText }}" onChange="{{ setAboutText }}" placeholder="Tell people more about yourself and what you're looking for" style="margin-top:9px;width:100%;box-sizing:border-box;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:14px 16px;font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--ink);resize:vertical"></textarea>
+<p style="margin:6px 2px 0;text-align:right;font-size:12px;font-weight:600;color:{{ aboutHintColor }}">{{ aboutHint }}</p>
+
+<p style="margin:22px 0 0;font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Looking for</p>
+<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ dynamicChips }}" as="d" hint-placeholder-count="9">
+<button onClick="{{ d.toggle }}" aria-pressed="{{ d.on }}" style="min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 15px;border-radius:99px;border:{{ d.border }};background:{{ d.bg }};color:{{ d.color }};font-family:var(--sans);font-size:14.5px;font-weight:700;cursor:pointer">
+{{ d.label }}
+<sc-if value="{{ d.on }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M5 13l4 4L19 7"></path></svg>
+</sc-if>
+</button>
+</sc-for>
+</div>
+
+<div style="margin-top:12px;display:flex;gap:8px">
+<input id="ob-dyn" value="{{ dynamicDraft }}" onChange="{{ setDynamicDraft }}" onKeyDown="{{ dynamicKeyDown }}" placeholder="Add your own" style="flex:1 1 auto;min-width:0;height:48px;border-radius:99px;border:1px solid var(--input);background:var(--bg);padding:0 18px;font-family:var(--sans);font-size:15.5px;color:var(--ink)">
+<button onClick="{{ addDynamic }}" disabled="{{ addDynamicDisabled }}" style="flex:none;height:48px;padding:0 20px;border:0;border-radius:99px;background:{{ addDynamicBg }};color:{{ addDynamicColor }};font-family:var(--sans);font-size:15.5px;font-weight:700;cursor:{{ addDynamicCursor }}">Add</button>
+</div>
+
+<button onClick="{{ next }}" disabled="{{ step2Disabled }}" style="margin-top:26px;width:100%;height:52px;border:0;border-radius:99px;background:{{ step2Bg }};color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16.5px;font-weight:700;cursor:{{ step2Cursor }}">Continue</button>
+
+</div>
+</sc-if>
+
+<sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ false }}">
+<div>
+<p style="margin:18px 0 0;font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--magenta)">{{ stepLabel }}</p>
+<h1 style="margin:6px 0 0;font-family:var(--display);font-size:26px;font-weight:700;color:var(--violet)">Add photos</h1>
+<p style="margin:8px 0 0;font-size:15px;line-height:1.5;color:var(--muted);text-wrap:pretty">Select up to six photos. Drag to reorder.</p>
+
+<div style="margin-top:18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+<sc-for list="{{ photoTiles }}" as="t" hint-placeholder-count="6">
+<div draggable="{{ t.draggable }}" onDragStart="{{ t.dragStart }}" onDragOver="{{ t.dragOver }}" onDrop="{{ t.drop }}" onDragEnd="{{ t.dragEnd }}" style="grid-area:{{ t.area }};position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;opacity:{{ t.opacity }}">
+<sc-if value="{{ t.filled }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0">
+<svg viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="{{ t.alt }}" style="position:absolute;inset:0;width:100%;height:100%;cursor:grab">
+<rect width="300" height="300" fill="{{ t.c1 }}"></rect>
+<circle cx="150" cy="118" r="52" fill="{{ t.c3 }}"></circle>
+<path d="M150 182c-58 0-96 38-102 88h204c-6-50-44-88-102-88Z" fill="{{ t.c3 }}"></path>
+<circle cx="150" cy="150" r="140" fill="none" stroke="{{ t.c2 }}" stroke-width="16"></circle>
+</svg>
+<sc-if value="{{ t.isMain }}" hint-placeholder-val="{{ false }}">
+<span style="position:absolute;left:8px;bottom:8px;padding:5px 10px;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Main</span>
+</sc-if>
+<button onClick="{{ t.remove }}" aria-label="{{ t.removeLabel }}" style="position:absolute;right:6px;top:6px;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:99px;background:oklch(0.22 0.03 300 / .62);cursor:pointer">
+<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="oklch(0.995 0.004 95)" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+</button>
+</div>
+</sc-if>
+<sc-if value="{{ t.empty }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ t.add }}" aria-label="{{ t.addLabel }}" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1.5px dashed var(--input);border-radius:14px;background:var(--sunken);font-family:var(--sans);cursor:pointer">
+<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--violet)" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+<span style="font-size:12px;font-weight:700;color:var(--muted)">{{ t.addLabel }}</span>
+</button>
+</sc-if>
+</div>
+</sc-for>
+</div>
+
+<div style="margin-top:14px;border-radius:16px;border:1px solid var(--cream-strong);background:var(--cream);padding:14px 16px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--gold)" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="margin-top:1px;flex:none"><path d="M12 4.5 21 19.5H3z"></path><path d="M12 10.5v3.4M12 16.6v.3"></path></svg>
+<p style="margin:0;min-width:0;font-size:14.5px;line-height:1.55;color:var(--ink);text-wrap:pretty"><b>Photo picker not yet implemented.</b> Tapping a square drops in a sample picture so the rest of the flow can be tried out.</p>
+</div>
+
+<sc-if value="{{ noPhotos }}" hint-placeholder-val="{{ true }}">
+<p style="margin:14px 0 0;font-size:13.5px;font-weight:700;color:var(--magenta)">Add at least one photo to continue.</p>
+</sc-if>
+
+<button onClick="{{ next }}" disabled="{{ step3Disabled }}" style="margin-top:20px;width:100%;height:52px;border:0;border-radius:99px;background:{{ step3Bg }};color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16.5px;font-weight:700;cursor:{{ step3Cursor }}">Continue</button>
+
+</div>
+</sc-if>
+
+<sc-if value="{{ isStep4 }}" hint-placeholder-val="{{ false }}">
+<div>
+<p style="margin:18px 0 0;font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--magenta)">{{ stepLabel }}</p>
+<h1 style="margin:6px 0 0;font-family:var(--display);font-size:26px;font-weight:700;color:var(--violet)">Vetting</h1>
+<p style="margin:8px 0 0;font-size:15px;line-height:1.5;color:var(--muted);text-wrap:pretty">These answers are not shown on your profile.</p>
+
+<p style="margin:22px 0 0;font-size:16.5px;font-weight:700;line-height:1.4;color:var(--ink);text-wrap:pretty">In your own words, what is consent and why is it important?</p>
+<textarea id="ob-vet-consent" rows="4" value="{{ vetConsent }}" onChange="{{ setVetConsent }}" placeholder="Write as much or as little as you need" style="margin-top:10px;width:100%;box-sizing:border-box;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:14px 16px;font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--ink);resize:vertical"></textarea>
+<p style="margin:6px 2px 0;text-align:right;font-size:12px;font-weight:600;color:{{ vetConsentColor }}">{{ vetConsentHint }}</p>
+
+<p style="margin:22px 0 0;font-size:16.5px;font-weight:700;line-height:1.4;color:var(--ink);text-wrap:pretty">What guidelines do you think everyone in the Kitchen Table community should adhere to?</p>
+<textarea id="ob-vet-why" rows="4" value="{{ vetWhy }}" onChange="{{ setVetWhy }}" placeholder="Write as much or as little as you need" style="margin-top:10px;width:100%;box-sizing:border-box;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:14px 16px;font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--ink);resize:vertical"></textarea>
+<p style="margin:6px 2px 0;text-align:right;font-size:12px;font-weight:600;color:{{ vetWhyColor }}">{{ vetWhyHint }}</p>
+
+<button onClick="{{ submit }}" disabled="{{ step4Disabled }}" style="margin-top:24px;width:100%;height:52px;border:0;border-radius:99px;background:{{ step4Bg }};color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16.5px;font-weight:700;cursor:{{ step4Cursor }}">Submit application</button>
+
+</div>
+</sc-if>
+
+<sc-if value="{{ isSubmitted }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:40px">
+<div style="display:flex;align-items:center;gap:13px">
+<svg viewBox="0 0 360 360" width="60" height="60" role="img" aria-label="Kitchen Table" style="flex:none"><g transform="translate(180 180)" fill="none" stroke-width="24" stroke-linecap="round"><circle r="70" stroke="#3B176F"></circle><path d="M-101.73 -21.62A104 104 0 0 1 -21.62 -101.73" stroke="#70C4EC"></path><path d="M21.62 -101.73A104 104 0 0 1 101.73 -21.62" stroke="#C83897"></path><path d="M101.73 21.62A104 104 0 0 1 21.62 101.73" stroke="#E3AF47"></path><path d="M-21.62 101.73A104 104 0 0 1 -101.73 21.62" stroke="#6C3AB2"></path></g><path transform="translate(180 180) scale(.9) translate(0 8)" fill="#E3AF47" d="M0 26C-22 8-38-4-38-20c0-13 10-22 21-22 8 0 14 5 17 11 3-6 9-11 17-11 11 0 21 9 21 22C38-4 22 8 0 26Z"></path></svg>
+<span style="font-family:var(--display);font-size:23px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--violet)">Kitchen Table</span>
+</div>
+<div style="margin-top:38px;display:flex;align-items:center;gap:14px">
+<span style="flex:none;display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:99px;background:var(--violet-container)">
+<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--violet)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"></path></svg>
+</span>
+<h1 style="margin:0;min-width:0;font-family:var(--display);font-size:24px;font-weight:700;line-height:1.2;color:var(--violet);text-wrap:pretty">Your application is being reviewed</h1>
+</div>
+<p style="margin:16px 0 0;font-size:16px;line-height:1.6;color:var(--ink);text-wrap:pretty">You will be emailed once your application has been reviewed.</p>
+
+</div>
+</sc-if>
+
+<sc-if value="{{ showFooter }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:34px;padding-top:18px;border-top:1px solid var(--outline-soft);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 14px">
+<p style="flex:1 1 100%;margin:0;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:4px 10px;font-size:13px;line-height:1.5;color:var(--muted)">
+<span style="overflow-wrap:anywhere">Signed in as <span style="font-weight:700;color:var(--ink)">{{ email }}</span></span>
+<button onClick="{{ logOut }}" style="border:0;background:transparent;padding:0;font-family:var(--sans);font-size:13px;font-weight:700;color:var(--violet);cursor:pointer">Sign out</button>
+</p>
+<a href="#" style="padding:6px 0;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none">Contact</a>
+<a href="#" style="padding:6px 0;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none">Terms &amp; Conditions</a>
+<a href="#" style="padding:6px 0;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none">Privacy Policy</a>
+<button onClick="{{ restart }}" style="flex:1 1 100%;border:0;background:transparent;padding:6px 0;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--outline);text-decoration:underline;cursor:pointer">Prototype: back to start</button>
+</div>
+</sc-if>
+</div><div role="dialog" aria-modal="true" aria-label="{{ sheetTitle }}" style="position:absolute;left:0;right:0;bottom:0;z-index:61;max-height:84%;display:flex;flex-direction:column;border-radius:32px 32px 0 0;background:var(--raised);box-shadow:var(--shadow-lift);transition:transform .3s ease-out;transform:{{ sheetTransform }};pointer-events:{{ sheetEvents }}">
+<div style="flex:none;padding:16px 20px 0">
+<div style="margin:0 auto;height:5px;width:44px;border-radius:99px;background:var(--outline-soft)"></div>
+<div style="margin-top:14px;display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;color:var(--violet)">{{ sheetTitle }}</h2>
+<sc-if value="{{ sheetShowsClear }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ clearField }}" style="border:0;background:transparent;padding:4px 0;font-family:var(--sans);font-size:13.5px;font-weight:700;color:var(--muted);cursor:pointer">Clear</button>
+</sc-if>
+</div>
+<p style="margin:6px 0 0;font-size:14px;line-height:1.5;color:var(--muted);text-wrap:pretty">{{ sheetHelp }}</p>
+</div>
+
+<div style="flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none;padding:16px 20px">
+<sc-if value="{{ sheetIsAge }}" hint-placeholder-val="{{ false }}">
+<div>
+<div style="display:flex;gap:10px">
+<span style="flex:1 1 auto;min-width:0">
+<label for="ob-month" style="display:block;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Month</label>
+<select id="ob-month" value="{{ birthMonth }}" onChange="{{ setBirthMonth }}" style="margin-top:8px;height:52px;width:100%;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:0 12px;font-family:var(--sans);font-size:16px;color:var(--ink)">
+<option value="">Month</option>
+<sc-for list="{{ monthOptions }}" as="m" hint-placeholder-count="12">
+<option value="{{ m.value }}">{{ m.label }}</option>
+</sc-for>
+</select>
+</span>
+<span style="flex:0 0 130px">
+<label for="ob-year" style="display:block;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Year</label>
+<select id="ob-year" value="{{ birthYear }}" onChange="{{ setBirthYear }}" style="margin-top:8px;height:52px;width:100%;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:0 12px;font-family:var(--sans);font-size:16px;color:var(--ink)">
+<option value="">Year</option>
+<sc-for list="{{ yearOptions }}" as="y" hint-placeholder-count="10">
+<option value="{{ y }}">{{ y }}</option>
+</sc-for>
+</select>
+</span>
+</div>
+<p style="margin:14px 0 0;font-size:15px;font-weight:700;color:{{ ageEchoColor }}">{{ ageEcho }}</p>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetIsChoice }}" hint-placeholder-val="{{ true }}">
+<div>
+<sc-if value="{{ sheetIsSingle }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ sheetOptions }}" as="o" hint-placeholder-count="7">
+<button onClick="{{ o.toggle }}" role="radio" aria-checked="{{ o.on }}" style="min-height:52px;display:flex;align-items:center;gap:11px;padding:0 15px;border-radius:14px;border:{{ o.rowBorder }};background:{{ o.rowBg }};font-family:var(--sans);font-size:15.5px;font-weight:700;color:var(--ink);text-align:left;cursor:pointer">
+<span style="width:20px;height:20px;flex:none;border-radius:99px;border:2px solid {{ o.dotBorder }};display:inline-flex;align-items:center;justify-content:center">
+<span style="width:10px;height:10px;border-radius:99px;background:{{ o.dotFill }}"></span>
+</span>
+{{ o.label }}
+</button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetIsMulti }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ sheetOptions }}" as="o" hint-placeholder-count="10">
+<button onClick="{{ o.toggle }}" aria-pressed="{{ o.on }}" style="min-height:44px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border-radius:99px;border:{{ o.border }};background:{{ o.bg }};color:{{ o.color }};font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer">
+<sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M4 12.5l5.2 5.2L20 7"></path></svg>
+</sc-if>
+{{ o.label }}
+</button>
+</sc-for>
+</div>
+</sc-if>
+
+<p style="margin:22px 0 8px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">In your own words</p>
+<div style="display:flex;gap:8px;align-items:center">
+<input value="{{ customDraft }}" onChange="{{ setCustomDraft }}" placeholder="{{ customPlaceholder }}" style="flex:1 1 auto;min-width:0;height:50px;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:0 15px;font-family:var(--sans);font-size:15.5px;color:var(--ink)">
+<button onClick="{{ addCustom }}" disabled="{{ addDisabled }}" style="flex:none;height:50px;padding:0 18px;border:0;border-radius:99px;background:{{ addBg }};color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:14.5px;font-weight:700;cursor:{{ addCursor }}">Add</button>
+</div>
+</div>
+</sc-if>
+</div>
+
+<sc-if value="{{ sheetShowsDone }}" hint-placeholder-val="{{ true }}">
+<div style="flex:none;padding:12px 20px 20px;border-top:1px solid var(--outline-soft)">
+<button onClick="{{ closeSheet }}" style="width:100%;height:52px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16.5px;font-weight:700;cursor:pointer">Done</button>
+</div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  STORAGE_KEY = "kt_onboarding_draft";
+  STEPS = ["Account", "Create profile", "About you", "Add photos", "Consent"];
+  APPLY_STEPS = 4;
+
+  state = this.load();
+
+  load() {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || "{}"); } catch (e) {}
+    return {
+      step: 0, email: "", agree: false, emailSent: false,
+      name: "", pronouns: [], gender: [], sexuality: [], age: "", location: "London", locationOther: "",
+      birthMonth: "", birthYear: "",
+      tagline: "", aboutText: "", dynamics: [], dynamicDraft: "",
+      photos: [], dragIndex: null,
+      vetConsent: "", vetWhy: "", submitted: false,
+      sheet: null, customDraft: "",
+      ...saved,
+      emailSent: false,
+      dynamics: this.toList(saved.dynamics),
+      photos: this.toList(saved.photos).filter((p) => ["violet", "sky", "magenta", "gold", "indigo", "green"].indexOf(p) !== -1),
+      dynamicDraft: "", dragIndex: null,
+      gender: this.toList(saved.gender),
+      sexuality: this.toList(saved.sexuality),
+      pronouns: this.toList(saved.pronouns),
+      sheet: null, customDraft: "",
+    };
+  }
+
+  toTop() {
+    {
+      const reset = () => {
+        let el = document.querySelector("[data-ob-scroll]");
+        while (el) {
+          if (el.scrollTop) el.scrollTop = 0;
+          el = el.parentElement || (el.getRootNode && el.getRootNode().host);
+        }
+        try {
+          if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
+          if (window.parent && window.parent !== window) window.parent.scrollTo(0, 0);
+          window.scrollTo(0, 0);
+        } catch (e) {}
+      };
+      reset();
+      requestAnimationFrame(reset);
+    }
+  }
+
+  MOCK_PHOTOS = ["violet", "sky", "magenta", "gold", "indigo", "green"];
+
+  MOCK_PALETTE = {
+    violet: ["#EDE4F7", "#C9B6E4", "#6C3AB2"],
+    sky: ["#DCEEF8", "#A9D4EC", "#2F7FA8"],
+    magenta: ["#FBE4F1", "#F0BADC", "#C83897"],
+    gold: ["#FAEFD6", "#EED89B", "#B8862A"],
+    indigo: ["#E6E1F2", "#BDB2DC", "#3B176F"],
+    green: ["#E4F2EA", "#B3D8C4", "#3F7F62"],
+  };
+
+  DYNAMICS = ["Solo poly", "Relationship anarchist", "Nesting partner", "Open couple", "Kitchen table poly", "Slow dating", "New friends", "Don't label it"];
+
+  MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  ageFrom(month, year) {
+    if (!month || !year) return null;
+    const now = new Date();
+    let age = now.getFullYear() - Number(year);
+    if (now.getMonth() + 1 < Number(month)) age -= 1;
+    return age >= 0 ? age : null;
+  }
+
+  toList(v) {
+    if (Array.isArray(v)) return v;
+    if (typeof v === "string" && v.trim()) return [v];
+    return [];
+  }
+
+  persist(patch) {
+    if (patch.step !== undefined || patch.submitted !== undefined) this.toTop();
+    this.setState(patch, () => {
+      const { step, email, agree, name, pronouns, gender, sexuality, location, locationOther, birthMonth, birthYear, tagline, aboutText, dynamics, photos, vetConsent, vetWhy, submitted } = this.state;
+      try {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify({ step, email, agree, name, pronouns, gender, sexuality, location, locationOther, birthMonth, birthYear, tagline, aboutText, dynamics, photos, vetConsent, vetWhy, submitted }));
+      } catch (e) {}
+    });
+    this.track(Object.keys(patch)[0] === "step" ? "onboarding_step_view" : "onboarding_field_change", patch);
+  }
+
+  track(event, data) {
+    console.log("[analytics]", event, { step: this.state.step, stepName: this.STEPS[this.state.step], ...data });
+  }
+
+  FIELDS = {
+    pronouns: {
+      label: "Preferred pronouns",
+      title: "Preferred pronouns",
+      empty: "Add pronouns",
+      single: true,
+      help: "Pick one, or add your own.",
+      placeholder: "e.g. ze/hir",
+      options: ["she/her", "he/him", "they/them", "she/they", "he/they", "any pronouns"],
+    },
+    gender: {
+      label: "Gender",
+      title: "Gender",
+      empty: "Add gender",
+      help: "Pick any that apply, or add your own. Shown on your profile.",
+      placeholder: "e.g. genderfluid, bigender",
+      options: ["Woman", "Man", "Non-binary", "Agender", "Genderfluid", "Genderqueer", "Trans woman", "Trans man", "Transmasculine", "Transfeminine", "Intersex", "Questioning"],
+    },
+    sexuality: {
+      label: "Sexuality",
+      title: "Sexuality",
+      empty: "Add sexuality",
+      help: "Pick any that apply, or add your own.",
+      placeholder: "e.g. sapphic, achillean",
+      options: ["Queer", "Bisexual", "Pansexual", "Lesbian", "Gay", "Straight", "Asexual", "Demisexual", "Aromantic", "Omnisexual", "Questioning"],
+    },
+    age: {
+      label: "Age",
+      title: "When were you born?",
+      empty: "Add birthday",
+      help: "We show your age on your profile, never your birthday.",
+    },
+  };
+
+  renderVals() {
+    const s = this.state;
+
+    const key = s.sheet;
+    const spec = key ? this.FIELDS[key] : null;
+    const picked = (k) => (Array.isArray(s[k]) ? s[k] : []);
+
+    const computedAge = this.ageFrom(s.birthMonth, s.birthYear);
+    const summary = (k) => {
+      if (k === "age") return computedAge != null ? String(computedAge) : this.FIELDS.age.empty;
+      const list = picked(k);
+      if (!list.length) return this.FIELDS[k].empty;
+      return list.join(", ");
+    };
+    const isSet = (k) => (k === "age" ? computedAge != null : picked(k).length > 0);
+
+    const fieldRows = ["pronouns", "gender", "sexuality", "age"].map((k) => ({
+      label: this.FIELDS[k].label,
+      value: summary(k),
+      valueColor: isSet(k) ? "var(--ink)" : "var(--muted)",
+      bg: isSet(k) ? "var(--violet-container)" : "var(--raised)",
+      border: isSet(k) ? "1.5px solid var(--violet)" : "1.5px solid var(--outline-soft)",
+      optional: this.FIELDS[k].single ? " · required" : " · optional",
+      open: () => this.setState({ sheet: k, customDraft: "" }),
+    }));
+
+    const sheetOptions = spec && spec.options
+      ? Array.from(new Set([...spec.options, ...picked(key)])).map((label) => {
+          const on = picked(key).includes(label);
+          return {
+            label, on,
+            bg: on ? "var(--violet-container)" : "var(--sunken)",
+            color: on ? "var(--violet)" : "var(--muted)",
+            border: on ? "2px solid var(--violet)" : "2px solid transparent",
+            rowBg: on ? "var(--violet-container)" : "var(--raised)",
+            rowBorder: on ? "1.5px solid var(--violet)" : "1.5px solid var(--outline-soft)",
+            dotBorder: on ? "var(--violet)" : "var(--input)",
+            dotFill: on ? "var(--violet)" : "transparent",
+            toggle: () => {
+              const list = picked(key);
+              if (spec.single) {
+                this.persist({ [key]: [label] });
+                this.setState({ sheet: null, customDraft: "" });
+                return;
+              }
+              this.persist({ [key]: list.includes(label) ? list.filter((v) => v !== label) : [...list, label] });
+            },
+          };
+        })
+      : [];
+
+    const draft = s.customDraft.trim();
+    const canAdd = !!(draft && key && key !== "age" && !picked(key).includes(draft));
+
+    const step0Ok = /\S+@\S+\.\S+/.test(s.email) && s.agree;
+    const step1Ok = s.name.trim().length > 0 && picked("pronouns").length > 0
+      && (s.location !== "Somewhere else" || s.locationOther.trim().length > 0);
+
+    const dynamicDraft = s.dynamicDraft.trim();
+    const dynamics = this.toList(s.dynamics);
+    const canAddDynamic = !!dynamicDraft && !dynamics.some((v) => v.toLowerCase() === dynamicDraft.toLowerCase());
+    const addDynamic = () => {
+      if (!canAddDynamic) return;
+      this.persist({ dynamics: [...dynamics, dynamicDraft] });
+      this.setState({ dynamicDraft: "" });
+    };
+    const aboutLen = s.aboutText.trim().length;
+    const aboutMin = 250;
+    const step2Ok = aboutLen >= aboutMin && dynamics.length > 0;
+
+    const photos = this.toList(s.photos);
+    const step3Ok = photos.length > 0;
+    const movePhoto = (from, to) => {
+      if (from == null || to == null || from === to || to >= photos.length) return;
+      const next = [...photos];
+      next.splice(to, 0, next.splice(from, 1)[0]);
+      this.persist({ photos: next });
+      this.setState({ dragIndex: to });
+    };
+    const photoTiles = Array.from({ length: 6 }, (_, i) => {
+      const key = photos[i];
+      const pal = this.MOCK_PALETTE[key] || ["#EDE4F7", "#C9B6E4", "#6C3AB2"];
+      return {
+        filled: !!key, empty: !key, isMain: i === 0 && !!key,
+        c1: pal[0], c2: pal[1], c3: pal[2],
+        area: i === 0 ? "1 / 1 / 3 / 3" : "auto",
+        opacity: s.dragIndex === i ? "0.45" : "1",
+        draggable: !!key,
+        alt: "Your photo " + (i + 1),
+        addLabel: i === 0 ? "Main photo" : "Add photo",
+        removeLabel: "Remove photo " + (i + 1),
+        add: () => {
+          const current = this.toList(this.state.photos);
+          const pool = this.MOCK_PHOTOS.filter((u) => !current.includes(u));
+          if (!pool.length || current.length >= 6) return;
+          this.persist({ photos: [...current, pool[0]] });
+        },
+        remove: () => this.persist({ photos: photos.filter((_, j) => j !== i) }),
+        dragStart: (e) => { this.setState({ dragIndex: i }); if (e.dataTransfer) e.dataTransfer.effectAllowed = "move"; },
+        dragOver: (e) => { e.preventDefault(); movePhoto(s.dragIndex, i); },
+        drop: (e) => { e.preventDefault(); this.setState({ dragIndex: null }); },
+        dragEnd: () => this.setState({ dragIndex: null }),
+      };
+    });
+
+    const vetMin = { consent: 80, why: 80 };
+    const vetLen = { consent: s.vetConsent.trim().length, why: s.vetWhy.trim().length };
+    const vetHint = (k) => (vetLen[k] >= vetMin[k] ? vetLen[k] + " characters" : (vetMin[k] - vetLen[k]) + " characters to go");
+    const step4Ok = vetLen.consent >= vetMin.consent && vetLen.why >= vetMin.why;
+    const stepName = this.STEPS[s.step];
+
+    return {
+      progressPct: Math.round((s.step / this.APPLY_STEPS) * 100) + "%",
+      showStepper: s.step > 0 && !s.submitted,
+      contentPad: s.step === 0 ? "0 24px 24px" : "8px 24px 24px",
+      contentBg: "var(--raised)",
+      showBack: s.step > 1,
+      showRestart: s.step > 0,
+      showFooter: s.step > 0,
+      logOut: () => { try { localStorage.removeItem(this.STORAGE_KEY); } catch (e) {} this.setState(this.load()); },
+      restart: () => {
+        try { localStorage.removeItem(this.STORAGE_KEY); } catch (e) {}
+        this.setState({
+          step: 0, email: "", agree: false, emailSent: false, name: "", pronouns: [], gender: [], sexuality: [],
+          location: "London", locationOther: "", birthMonth: "", birthYear: "",
+          tagline: "", aboutText: "", dynamics: [], dynamicDraft: "",
+          photos: [], dragIndex: null, vetConsent: "", vetWhy: "", submitted: false,
+          sheet: null, customDraft: "",
+        });
+      },
+      back: () => this.persist({ step: Math.max(0, s.step - 1) }),
+      next: () => this.persist({ step: Math.min(this.STEPS.length - 1, s.step + 1) }),
+      isStep0: s.step === 0,
+      isStep1: s.step === 1,
+      isStep2: s.step === 2,
+      isStep3: s.step === 3,
+      isStep4: s.step === 4 && !s.submitted,
+      isSubmitted: !!s.submitted,
+      stepLabel: "Step " + Math.max(1, s.step) + " of " + this.APPLY_STEPS,
+
+      vetConsent: s.vetConsent,
+      setVetConsent: (e) => this.persist({ vetConsent: e.target.value }),
+      vetConsentHint: vetHint("consent"),
+      vetConsentColor: vetLen.consent >= vetMin.consent ? "var(--outline)" : "var(--magenta)",
+      vetWhy: s.vetWhy,
+      setVetWhy: (e) => this.persist({ vetWhy: e.target.value }),
+      vetWhyHint: vetHint("why"),
+      vetWhyColor: vetLen.why >= vetMin.why ? "var(--outline)" : "var(--magenta)",
+      submit: () => { if (step4Ok) this.persist({ submitted: true }); },
+      step4Disabled: !step4Ok,
+      step4Bg: step4Ok ? "var(--violet)" : "var(--outline-soft)",
+      step4Cursor: step4Ok ? "pointer" : "not-allowed",
+
+      photoTiles,
+      noPhotos: photos.length === 0,
+      step3Disabled: !step3Ok,
+      step3Bg: step3Ok ? "var(--violet)" : "var(--outline-soft)",
+      step3Cursor: step3Ok ? "pointer" : "not-allowed",
+
+      tagline: s.tagline,
+      setTagline: (e) => this.persist({ tagline: e.target.value }),
+      taglineCount: (60 - s.tagline.length) + " left",
+      aboutText: s.aboutText,
+      setAboutText: (e) => this.persist({ aboutText: e.target.value }),
+      aboutHint: aboutLen >= aboutMin ? aboutLen + " characters" : (aboutMin - aboutLen) + " characters to go",
+      aboutHintColor: aboutLen >= aboutMin ? "var(--outline)" : "var(--magenta)",
+      dynamicChips: Array.from(new Set([...this.DYNAMICS, ...dynamics])).map((label) => {
+        const on = dynamics.includes(label);
+        return {
+          label, on,
+          tickOpacity: on ? "1" : "0",
+          bg: on ? "var(--violet-container)" : "var(--sunken)",
+          color: on ? "var(--violet)" : "var(--muted)",
+          border: on ? "1.5px solid var(--violet)" : "1.5px solid transparent",
+          toggle: () => this.persist({ dynamics: on ? dynamics.filter((v) => v !== label) : [...dynamics, label] }),
+        };
+      }),
+      dynamicDraft: s.dynamicDraft,
+      setDynamicDraft: (e) => this.setState({ dynamicDraft: e.target.value }),
+      dynamicKeyDown: (e) => { if (e.key === "Enter") { e.preventDefault(); addDynamic(); } },
+      addDynamic,
+      addDynamicDisabled: !canAddDynamic,
+      addDynamicBg: canAddDynamic ? "var(--violet)" : "var(--outline-soft)",
+      addDynamicColor: canAddDynamic ? "oklch(0.995 0.004 95)" : "var(--muted)",
+      addDynamicCursor: canAddDynamic ? "pointer" : "not-allowed",
+      step2Disabled: !step2Ok,
+      step2Bg: step2Ok ? "var(--violet)" : "var(--outline-soft)",
+      step2Cursor: step2Ok ? "pointer" : "not-allowed",
+
+      email: s.email,
+      setEmail: (e) => this.persist({ email: e.target.value }),
+      agree: s.agree,
+      agreeBorder: s.agree ? "var(--violet)" : "var(--outline)",
+      agreeBg: s.agree ? "var(--violet)" : "var(--raised)",
+      toggleAgree: () => this.persist({ agree: !s.agree }),
+      stopLink: (e) => { e.preventDefault(); e.stopPropagation(); },
+      step0Disabled: !step0Ok,
+      step0Bg: step0Ok ? "var(--violet)" : "var(--outline-soft)",
+      step0Cursor: step0Ok ? "pointer" : "not-allowed",
+      sendLink: () => { this.track("magic_link_sent", { email: s.email }); this.setState({ emailSent: true }); this.toTop(); },
+      emailSent: !!s.emailSent,
+      showSignUp: !s.emailSent,
+      backToSignUp: () => this.setState({ emailSent: false }),
+
+      name: s.name, setName: (e) => this.persist({ name: e.target.value }),
+      pronouns: s.pronouns, setPronouns: (e) => this.persist({ pronouns: e.target.value }),
+      age: s.age, setAge: (e) => this.persist({ age: e.target.value }),
+      location: s.location, setLocation: (e) => this.persist({ location: e.target.value }),
+      fieldRows, sheetOptions,
+      monthOptions: this.MONTHS.map((label, i) => ({ label, value: String(i + 1) })),
+      yearOptions: Array.from({ length: 73 }, (_, i) => String(new Date().getFullYear() - 18 - i)),
+      birthMonth: s.birthMonth,
+      birthYear: s.birthYear,
+      setBirthMonth: (e) => this.persist({ birthMonth: e.target.value }),
+      setBirthYear: (e) => this.persist({ birthYear: e.target.value }),
+      ageEcho: computedAge != null ? "That makes you " + computedAge + "." : "Pick a month and year.",
+      ageEchoColor: computedAge != null ? "var(--violet)" : "var(--muted)",
+      locationOptions: ["London", "Somewhere else"].map((label) => {
+        const on = s.location === label;
+        return {
+          label, on,
+          bg: on ? "var(--violet-container)" : "var(--raised)",
+          color: on ? "var(--violet)" : "var(--ink)",
+          border: on ? "1.5px solid var(--violet)" : "1.5px solid var(--outline-soft)",
+          dotBorder: on ? "var(--violet)" : "var(--input)",
+          dotFill: on ? "var(--violet)" : "transparent",
+          pick: () => this.persist({ location: label }),
+        };
+      }),
+      isOtherLocation: s.location === "Somewhere else",
+      locationOther: s.locationOther,
+      setLocationOther: (e) => this.persist({ locationOther: e.target.value }),
+      sheetTitle: spec ? spec.title : "",
+      sheetHelp: spec ? spec.help : "",
+      sheetIsAge: key === "age",
+      sheetIsChoice: !!key && key !== "age",
+      sheetIsSingle: !!spec && !!spec.single,
+      sheetShowsDone: !(spec && spec.single),
+      sheetShowsClear: !(spec && spec.single),
+      sheetIsMulti: !!key && key !== "age" && !(spec && spec.single),
+      sheetTransform: key ? "translateY(0)" : "translateY(110%)",
+      sheetScrim: key ? 1 : 0,
+      sheetEvents: key ? "auto" : "none",
+      closeSheet: () => this.setState({ sheet: null, customDraft: "" }),
+      clearField: () => {
+        if (!key) return;
+        if (key === "age") this.persist({ birthMonth: "", birthYear: "" });
+        else this.persist({ [key]: [] });
+      },
+      customDraft: s.customDraft,
+      customPlaceholder: spec && spec.placeholder ? spec.placeholder : "",
+      setCustomDraft: (e) => this.setState({ customDraft: e.target.value }),
+      addDisabled: !canAdd,
+      addBg: canAdd ? "var(--violet)" : "var(--outline-soft)",
+      addCursor: canAdd ? "pointer" : "not-allowed",
+      addCustom: () => {
+        if (!canAdd) return;
+        if (spec && spec.single) {
+          this.persist({ [key]: [draft] });
+          this.setState({ sheet: null, customDraft: "" });
+          return;
+        }
+        this.persist({ [key]: [...picked(key), draft] });
+        this.setState({ customDraft: "" });
+      },
+      step1Disabled: !step1Ok,
+      step1Bg: step1Ok ? "var(--violet)" : "var(--outline-soft)",
+      step1Cursor: step1Ok ? "pointer" : "not-allowed",
+    };
+  }
+}
+</script>
+</body>
+</html>
