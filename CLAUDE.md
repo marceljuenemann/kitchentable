@@ -8,7 +8,7 @@ Full product context — mission, principles, business model, MVP scope — live
 
 - **Backend:** Supabase (Postgres, Auth via magic link, Storage, RLS). Schema/migrations in `supabase/migrations/`, pgTAP tests in `supabase/tests/database/`.
 - **Frontend:** Angular (standalone components + signals, no NgModules) + Angular Material, in `web/`. No custom branding/theme yet — stock Material. A Material 3 theme + brand palette (violet/magenta/gold/sky, "Baloo Bhaijaan 2" + "Nunito Sans") is specced but not yet implemented — see `prototype/onboarding/`.
-- **Local dev:** see [README.md](README.md) for setup. `supabase start` for the backend, `ng serve` for the frontend, Mailpit for magic-link emails.
+- **Local dev:** see [README.md](README.md) for setup. `supabase start` for the backend, `ng serve` for the frontend, Mailpit for magic-link emails. Keep both `supabase start` and `ng serve` running in the background rather than starting/stopping them per task — the user keeps them running too and is happy to share the same instance to preview changes live.
 
 ## Status
 

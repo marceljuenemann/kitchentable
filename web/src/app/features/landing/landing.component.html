@@ -1,0 +1,63 @@
+<div class="landing">
+  <header class="masthead">
+    <app-logo [size]="60" />
+    <span class="wordmark">Kitchen Table</span>
+  </header>
+
+  <h1 class="headline">Let's fix ENM dating.</h1>
+
+  <p class="subhead">
+    Kitchen Table is a new dating community for non-monogamous folks in London.
+  </p>
+
+  <ul class="pitch">
+    <li>
+      <span class="dot dot-sky"></span>
+      <span><b>Non-profit.</b>&nbsp;No need to pay just to see who likes you</span>
+    </li>
+    <li>
+      <span class="dot dot-magenta"></span>
+      <span><b>Invite-only.</b>&nbsp;Only vetted members, no fake profiles</span>
+    </li>
+    <li>
+      <span class="dot dot-gold"></span>
+      <span><b>Community-driven.</b>&nbsp;Contribute to guidelines, product decisions, or the open-source code</span>
+    </li>
+  </ul>
+
+  <div class="signup-card">
+    <h2>Sign Up</h2>
+
+    <label for="landing-email">Email</label>
+    <input
+      id="landing-email"
+      type="email"
+      placeholder="you@example.com"
+      [value]="email()"
+      (input)="setEmail($any($event.target).value)"
+    />
+
+    <div class="consent">
+      <button
+        type="button"
+        role="checkbox"
+        class="checkbox"
+        [class.checked]="agree()"
+        [attr.aria-checked]="agree()"
+        aria-label="I agree to the Terms and Privacy Policy"
+        (click)="toggleAgree()"
+      >
+        @if (agree()) {
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 12.5l5.2 5.2L20 7" />
+          </svg>
+        }
+      </button>
+      <span class="consent-text">
+        <span (click)="toggleAgree()">I agree to the </span><a href="#" (click)="$event.preventDefault(); $event.stopPropagation()">Terms</a><span (click)="toggleAgree()"> and </span><a href="#" (click)="$event.preventDefault(); $event.stopPropagation()">Privacy Policy</a><span (click)="toggleAgree()">.</span>
+      </span>
+    </div>
+
+    <button type="button" class="primary" [disabled]="!canSignUp()">Sign up</button>
+  </div>
+</div>

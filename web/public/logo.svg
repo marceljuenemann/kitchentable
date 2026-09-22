@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" role="img" aria-label="Kitchen Table">
+  <g transform="translate(180 180)" fill="none" stroke-width="24" stroke-linecap="round">
+    <circle r="70" stroke="#3B176F"/>
+    <path d="M-111.51 -23.7A114 114 0 0 1 -23.7 -111.51" stroke="#70C4EC"/>
+    <path d="M23.7 -111.51A114 114 0 0 1 111.51 -23.7" stroke="#C83897"/>
+    <path d="M111.51 23.7A114 114 0 0 1 23.7 111.51" stroke="#E3AF47"/>
+    <path d="M-23.7 111.51A114 114 0 0 1 -111.51 23.7" stroke="#6C3AB2"/>
+  </g>
+  <path transform="translate(180 180) scale(.9) translate(0 8)" fill="#E3AF47" d="M0 26C-22 8-38-4-38-20c0-13 10-22 21-22 8 0 14 5 17 11 3-6 9-11 17-11 11 0 21 9 21 22C38-4 22 8 0 26Z"/>
+</svg>

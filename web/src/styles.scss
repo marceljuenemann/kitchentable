@@ -37,3 +37,32 @@ body {
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+// Kitchen Table brand tokens (see prototype/onboarding for the design spec).
+// Scoped as custom properties, not wired into Angular Material's own theme yet —
+// pages opt in by referencing these vars directly until a full M3 theme exists.
+:root {
+  --kt-violet: oklch(0.29 0.15 300.5);
+  --kt-violet-soft: oklch(0.42 0.19 300);
+  --kt-violet-container: oklch(0.925 0.032 300);
+  --kt-sky: oklch(0.48 0.12 233);
+  --kt-sky-container: oklch(0.925 0.043 233);
+  --kt-magenta: oklch(0.5 0.216 341);
+  --kt-magenta-container: oklch(0.935 0.038 341);
+  --kt-gold: oklch(0.48 0.12 68);
+  --kt-gold-container: oklch(0.935 0.05 84);
+  --kt-bg: oklch(0.995 0.004 95);
+  --kt-ink: oklch(0.21 0.095 300);
+  --kt-muted: oklch(0.42 0.045 300);
+  --kt-raised: oklch(1 0 0);
+  --kt-sunken: oklch(0.958 0.008 95);
+  --kt-cream: oklch(0.955 0.032 88);
+  --kt-cream-strong: oklch(0.925 0.048 86);
+  --kt-outline: oklch(0.55 0.03 300);
+  --kt-outline-soft: oklch(0.885 0.012 95);
+  --kt-input: oklch(0.855 0.016 95);
+  --kt-shadow-soft: 0 1px 2px oklch(0.3 0.12 300 / .07), 0 10px 26px -14px oklch(0.3 0.12 300 / .22);
+  --kt-shadow-lift: 0 2px 6px oklch(0.3 0.12 300 / .1), 0 22px 46px -20px oklch(0.3 0.12 300 / .3);
+  --kt-font-display: "Baloo Bhaijaan 2", "Trebuchet MS", sans-serif;
+  --kt-font-sans: "Nunito Sans", system-ui, sans-serif;
+}
