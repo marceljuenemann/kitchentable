@@ -20,44 +20,34 @@
       <span><b>Invite-only.</b>&nbsp;Only vetted members, no fake profiles</span>
     </li>
     <li>
-      <span class="dot dot-gold"></span>
+      <span class="dot dot-primary"></span>
       <span><b>Community-driven.</b>&nbsp;Contribute to guidelines, product decisions, or the open-source code</span>
     </li>
   </ul>
 
-  <div class="signup-card">
+  <mat-card class="signup-card" appearance="outlined">
     <h2>Sign Up</h2>
 
-    <label for="landing-email">Email</label>
-    <input
-      id="landing-email"
-      type="email"
-      placeholder="you@example.com"
-      [value]="email()"
-      (input)="setEmail($any($event.target).value)"
-    />
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Email</mat-label>
+      <input
+        matInput
+        type="email"
+        placeholder="you@example.com"
+        [value]="email()"
+        (input)="setEmail($any($event.target).value)"
+      />
+    </mat-form-field>
 
-    <div class="consent">
-      <button
-        type="button"
-        role="checkbox"
-        class="checkbox"
-        [class.checked]="agree()"
-        [attr.aria-checked]="agree()"
-        aria-label="I agree to the Terms and Privacy Policy"
-        (click)="toggleAgree()"
-      >
-        @if (agree()) {
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M4 12.5l5.2 5.2L20 7" />
-          </svg>
-        }
-      </button>
-      <span class="consent-text">
-        <span (click)="toggleAgree()">I agree to the </span><a href="#" (click)="$event.preventDefault(); $event.stopPropagation()">Terms</a><span (click)="toggleAgree()"> and </span><a href="#" (click)="$event.preventDefault(); $event.stopPropagation()">Privacy Policy</a><span (click)="toggleAgree()">.</span>
-      </span>
-    </div>
+    <mat-checkbox [checked]="agree()" (change)="setAgree($event.checked)">
+      I agree to the
+      <a href="#" (click)="$event.preventDefault(); $event.stopPropagation()">Terms</a>
+      and
+      <a href="#" (click)="$event.preventDefault(); $event.stopPropagation()">Privacy Policy</a>.
+    </mat-checkbox>
 
-    <button type="button" class="primary" [disabled]="!canSignUp()">Sign up</button>
-  </div>
+    <button mat-flat-button color="primary" type="button" [disabled]="!canSignUp()">
+      Sign up
+    </button>
+  </mat-card>
 </div>

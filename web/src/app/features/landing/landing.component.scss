@@ -12,6 +12,7 @@
   padding: 0 24px 48px;
 }
 
+/* TODO: Move into component. */
 .masthead {
   display: flex;
   align-items: center;
@@ -77,118 +78,47 @@
   border-radius: 99px;
   margin-top: 7px;
 
-  &-sky { background: var(--kt-sky); }
-  &-magenta { background: var(--kt-magenta); }
-  &-gold { background: var(--kt-gold); }
+  // The logo's own arc colors, not the darker --kt-sky/--kt-magenta text-safe tokens —
+  // these are small decorative swatches with no text on them, so contrast isn't a concern,
+  // and matching the logo directly reads as more on-brand.
+  &-sky { background: #70c4ec; }
+  &-magenta { background: #c83897; }
+  &-primary { background: var(--mat-sys-primary); }
 }
 
 .signup-card {
+  --mat-card-outlined-container-color: var(--kt-bg-soft);
+  --mat-card-outlined-outline-color: var(--kt-outline-soft);
+  --mat-card-outlined-container-shape: 24px;
   margin: 28px 0 8px;
-  border-radius: 24px;
-  border: 1px solid var(--kt-outline-soft);
-  background: var(--kt-raised);
-  padding: 24px 20px;
+  padding: 20px 20px 24px;
+  display: flex;
+  flex-direction: column;
 
   h2 {
-    margin: 0;
+    margin: 0 0 16px;
     font-family: var(--kt-font-display);
     font-size: 20px;
     font-weight: 700;
     color: var(--kt-violet);
   }
 
-  label {
-    display: block;
-    margin-top: 16px;
-    font-size: 12.5px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--kt-muted);
-  }
-
-  input[type='email'] {
-    margin-top: 8px;
-    height: 52px;
+  mat-form-field {
     width: 100%;
-    box-sizing: border-box;
-    border-radius: 14px;
-    border: 1px solid var(--kt-input);
-    background: var(--kt-bg);
-    padding: 0 16px;
-    font-family: var(--kt-font-sans);
-    font-size: 16px;
-    color: var(--kt-ink);
+    --mat-form-field-outlined-container-shape: 14px;
+  }
 
-    &::placeholder {
-      color: var(--kt-outline);
+  mat-checkbox {
+    // MDC's checkbox reserves an 11px touch-target inset around the box; pull it back
+    // so the box lines up with the form field and button either side of it.
+    margin: 8px 0 16px -11px;
+
+    a {
+      color: var(--mat-sys-primary);
     }
   }
-}
 
-.consent {
-  margin-top: 18px;
-  display: flex;
-  align-items: flex-start;
-  gap: 11px;
-}
-
-.checkbox {
-  width: 24px;
-  height: 24px;
-  flex: none;
-  padding: 0;
-  margin-top: -1px;
-  border-radius: 8px;
-  border: 2px solid var(--kt-outline);
-  background: var(--kt-raised);
-  color: var(--kt-bg);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  &.checked {
-    border-color: var(--kt-violet);
-    background: var(--kt-violet);
-  }
-}
-
-.consent-text {
-  min-width: 0;
-  font-size: 14.5px;
-  line-height: 1.5;
-  color: var(--kt-ink);
-
-  span {
-    cursor: pointer;
-  }
-
-  a {
-    color: var(--kt-violet-soft);
-
-    &:hover {
-      color: var(--kt-violet);
-    }
-  }
-}
-
-.primary {
-  margin-top: 20px;
-  width: 100%;
-  height: 52px;
-  border: 0;
-  border-radius: 99px;
-  background: var(--kt-violet);
-  color: var(--kt-bg);
-  font-family: var(--kt-font-sans);
-  font-size: 16.5px;
-  font-weight: 700;
-  cursor: pointer;
-
-  &:disabled {
-    background: var(--kt-outline-soft);
-    color: var(--kt-muted);
-    cursor: not-allowed;
+  button {
+    width: 100%;
   }
 }

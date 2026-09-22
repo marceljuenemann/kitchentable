@@ -5,14 +5,18 @@
 // Learn more about theming and how to use it for your application's
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+@use './theme-colors' as brand-theme;
 
 html {
   @include mat.theme((
     color: (
-      primary: mat.$azure-palette,
-      tertiary: mat.$blue-palette,
+      primary: brand-theme.$primary-palette,
+      tertiary: brand-theme.$tertiary-palette,
     ),
-    typography: Roboto,
+    typography: (
+      plain-family: '"Nunito Sans", system-ui, sans-serif',
+      brand-family: '"Baloo Bhaijaan 2", "Trebuchet MS", sans-serif',
+    ),
     density: 0,
   ));
 }
@@ -36,11 +40,11 @@ body {
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 // Kitchen Table brand tokens (see prototype/onboarding for the design spec).
-// Scoped as custom properties, not wired into Angular Material's own theme yet —
-// pages opt in by referencing these vars directly until a full M3 theme exists.
+// The M3 theme above (src/theme-colors.scss) is generated from --kt-violet/--kt-sky/--kt-magenta,
+// so Angular Material components already pick up the brand through --mat-sys-* vars. These raw
+// tokens remain for custom markup (shapes, spacing, shadows) that Material's theme doesn't cover.
 :root {
   --kt-violet: oklch(0.29 0.15 300.5);
   --kt-violet-soft: oklch(0.42 0.19 300);
@@ -51,7 +55,8 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   --kt-magenta-container: oklch(0.935 0.038 341);
   --kt-gold: oklch(0.48 0.12 68);
   --kt-gold-container: oklch(0.935 0.05 84);
-  --kt-bg: oklch(0.995 0.004 95);
+  --kt-bg: oklch(1 0 0);
+  --kt-bg-soft: oklch(0.995 0.004 95);
   --kt-ink: oklch(0.21 0.095 300);
   --kt-muted: oklch(0.42 0.045 300);
   --kt-raised: oklch(1 0 0);
