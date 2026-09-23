@@ -1,0 +1,10 @@
+@if (session(); as session) {
+  <p class="account">
+    Signed in as <b>{{ session.user.email }}</b>
+    <button mat-button type="button" (click)="signOut()">Sign out</button>
+  </p>
+}
+<a href="mailto:hello@kitchentable.dating">Contact</a>
+<a href="#" (click)="$event.preventDefault()">Terms &amp; Conditions</a>
+<a href="#" (click)="$event.preventDefault()">Privacy Policy</a>
+<a href="https://github.com/marceljuenemann/kitchentable" target="_blank" rel="noopener">GitHub</a>

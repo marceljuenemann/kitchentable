@@ -1,0 +1,32 @@
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 14px;
+  margin-top: 56px;
+  padding-bottom: 24px;
+}
+
+.account {
+  flex-basis: 100%;
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--kt-muted);
+
+  b {
+    color: var(--kt-ink);
+  }
+}
+
+a {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--kt-muted);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--kt-ink);
+  }
+}

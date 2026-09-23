@@ -1,8 +1,5 @@
 <div class="landing">
-  <header class="masthead">
-    <app-logo [size]="60" />
-    <span class="wordmark">Kitchen Table</span>
-  </header>
+  <app-header />
 
   <h1 class="headline">Let's fix ENM dating.</h1>
 
@@ -83,12 +80,5 @@
     <button mat-button type="button" (click)="openSignIn()">Sign in</button>
   </p>
 
-  <footer class="site-footer">
-    <a href="mailto:hello@kitchentable.dating">Contact</a>
-    <a href="#" (click)="$event.preventDefault()">Terms &amp; Conditions</a>
-    <a href="#" (click)="$event.preventDefault()">Privacy Policy</a>
-    <a href="https://github.com/marceljuenemann/kitchentable" target="_blank" rel="noopener"
-      >GitHub</a
-    >
-  </footer>
+  <app-footer />
 </div>

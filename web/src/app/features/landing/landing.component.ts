@@ -7,7 +7,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { LogoComponent } from '../../shared/logo/logo.component';
+import { FooterComponent } from '../../shared/footer/footer.component';
+import { HeaderComponent } from '../../shared/header/header.component';
 import { AuthService } from '../../core/auth/auth.service';
 import { SignInSheetComponent } from './sign-in-sheet/sign-in-sheet.component';
 
@@ -17,7 +18,8 @@ const EMAIL_PATTERN = /\S+@\S+\.\S+/;
   selector: 'app-landing',
   standalone: true,
   imports: [
-    LogoComponent,
+    FooterComponent,
+    HeaderComponent,
     MatButtonModule,
     MatCardModule,
     MatCheckboxModule,

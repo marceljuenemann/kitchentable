@@ -1,11 +1,10 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AuthService } from '../../core/auth/auth.service';
 import { ProfileService, ProfileState } from '../../core/profile.service';
-import { LogoComponent } from '../../shared/logo/logo.component';
+import { FooterComponent } from '../../shared/footer/footer.component';
+import { HeaderComponent } from '../../shared/header/header.component';
 import { AgeVerificationComponent } from '../age-verification/age-verification.component';
 import { MainComponent } from '../main/main.component';
 import { OnboardingComponent } from '../onboarding/onboarding.component';
@@ -14,7 +13,7 @@ import { VettingComponent } from '../vetting/vetting.component';
 /**
  * Everything a signed-in user sees lives behind this one component: it shows the screen that
  * matches their profile status (see docs/database.md), rather than routes users could wander
- * into out of order.
+ * into out of order. Each screen includes the header/footer it needs.
  */
 @Component({
   selector: 'app-shell',
@@ -22,7 +21,8 @@ import { VettingComponent } from '../vetting/vetting.component';
   imports: [
     MatButtonModule,
     MatProgressSpinnerModule,
-    LogoComponent,
+    FooterComponent,
+    HeaderComponent,
     AgeVerificationComponent,
     MainComponent,
     OnboardingComponent,
@@ -32,9 +32,7 @@ import { VettingComponent } from '../vetting/vetting.component';
   styleUrl: './shell.component.scss',
 })
 export class ShellComponent {
-  private readonly auth = inject(AuthService);
   private readonly profiles = inject(ProfileService);
-  private readonly router = inject(Router);
 
   private readonly state = toSignal(this.profiles.state$, {
     initialValue: { kind: 'loading' } as ProfileState,
@@ -56,10 +54,5 @@ export class ShellComponent {
 
   retry() {
     this.profiles.refresh();
-  }
-
-  async signOut() {
-    await this.auth.signOut();
-    await this.router.navigateByUrl('/');
   }
 }

@@ -1,9 +1,12 @@
 # TODO
 
 - Implement onboarding flow
+  - Store in local user storage?
+  - Offline support for your own profile? Probably over-engineered for now
+- Clean up CLAUDE etc. Improve infrastructure
 - Deploy to staging
   - Recreate database (single migration)
-- Clean up CLAUDE etc. Improve infrastructure
+  - Staging disclaimer
 - Add Terms & Conditions and Privacy Policy
 - Security review
 

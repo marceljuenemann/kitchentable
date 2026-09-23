@@ -46,6 +46,12 @@ export async function signInAs(page: Page, status: ProfileStatus | null): Promis
     await api('/rest/v1/profiles', { id: user.id, status, name: 'E2E User' });
   }
 
+  await signIn(page, email);
+  return email;
+}
+
+/** Signs the page in as an existing user via a generated magic link (no email involved). */
+export async function signIn(page: Page, email: string) {
   const link = await api('/auth/v1/admin/generate_link', {
     type: 'magiclink',
     email,
@@ -53,5 +59,4 @@ export async function signInAs(page: Page, status: ProfileStatus | null): Promis
   });
   await page.goto(link.action_link);
   await page.waitForURL('**/app');
-  return email;
 }

@@ -2,7 +2,6 @@ import { Injectable, inject, signal } from '@angular/core';
 import type { Session } from '@supabase/supabase-js';
 import { asyncScheduler, distinctUntilChanged, Observable, observeOn, shareReplay } from 'rxjs';
 import { SupabaseService } from '../supabase.service';
-import { clearOnboardingDraft } from '../onboarding-draft';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -52,7 +51,5 @@ export class AuthService {
 
   async signOut() {
     await this.supabase.client.auth.signOut();
-    // TODO: Build a more general solution for userStorage
-    clearOnboardingDraft();
   }
 }

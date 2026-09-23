@@ -1,0 +1,25 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 40px;
+}
+
+.wordmark {
+  font-family: var(--kt-font-display);
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--kt-violet);
+}
+
+:host(.compact) {
+  justify-content: center;
+  padding-top: 14px;
+
+  .wordmark {
+    font-size: 14px;
+    letter-spacing: 0.15em;
+  }
+}
