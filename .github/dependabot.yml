@@ -1,0 +1,36 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+    # Angular majors (and the TypeScript/zone.js versions they pin) move in lockstep via
+    # `ng update`; individual major-bump PRs for them would just break the build.
+    ignore:
+      - dependency-name: '@angular/*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'angular-eslint'
+        update-types: ['version-update:semver-major']
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+      - dependency-name: zone.js
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']

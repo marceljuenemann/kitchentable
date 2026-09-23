@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { Profile, ProfilePhoto } from './profile.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
-  constructor(private readonly supabase: SupabaseService) {}
+  private readonly supabase = inject(SupabaseService);
 
   async getMyProfile(): Promise<Profile> {
     const {
@@ -79,10 +79,7 @@ export class ProfileService {
       .remove([photo.storage_path]);
     if (removeError) throw removeError;
 
-    const { error } = await this.supabase.client
-      .from('profile_photos')
-      .delete()
-      .eq('id', photo.id);
+    const { error } = await this.supabase.client.from('profile_photos').delete().eq('id', photo.id);
     if (error) throw error;
   }
 

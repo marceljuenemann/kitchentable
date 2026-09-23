@@ -53,4 +53,15 @@ npx playwright test     # from the repo root; starts `ng serve` for you if it's 
 
 Playwright captures magic-link emails via Mailpit (http://127.0.0.1:54324) instead of a real inbox. `supabase/config.toml` raises the local `auth.rate_limit.email_sent` limit to 100/hour (from the Supabase CLI's default of 2) so a full run doesn't get rate-limited — this only affects the local/CI stack, never production.
 
+### Code quality (format, lint, types, build)
+
+```bash
+npm run check          # from the repo root; no Docker needed. Runs everything below
+npm run format         # fix formatting (Prettier) — `format:check` only verifies
+npm run lint           # ng lint (angular-eslint); skips the old web/src/app/features/apply/ flow
+npm run typecheck:e2e  # type-check e2e/ (Playwright transpiles TS without checking types)
+```
+
+`check` also runs a production `ng build` (strict TypeScript + templates). CI (`.github/workflows/ci.yml`) runs the same checks as one job, in parallel with the e2e/pgTAP job.
+
 See [TODO.md](TODO.md) for remaining gaps, including e2e coverage for `/apply/start`, the apply stepper, and photo upload.

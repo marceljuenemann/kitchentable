@@ -81,9 +81,15 @@
   // The logo's own arc colors, not the darker --kt-sky/--kt-magenta text-safe tokens —
   // these are small decorative swatches with no text on them, so contrast isn't a concern,
   // and matching the logo directly reads as more on-brand.
-  &-sky { background: #70c4ec; }
-  &-magenta { background: #c83897; }
-  &-primary { background: var(--mat-sys-primary); }
+  &-sky {
+    background: #70c4ec;
+  }
+  &-magenta {
+    background: #c83897;
+  }
+  &-primary {
+    background: var(--mat-sys-primary);
+  }
 }
 
 .signup-card {

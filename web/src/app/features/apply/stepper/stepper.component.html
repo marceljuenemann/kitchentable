@@ -48,7 +48,12 @@
           }
 
           <div class="step-actions">
-            <button mat-flat-button color="primary" type="submit" [disabled]="locationForm.invalid || saving()">
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="locationForm.invalid || saving()"
+            >
               Next
             </button>
           </div>
@@ -121,7 +126,12 @@
 
           <div class="step-actions">
             <button mat-button type="button" matStepperPrevious>Back</button>
-            <button mat-flat-button color="primary" type="submit" [disabled]="aboutForm.invalid || saving()">
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="aboutForm.invalid || saving()"
+            >
               Next
             </button>
           </div>
@@ -137,7 +147,12 @@
 
           <div class="step-actions">
             <button mat-button type="button" matStepperPrevious>Back</button>
-            <button mat-flat-button color="primary" type="submit" [disabled]="bioForm.invalid || saving()">
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              [disabled]="bioForm.invalid || saving()"
+            >
               Next
             </button>
           </div>
@@ -151,7 +166,12 @@
           @for (photo of photos(); track photo.id) {
             <div class="photo-tile">
               <img [src]="photo.url" alt="" />
-              <button mat-icon-button type="button" (click)="removePhoto(photo)" aria-label="Remove photo">
+              <button
+                mat-icon-button
+                type="button"
+                (click)="removePhoto(photo)"
+                aria-label="Remove photo"
+              >
                 <mat-icon>close</mat-icon>
               </button>
             </div>
@@ -167,7 +187,13 @@
 
         <div class="step-actions">
           <button mat-button type="button" matStepperPrevious>Back</button>
-          <button mat-flat-button color="primary" type="button" [disabled]="photos().length === 0" matStepperNext>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            [disabled]="photos().length === 0"
+            matStepperNext
+          >
             Next
           </button>
         </div>
@@ -197,7 +223,11 @@
               type="submit"
               [disabled]="questionsForm.invalid || photos().length === 0 || saving()"
             >
-              {{ profile()?.application_status === 'rejected' ? 'Resubmit application' : 'Submit application' }}
+              {{
+                profile()?.application_status === 'rejected'
+                  ? 'Resubmit application'
+                  : 'Submit application'
+              }}
             </button>
           </div>
         </form>

@@ -14,7 +14,11 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { ProfileService } from '../../../core/profile.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { Profile, ProfilePhoto } from '../../../core/profile.model';
-import { GENDER_OPTIONS, SEXUALITY_OPTIONS, LOOKING_FOR_OPTIONS } from '../../../shared/profile-options';
+import {
+  GENDER_OPTIONS,
+  SEXUALITY_OPTIONS,
+  LOOKING_FOR_OPTIONS,
+} from '../../../shared/profile-options';
 
 const MONTHS = [
   { value: 1, label: 'January' },
@@ -110,7 +114,10 @@ export class StepperComponent implements OnInit {
 
     const photos = await this.profileService.listPhotos();
     const withUrls = await Promise.all(
-      photos.map(async (p) => ({ ...p, url: await this.profileService.getPhotoUrl(p.storage_path) })),
+      photos.map(async (p) => ({
+        ...p,
+        url: await this.profileService.getPhotoUrl(p.storage_path),
+      })),
     );
     this.photos.set(withUrls);
     // Computed before the stepper exists (behind the `loading` @else) and

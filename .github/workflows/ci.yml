@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on:
   push:
@@ -7,11 +7,46 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: test-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test:
+  # Fast checks, no Docker: fails within a couple of minutes on formatting, lint, type errors
+  # or a broken production build, while the slower e2e job below is still running.
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install web app dependencies
+        run: npm ci --prefix web
+
+      - name: Check formatting (Prettier)
+        run: npm run format:check
+
+      - name: Lint (angular-eslint)
+        run: npm run lint
+
+      - name: Type-check e2e specs
+        run: npm run typecheck:e2e
+
+      - name: Production build (strict TypeScript + templates)
+        run: npm run build --prefix web
+
+  e2e:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -40,6 +75,11 @@ jobs:
 
       - name: Reset database for a clean, deterministic seeded state
         run: npx supabase db reset
+
+      # Restricted to our own schema: the default also lints pgTAP's `extensions` schema,
+      # whose internals produce "errors" that aren't ours.
+      - name: Lint database functions
+        run: npx supabase db lint --local --schema public --fail-on error
 
       - name: Run pgTAP tests
         run: npx supabase test db --local supabase/tests/database
