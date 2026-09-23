@@ -10,6 +10,12 @@ import { OptionSheetComponent, OptionSheetData } from '../option-sheet/option-sh
 import { OnboardingDraftStore, ONBOARDING_STEPS } from '../onboarding-draft.store';
 import { GENDER_OPTIONS, PRONOUN_OPTIONS, SEXUALITY_OPTIONS } from '../onboarding-options';
 
+const SHEET_CONFIG = {
+  panelClass: 'kt-bottom-sheet',
+  // Focus the sheet itself rather than its first button (which would be "Clear").
+  autoFocus: 'dialog',
+} as const;
+
 type ListField = 'pronouns' | 'gender' | 'sexuality';
 
 interface Row {
@@ -30,17 +36,18 @@ const SHEETS: Record<ListField, Omit<OptionSheetData, 'selected'>> = {
   },
   gender: {
     title: 'Gender',
-    help: 'Pick any that apply, or add your own. Shown on your profile.',
+    help: 'Select what you want to be shown on your profile.',
     options: GENDER_OPTIONS,
     multi: true,
     placeholder: 'e.g. genderfluid, bigender',
   },
   sexuality: {
     title: 'Sexuality',
-    help: 'Pick any that apply, or add your own.',
+    help: 'Select what you want to be shown on your profile.',
     options: SEXUALITY_OPTIONS,
     multi: true,
     placeholder: 'e.g. sapphic, achillean',
+    accent: 'tertiary',
   },
 };
 
@@ -114,7 +121,7 @@ export class CreateProfileStepComponent {
     if (key === 'location') {
       this.bottomSheet
         .open(LocationSheetComponent, {
-          panelClass: 'kt-bottom-sheet',
+          ...SHEET_CONFIG,
           data: { location: this.draft().location },
         })
         .afterDismissed()
@@ -124,14 +131,14 @@ export class CreateProfileStepComponent {
     if (key === 'age') {
       const { birthMonth, birthYear } = this.draft();
       this.bottomSheet
-        .open(AgeSheetComponent, { panelClass: 'kt-bottom-sheet', data: { birthMonth, birthYear } })
+        .open(AgeSheetComponent, { ...SHEET_CONFIG, data: { birthMonth, birthYear } })
         .afterDismissed()
         .subscribe((result) => result && this.store.update(result));
       return;
     }
     this.bottomSheet
       .open(OptionSheetComponent, {
-        panelClass: 'kt-bottom-sheet',
+        ...SHEET_CONFIG,
         data: { ...SHEETS[key], selected: this.draft()[key] },
       })
       .afterDismissed()

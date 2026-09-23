@@ -1,12 +1,17 @@
 # TODO
 
 - Implement onboarding flow
-  - Store in local user storage?
-  - Offline support for your own profile? Probably over-engineered for now
+  - Pronoun selection nicer
+  - Test: Store in local user storage?
+  - e2e tests: Age selection, minimum length, photos etc.
+- Angular update
+- Angular karma tests
+- Set up eMail templates (with logo and whatnot)
 - Clean up CLAUDE etc. Improve infrastructure
 - Deploy to staging
   - Recreate database (single migration)
   - Staging disclaimer
+  - eMail on registration
 - Add Terms & Conditions and Privacy Policy
 - Security review
 
@@ -18,10 +23,6 @@
 - **No Angular unit tests exist** (zero `*.spec.ts`). Karma is configured but would fail on an empty suite and is on its way out; the Vitest-based `@angular/build:unit-test` builder is still experimental in Angular 20.3 and became stable/default in Angular 21. Revisit alongside an Angular 21 upgrade rather than building on Karma.
 - **Lint skips `web/src/app/features/apply/`** (see `web/eslint.config.js`) because that flow will likely be deleted. If it ends up being kept, remove the ignore and fix what it flags.
 - **Branch protection:** CI only gates anything once PRs are used. When that starts, enable branch protection on `main` with required status checks `check` and `e2e` (a GitHub repo setting, not a file).
-
-## Admin review
-
-- Application review is fully manual right now (flip `application_status` in Supabase Studio). The originally-discussed flow — email notification to the admin on submission with a tokenized one-click approve link (via Resend) — was deliberately deferred to get the applicant-facing UX right first. Build this next once the apply flow feels solid.
 
 ## Product/next slice
 

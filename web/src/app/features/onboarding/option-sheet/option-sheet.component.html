@@ -1,0 +1,62 @@
+<div class="option-sheet">
+  <div class="grab-handle"></div>
+
+  <div class="title-row">
+    <h2>{{ data.title }}</h2>
+    @if (data.multi) {
+      <button mat-button type="button" (click)="clear()">Clear</button>
+    }
+  </div>
+  <p class="help">{{ data.help }}</p>
+
+  <div class="body">
+    @if (data.multi) {
+      <mat-chip-listbox
+        multiple
+        [class.tertiary]="data.accent === 'tertiary'"
+        [aria-label]="data.title"
+        [value]="selected()"
+        (change)="setSelected($event.value)"
+      >
+        @for (option of options(); track option) {
+          <mat-chip-option [value]="option">{{ option }}</mat-chip-option>
+        }
+      </mat-chip-listbox>
+    } @else {
+      <mat-radio-group [value]="selected()[0]" (change)="pick($event.value)">
+        @for (option of options(); track option) {
+          <mat-radio-button [value]="option">{{ option }}</mat-radio-button>
+        }
+      </mat-radio-group>
+    }
+
+    <mat-form-field
+      class="custom"
+      appearance="outline"
+      subscriptSizing="dynamic"
+      floatLabel="always"
+    >
+      <mat-label>Self describe</mat-label>
+      <input
+        matInput
+        [placeholder]="data.placeholder"
+        [value]="custom()"
+        (input)="custom.set($any($event.target).value)"
+        (keydown.enter)="addCustom()"
+      />
+      <button
+        matSuffix
+        mat-flat-button
+        type="button"
+        [disabled]="!canAddCustom()"
+        (click)="addCustom()"
+      >
+        Add
+      </button>
+    </mat-form-field>
+  </div>
+
+  @if (data.multi) {
+    <button mat-flat-button class="done" type="button" (click)="done()">Done</button>
+  }
+</div>
