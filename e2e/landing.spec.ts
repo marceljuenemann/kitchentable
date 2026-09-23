@@ -27,7 +27,7 @@ test('completes the full sign-up flow with a valid invite code', async ({ page }
 
   const link = await getLatestMagicLink(email);
   await page.goto(link);
-  await page.waitForURL('**/apply');
+  await page.waitForURL('**/app');
 
   await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
 });

@@ -1,93 +1,64 @@
 import { Injectable, inject } from '@angular/core';
+import {
+  BehaviorSubject,
+  catchError,
+  combineLatest,
+  concat,
+  from,
+  map,
+  Observable,
+  of,
+  shareReplay,
+  switchMap,
+} from 'rxjs';
+import { AuthService } from './auth/auth.service';
+import { Profile } from './profile.model';
 import { SupabaseService } from './supabase.service';
-import { Profile, ProfilePhoto } from './profile.model';
 
+/**
+ * - `loading`: fetching
+ * - `signed-out`: no session
+ * - `none`: signed in but no profile row yet (needs onboarding)
+ * - `error`: the fetch failed
+ */
+export type ProfileState =
+  { kind: 'loading' | 'signed-out' | 'none' | 'error' } | { kind: 'loaded'; profile: Profile };
+
+/** All profile access goes through stored procedures, never the tables (see docs/database.md). */
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
   private readonly supabase = inject(SupabaseService);
+  private readonly auth = inject(AuthService);
+  private readonly refreshTrigger = new BehaviorSubject<void>(undefined);
 
-  async getMyProfile(): Promise<Profile> {
-    const {
-      data: { session },
-    } = await this.supabase.client.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
+  /** The signed-in user's profile, refetched when the user changes or `refresh()` is called. */
+  readonly state$: Observable<ProfileState> = combineLatest([
+    this.auth.userId$,
+    this.refreshTrigger,
+  ]).pipe(
+    switchMap(([userId]) =>
+      userId
+        ? concat(of<ProfileState>({ kind: 'loading' }), this.fetchState())
+        : of<ProfileState>({ kind: 'signed-out' }),
+    ),
+    shareReplay({ bufferSize: 1, refCount: true }),
+  );
 
-    const { data, error } = await this.supabase.client
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
-
-    if (error) throw error;
-    return data as Profile;
+  refresh() {
+    this.refreshTrigger.next();
   }
 
-  async updateProfile(patch: Partial<Profile>): Promise<Profile> {
-    const {
-      data: { session },
-    } = await this.supabase.client.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
-
-    const { data, error } = await this.supabase.client
-      .from('profiles')
-      .update(patch)
-      .eq('id', session.user.id)
-      .select('*')
-      .single();
-
-    if (error) throw error;
-    return data as Profile;
+  private fetchState(): Observable<ProfileState> {
+    return from(this.getMyProfile()).pipe(
+      map((profile): ProfileState => (profile ? { kind: 'loaded', profile } : { kind: 'none' })),
+      catchError(() => of<ProfileState>({ kind: 'error' })),
+    );
   }
 
-  async listPhotos(): Promise<ProfilePhoto[]> {
-    const { data, error } = await this.supabase.client
-      .from('profile_photos')
-      .select('*')
-      .order('position', { ascending: true });
-
+  /** The profile, or null if the user hasn't completed onboarding yet. */
+  private async getMyProfile(): Promise<Profile | null> {
+    const { data, error } = await this.supabase.client.rpc('get_my_profile');
     if (error) throw error;
-    return data as ProfilePhoto[];
-  }
-
-  async uploadPhoto(file: File, position: number): Promise<ProfilePhoto> {
-    const {
-      data: { session },
-    } = await this.supabase.client.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
-
-    const extension = file.name.split('.').pop() ?? 'jpg';
-    const storagePath = `${session.user.id}/${crypto.randomUUID()}.${extension}`;
-
-    const { error: uploadError } = await this.supabase.client.storage
-      .from('photos')
-      .upload(storagePath, file);
-    if (uploadError) throw uploadError;
-
-    const { data, error } = await this.supabase.client
-      .from('profile_photos')
-      .insert({ profile_id: session.user.id, storage_path: storagePath, position })
-      .select('*')
-      .single();
-
-    if (error) throw error;
-    return data as ProfilePhoto;
-  }
-
-  async deletePhoto(photo: ProfilePhoto): Promise<void> {
-    const { error: removeError } = await this.supabase.client.storage
-      .from('photos')
-      .remove([photo.storage_path]);
-    if (removeError) throw removeError;
-
-    const { error } = await this.supabase.client.from('profile_photos').delete().eq('id', photo.id);
-    if (error) throw error;
-  }
-
-  async getPhotoUrl(storagePath: string): Promise<string> {
-    const { data, error } = await this.supabase.client.storage
-      .from('photos')
-      .createSignedUrl(storagePath, 60 * 60);
-    if (error) throw error;
-    return data.signedUrl;
+    return data as Profile | null;
   }
 }

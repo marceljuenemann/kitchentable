@@ -1,28 +1,25 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth/auth.guard';
+import { authGuard, signedOutGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
+    canActivate: [signedOutGuard],
     loadComponent: () =>
       import('./features/landing/landing.component').then((m) => m.LandingComponent),
   },
   {
-    path: 'apply/start',
-    loadComponent: () =>
-      import('./features/apply/start/start.component').then((m) => m.StartComponent),
-  },
-  {
     path: 'auth/callback',
     loadComponent: () =>
-      import('./features/apply/callback/callback.component').then((m) => m.CallbackComponent),
+      import('./features/auth-callback/callback.component').then((m) => m.CallbackComponent),
   },
+  // One route for everything a signed-in user sees: the shell picks the screen from the
+  // profile status, so nobody can navigate into the wrong flow.
   {
-    path: 'apply',
+    path: 'app',
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/apply/stepper/stepper.component').then((m) => m.StepperComponent),
+    loadComponent: () => import('./features/shell/shell.component').then((m) => m.ShellComponent),
   },
-  { path: '**', redirectTo: 'apply' },
+  { path: '**', redirectTo: '' },
 ];

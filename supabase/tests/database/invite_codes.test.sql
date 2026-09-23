@@ -27,9 +27,9 @@ select lives_ok(
 );
 
 select is(
-  (select application_status from public.profiles where id = '11111111-1111-1111-1111-111111111111'),
-  'draft',
-  'a draft profile is created for the new user'
+  (select count(*)::int from public.profiles where id = '11111111-1111-1111-1111-111111111111'),
+  0,
+  'no profile row is created at signup (only once onboarding is submitted)'
 );
 
 select is(

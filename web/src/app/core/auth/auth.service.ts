@@ -1,6 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import type { Session } from '@supabase/supabase-js';
+import { asyncScheduler, distinctUntilChanged, Observable, observeOn, shareReplay } from 'rxjs';
 import { SupabaseService } from '../supabase.service';
+import { clearOnboardingDraft } from '../onboarding-draft';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -8,6 +10,23 @@ export class AuthService {
 
   readonly session = signal<Session | null>(null);
   readonly ready = signal(false);
+
+  /**
+   * The signed-in user's id (null when signed out), following sign-in, sign-out and session
+   * changes. Token refreshes don't re-emit. supabase-js emits the current session on subscribe.
+   */
+  readonly userId$: Observable<string | null> = new Observable<string | null>((subscriber) => {
+    const { data } = this.supabase.client.auth.onAuthStateChange((_event, session) => {
+      subscriber.next(session?.user.id ?? null);
+    });
+    return () => data.subscription.unsubscribe();
+  }).pipe(
+    // supabase-js holds an internal lock while running this callback, so awaiting another
+    // supabase call synchronously from it (e.g. an rpc) would deadlock. Hop off the callback.
+    observeOn(asyncScheduler),
+    distinctUntilChanged(),
+    shareReplay({ bufferSize: 1, refCount: true }),
+  );
 
   constructor() {
     this.supabase.client.auth.getSession().then(({ data }) => {
@@ -33,5 +52,7 @@ export class AuthService {
 
   async signOut() {
     await this.supabase.client.auth.signOut();
+    // TODO: Build a more general solution for userStorage
+    clearOnboardingDraft();
   }
 }

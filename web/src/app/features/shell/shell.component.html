@@ -1,0 +1,47 @@
+<div class="shell">
+  <header class="masthead">
+    <app-logo [size]="40" />
+  </header>
+
+  <main>
+    @switch (view()) {
+      @case ('loading') {
+        <mat-spinner diameter="32" />
+      }
+      @case ('error') {
+        <p>Something went wrong loading your profile.</p>
+        <button mat-flat-button type="button" (click)="retry()">Try again</button>
+      }
+      @case ('onboarding') {
+        <app-onboarding />
+      }
+      @case ('vetting') {
+        <app-vetting />
+      }
+      @case ('approved') {
+        <app-age-verification />
+      }
+      @case ('active') {
+        <app-main />
+      }
+      @case ('disabled') {
+        <!-- Hidden from search but still able to message, so the app stays usable. -->
+        <app-main />
+      }
+      @case ('suspended') {
+        <h1>Your profile is suspended</h1>
+        <p>
+          Please get in touch at
+          <a href="mailto:hello@kitchentable.dating">hello&#64;kitchentable.dating</a>.
+        </p>
+      }
+      @case ('deleted') {
+        <h1>Your profile has been deleted</h1>
+      }
+    }
+  </main>
+
+  <footer class="site-footer">
+    <button mat-button type="button" (click)="signOut()">Sign out</button>
+  </footer>
+</div>
