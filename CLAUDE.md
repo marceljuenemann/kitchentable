@@ -18,6 +18,12 @@ Not built yet: browse, connections/intros, messaging (planned to use RxDB for of
 
 A high-fidelity redesign of the onboarding/application flow (landing page through submission) is dropped as a design handoff at `prototype/onboarding/` — see its README for the full spec (design tokens, copy, validation rules, state model). It has not been built yet; the current app still uses stock Material. Treat the prototype only as the visual/copy/behavior spec and rebuild it against this repo's actual Angular + Angular Material structure, not by porting its inline styles.
 
+## Testing
+
+- **Backend (pgTAP):** `supabase/tests/database/`. Run via `npx supabase db reset && npx supabase test db --local supabase/tests/database`. Run after any migration, RLS policy, or trigger change.
+- **E2E (Playwright):** `e2e/`, config at `playwright.config.ts`. Covers invite/auth flows only so far — landing-page invite gating, the sign-in bottom sheet, and the auth guard redirect. `/apply/start` and the apply stepper aren't covered (see TODO.md). Run via `npx playwright test` from the repo root — needs `supabase start` running (Playwright starts `ng serve` itself if it isn't already running). Run the relevant spec(s) after changes under `web/src/app/core/auth/`, `web/src/app/features/landing/`, or `web/src/app/features/apply/callback/`; run the full suite (`npx playwright test`) for anything broader or route/guard-related.
+- CI (`.github/workflows/test.yml`) always runs both suites in full on every push to `main` and every PR, regardless of what changed locally.
+
 Known Angular/Material gotchas hit while building this (worth knowing before repeating them):
 - Field initializers that reference an injected dependency must use `inject()`, not constructor-parameter properties — constructor param properties are assigned *after* field initializers run, so `readonly form = this.fb.group(...)` with `constructor(private fb: FormBuilder)` throws "used before initialization."
 - Don't set a `mat-stepper`'s initial step via `@ViewChild` + imperative `selectedIndex =` after render — `CdkStepper`'s own content-init logic runs after that and silently overwrites it. Bind `[selectedIndex]` from the template instead, computed before the stepper exists.

@@ -1,8 +1,6 @@
 # TODO
 
 - Deploy to staging
-  - Add e2e tests
-  - GitHub workflow
   - Recreate database (single migration)
 - Landing page: Redirect already logged in user
 - Add Terms & Conditions and Privacy Policy
@@ -13,7 +11,8 @@
 
 ## Testing
 
-- **No automated frontend/e2e test suite yet.** The application flow (invite → magic link → apply stepper → submission) was verified manually with a throwaway Playwright script during development, not checked into the repo. Worth adding a real Playwright test suite once the UI stabilizes, covering at least: invite gating, the full apply flow with autosave/resume, and photo upload.
+- **Playwright e2e suite is in place**, covering invite/auth flows: landing-page invite gating, the sign-in bottom sheet, and the auth guard redirect. See `e2e/` and CLAUDE.md's Testing section for how to run it.
+- **Not yet covered by e2e:** `/apply/start` (skipped deliberately — likely to be rewritten, see the "delete most of the old apply flow" note above), the full apply flow with autosave/resume (the multi-step stepper), and photo upload. Worth adding once that part of the UI stabilizes.
 - Backend (schema, RLS, triggers) has pgTAP coverage in `supabase/tests/database/` — keep extending this as new tables/policies are added, it's cheap and already caught one real bug (missing `authenticated` grants) that manual testing missed.
 
 ## Admin review

@@ -22,12 +22,9 @@ npm install
 npm start                   # ng serve, http://localhost:4200
 ```
 
-The app is invite-only, so you'll need at least one invite code before you can apply. Seed one directly against the local DB:
+The app is invite-only. `supabase/seed.sql` pre-seeds a reusable invite code on every `supabase start` / `supabase db reset` — no manual step needed:
 
-```bash
-docker exec -i supabase_db_kitchentable psql -U postgres -d postgres \
-  -c "insert into public.invite_codes (code, max_uses) values ('DEMO-CODE', 5);"
-```
+http://localhost:4200/?invite=TESTCODE
 
 Sign-in uses passwordless magic links. Locally, Supabase routes outgoing email to **Mailpit** instead of a real inbox — after requesting a link at `/apply/start`, open **http://127.0.0.1:54324** to find and click it.
 
@@ -45,4 +42,15 @@ npx supabase db reset                              # reapplies migrations from s
 npx supabase test db --local supabase/tests/database
 ```
 
-See [TODO.md](TODO.md) for known gaps, including the lack of an automated frontend/e2e test suite.
+### E2E tests (Playwright)
+
+Covers the invite/auth flows: landing-page invite gating, the sign-in bottom sheet, and the auth guard redirect. `/apply/start`, the apply stepper, and photo upload aren't covered yet (see TODO.md).
+
+```bash
+npx supabase start      # if not already running
+npx playwright test     # from the repo root; starts `ng serve` for you if it's not already running
+```
+
+Playwright captures magic-link emails via Mailpit (http://127.0.0.1:54324) instead of a real inbox. `supabase/config.toml` raises the local `auth.rate_limit.email_sent` limit to 100/hour (from the Supabase CLI's default of 2) so a full run doesn't get rate-limited — this only affects the local/CI stack, never production.
+
+See [TODO.md](TODO.md) for remaining gaps, including e2e coverage for `/apply/start`, the apply stepper, and photo upload.
