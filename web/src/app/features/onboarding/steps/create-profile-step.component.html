@@ -1,0 +1,61 @@
+<p class="eyebrow">Step 1 of {{ totalSteps }}</p>
+<h1>Create profile</h1>
+
+<mat-form-field appearance="outline" subscriptSizing="dynamic" class="name">
+  <mat-label>Name</mat-label>
+  <input
+    matInput
+    autocomplete="given-name"
+    placeholder="What should people call you?"
+    [value]="draft().name"
+    (input)="setName($any($event.target).value)"
+  />
+</mat-form-field>
+
+<div class="rows">
+  @for (row of rows(); track row.key) {
+    <button type="button" class="row" [class.set]="row.value" (click)="openRow(row.key)">
+      <span class="text">
+        <span class="label">
+          {{ row.label }}<span class="suffix"> · {{ row.required ? 'required' : 'optional' }}</span>
+        </span>
+        <span class="value">{{ row.value || row.emptyText }}</span>
+      </span>
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  }
+</div>
+
+<h2 class="section-label">Location</h2>
+<mat-radio-group
+  class="location"
+  aria-label="Location"
+  [value]="draft().location"
+  (change)="setLocation($event.value)"
+>
+  <mat-radio-button value="London">London</mat-radio-button>
+  <mat-radio-button value="Somewhere else">Somewhere else</mat-radio-button>
+</mat-radio-group>
+
+@if (draft().location === 'Somewhere else') {
+  <div class="notice">
+    <mat-icon>warning</mat-icon>
+    <p>
+      <b>We've only launched in London so far.</b> Leave your city and we'll email you when Kitchen
+      Table opens where you are — you won't appear in search until then.
+    </p>
+  </div>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Where are you?</mat-label>
+    <input
+      matInput
+      placeholder="e.g. Manchester, Berlin"
+      [value]="draft().locationOther"
+      (input)="setLocationOther($any($event.target).value)"
+    />
+  </mat-form-field>
+}
+
+<button mat-flat-button class="continue" type="button" [disabled]="!canContinue()" (click)="next()">
+  Continue
+</button>

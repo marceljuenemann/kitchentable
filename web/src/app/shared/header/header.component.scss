@@ -13,13 +13,3 @@
   text-transform: uppercase;
   color: var(--kt-violet);
 }
-
-:host(.compact) {
-  justify-content: center;
-  padding-top: 14px;
-
-  .wordmark {
-    font-size: 14px;
-    letter-spacing: 0.15em;
-  }
-}
