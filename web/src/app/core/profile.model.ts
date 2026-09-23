@@ -1,11 +1,19 @@
-export type ApplicationStatus = 'draft' | 'pending' | 'approved' | 'rejected';
+/** See docs/database.md for what each status means and who may change it. */
+export type ProfileStatus =
+  'vetting' | 'approved' | 'active' | 'disabled' | 'suspended' | 'deleted';
+
+export interface ProfilePhoto {
+  id: string;
+  profile_id: string;
+  storage_path: string;
+  position: number;
+}
 
 export interface Profile {
   id: string;
-  application_status: ApplicationStatus;
-  application_submitted_at: string | null;
-  application_consent_answer: string | null;
-  application_enm_answer: string | null;
+  status: ProfileStatus;
+  /** Answers to the vetting questions, keyed by question id. */
+  vetting_answers: Record<string, unknown>;
   name: string | null;
   pronouns: string | null;
   tagline: string | null;
@@ -16,11 +24,5 @@ export interface Profile {
   birth_year: number | null;
   birth_month: number | null;
   looking_for: string[];
-}
-
-export interface ProfilePhoto {
-  id: string;
-  profile_id: string;
-  storage_path: string;
-  position: number;
+  photos: ProfilePhoto[];
 }

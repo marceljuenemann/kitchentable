@@ -4,7 +4,7 @@ An open-source, non-profit dating app, starting with a focus on the ENM (ethical
 
 See [PRODUCT.md](PRODUCT.md) for the full mission, principles, business model, and MVP plan.
 
-Status: early-stage. The invite-gated application flow (magic-link sign-in, London check, profile, photos, consent/ENM questions, submission) is built; browse, connections, and messaging are not yet.
+Status: early-stage. Invite-gated sign-up and magic-link sign-in are built, and signed-in users see a screen based on their profile status; onboarding, age verification, browse, connections, and messaging are not yet.
 
 A redesign of the onboarding/application flow is specced (not yet built) as a design handoff in [prototype/onboarding](prototype/onboarding/README.md) — open `design/Onboarding.dc.html` in a browser to click through it.
 
@@ -26,7 +26,7 @@ The app is invite-only. `supabase/seed.sql` pre-seeds a reusable invite code on 
 
 http://localhost:4200/?invite=TESTCODE
 
-Sign-in uses passwordless magic links. Locally, Supabase routes outgoing email to **Mailpit** instead of a real inbox — after requesting a link at `/apply/start`, open **http://127.0.0.1:54324** to find and click it.
+Sign-in uses passwordless magic links. Locally, Supabase routes outgoing email to **Mailpit** instead of a real inbox — after requesting a link on the landing page, open **http://127.0.0.1:54324** to find and click it.
 
 Useful local URLs (from `supabase start` output):
 - App: http://localhost:4200
@@ -35,7 +35,7 @@ Useful local URLs (from `supabase start` output):
 
 ### Backend tests
 
-Schema, RLS policies, and triggers (invite gating, the submission-completeness gate) are covered by pgTAP tests:
+Schema, access rules, stored procedures and triggers (invite gating, profile lifecycle) are covered by pgTAP tests. See [docs/database.md](docs/database.md) for the data model:
 
 ```bash
 npx supabase db reset                              # reapplies migrations from scratch
@@ -44,7 +44,7 @@ npx supabase test db --local supabase/tests/database
 
 ### E2E tests (Playwright)
 
-Covers the invite/auth flows: landing-page invite gating, the sign-in bottom sheet, and the auth guard redirect. `/apply/start`, the apply stepper, and photo upload aren't covered yet (see TODO.md).
+Covers the invite/auth flows and the status-driven shell: landing-page invite gating, the sign-in bottom sheet, auth-guard redirects, and the screen shown for each profile status.
 
 ```bash
 npx supabase start      # if not already running
@@ -58,10 +58,10 @@ Playwright captures magic-link emails via Mailpit (http://127.0.0.1:54324) inste
 ```bash
 npm run check          # from the repo root; no Docker needed. Runs everything below
 npm run format         # fix formatting (Prettier) — `format:check` only verifies
-npm run lint           # ng lint (angular-eslint); skips the old web/src/app/features/apply/ flow
+npm run lint           # ng lint (angular-eslint)
 npm run typecheck:e2e  # type-check e2e/ (Playwright transpiles TS without checking types)
 ```
 
 `check` also runs a production `ng build` (strict TypeScript + templates). CI (`.github/workflows/ci.yml`) runs the same checks as one job, in parallel with the e2e/pgTAP job.
 
-See [TODO.md](TODO.md) for remaining gaps, including e2e coverage for `/apply/start`, the apply stepper, and photo upload.
+See [TODO.md](TODO.md) for remaining gaps.

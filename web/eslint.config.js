@@ -5,8 +5,7 @@ const angular = require("angular-eslint");
 
 module.exports = tseslint.config(
   {
-    // The old apply flow is slated for deletion (see TODO.md) -- not worth fixing lint there.
-    ignores: ["src/app/features/apply/**", "dist/**", ".angular/**"],
+    ignores: ["dist/**", ".angular/**"],
   },
   {
     files: ["**/*.ts"],

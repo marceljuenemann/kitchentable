@@ -1,0 +1,22 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: var(--kt-bg);
+  color: var(--kt-ink);
+  font-family: var(--kt-font-sans);
+}
+
+.shell {
+  max-width: var(--kt-page-width);
+  margin: 0 auto;
+  padding: 40px 24px 48px;
+}
+
+main {
+  margin-top: 24px;
+}
+
+.site-footer {
+  margin-top: 48px;
+  text-align: center;
+}

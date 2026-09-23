@@ -1,8 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
-import { SupabaseService } from '../../../core/supabase.service';
+import { SupabaseService } from '../../core/supabase.service';
 
 @Component({
   selector: 'app-callback',
@@ -14,7 +14,7 @@ import { SupabaseService } from '../../../core/supabase.service';
 export class CallbackComponent implements OnInit {
   readonly timedOut = signal(false);
 
-  constructor(private readonly supabase: SupabaseService) {}
+  private readonly supabase = inject(SupabaseService);
 
   ngOnInit() {
     // supabase-js parses the magic-link token out of the URL as part of
@@ -27,12 +27,12 @@ export class CallbackComponent implements OnInit {
     const { data: sub } = this.supabase.client.auth.onAuthStateChange((_event, session) => {
       if (session) {
         sub.subscription.unsubscribe();
-        window.location.href = '/apply';
+        window.location.href = '/app';
       }
     });
 
     setTimeout(() => {
-      if (!window.location.pathname.startsWith('/apply')) {
+      if (!window.location.pathname.startsWith('/app')) {
         this.timedOut.set(true);
       }
     }, 8000);

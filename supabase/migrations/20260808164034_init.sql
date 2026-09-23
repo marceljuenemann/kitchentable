@@ -1,14 +1,31 @@
+-- Kitchentable schema. See docs/database.md for the rules behind it.
+--
+-- Access model: clients never touch profiles/profile_photos directly. Every read and write goes
+-- through the security definer functions below, which check auth.uid() and enforce the allowed
+-- status transitions. The one exception is the `photos` storage bucket (owner-only RLS).
+
 create extension if not exists pgcrypto;
+create extension if not exists pgtap with schema extensions;
 
 -- profiles ------------------------------------------------------------
 
+create type public.profile_status as enum (
+  'vetting',    -- submitted, admin is reviewing
+  'approved',   -- admin approved, age verification pending
+  'active',     -- verified and live
+  'disabled',   -- hidden by the user (not in search, can still message)
+  'suspended',  -- suspended by an admin
+  'deleted'     -- deleted by the user (PII scrubbed, can no longer message)
+);
+
+-- A row only exists once onboarding has been submitted; users without a row still need to
+-- onboard. (Rows are not created by any function yet -- onboarding submission is not built.)
 create table public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
-  application_status text not null default 'draft'
-    check (application_status in ('draft', 'pending', 'approved', 'rejected')),
-  application_submitted_at timestamptz,
-  application_consent_answer text,
-  application_enm_answer text,
+  status public.profile_status not null default 'vetting',
+  -- Answers to the vetting questions, keyed by question id. Free-form JSON because the
+  -- questions will change and we never filter or search on them.
+  vetting_answers jsonb not null default '{}',
   name text,
   pronouns text,
   tagline text,
@@ -23,21 +40,22 @@ create table public.profiles (
   updated_at timestamptz not null default now()
 );
 
+create table public.profile_photos (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid not null references public.profiles (id) on delete cascade,
+  storage_path text not null,
+  position int not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create index profile_photos_profile_id_idx on public.profile_photos (profile_id);
+
+-- No client access at all: RLS on with no policies is the backstop, the revoke is the rule.
 alter table public.profiles enable row level security;
-
--- Postgres grants nothing to anon/authenticated on a newly created table by
--- default (that only happens automatically for tables made via the Studio
--- table editor) -- RLS policies are meaningless without this base grant.
-grant select, update on public.profiles to authenticated;
-
-create policy "profiles_select_own" on public.profiles
-  for select using (auth.uid() = id);
-
-create policy "profiles_update_own" on public.profiles
-  for update using (auth.uid() = id) with check (auth.uid() = id);
-
--- No insert policy: rows are only ever created by handle_new_user() below.
--- No public read policy yet: browse doesn't exist in this pass.
+alter table public.profile_photos enable row level security;
+revoke all on public.profiles, public.profile_photos from anon, authenticated;
+-- Admin tooling, webhooks and e2e fixtures use the service role.
+grant all on public.profiles, public.profile_photos to service_role;
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -54,83 +72,47 @@ create trigger profiles_set_updated_at
   before update on public.profiles
   for each row execute function public.set_updated_at();
 
--- An application can only move to 'pending' once it's actually complete,
--- so an empty/trivial application is structurally impossible to submit.
-create or replace function public.enforce_application_submission()
-returns trigger
+-- profile functions -------------------------------------------------------
+
+create or replace function public.require_auth_uid()
+returns uuid
 language plpgsql
+stable
 set search_path = public
 as $$
+declare
+  uid uuid := auth.uid();
 begin
-  if new.application_status = 'pending' and old.application_status is distinct from 'pending' then
-    if coalesce(new.name, '') = '' then
-      raise exception 'name is required before submitting';
-    end if;
-    if coalesce(new.tagline, '') = '' then
-      raise exception 'tagline is required before submitting';
-    end if;
-    if coalesce(new.bio, '') = '' then
-      raise exception 'bio is required before submitting';
-    end if;
-    if coalesce(new.location, '') = '' then
-      raise exception 'location is required before submitting';
-    end if;
-    if coalesce(new.application_consent_answer, '') = '' then
-      raise exception 'consent answer is required before submitting';
-    end if;
-    if coalesce(new.application_enm_answer, '') = '' then
-      raise exception 'ENM answer is required before submitting';
-    end if;
-    if coalesce(array_length(new.gender, 1), 0) = 0 then
-      raise exception 'gender is required before submitting';
-    end if;
-    if coalesce(array_length(new.sexuality, 1), 0) = 0 then
-      raise exception 'sexuality is required before submitting';
-    end if;
-    if not exists (select 1 from public.profile_photos where profile_id = new.id) then
-      raise exception 'at least one photo is required before submitting';
-    end if;
-
-    new.application_submitted_at := now();
+  if uid is null then
+    raise exception 'Not authenticated.';
   end if;
-
-  return new;
+  return uid;
 end;
 $$;
 
--- profile_photos --------------------------------------------------------
+-- The caller's own profile (including photos), or null if they haven't onboarded yet.
+create or replace function public.get_my_profile()
+returns jsonb
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select to_jsonb(p) || jsonb_build_object(
+    'photos',
+    coalesce(
+      (select jsonb_agg(to_jsonb(ph) order by ph.position) from public.profile_photos ph where ph.profile_id = p.id),
+      '[]'::jsonb
+    )
+  )
+  from public.profiles p
+  where p.id = public.require_auth_uid();
+$$;
 
-create table public.profile_photos (
-  id uuid primary key default gen_random_uuid(),
-  profile_id uuid not null references public.profiles (id) on delete cascade,
-  storage_path text not null,
-  position int not null default 0,
-  created_at timestamptz not null default now()
-);
+revoke execute on function public.require_auth_uid(), public.get_my_profile()
+from public, anon, authenticated;
 
-create index profile_photos_profile_id_idx on public.profile_photos (profile_id);
-
-alter table public.profile_photos enable row level security;
-
-grant select, insert, update, delete on public.profile_photos to authenticated;
-
-create policy "profile_photos_select_own" on public.profile_photos
-  for select using (auth.uid() = profile_id);
-
-create policy "profile_photos_insert_own" on public.profile_photos
-  for insert with check (auth.uid() = profile_id);
-
-create policy "profile_photos_update_own" on public.profile_photos
-  for update using (auth.uid() = profile_id) with check (auth.uid() = profile_id);
-
-create policy "profile_photos_delete_own" on public.profile_photos
-  for delete using (auth.uid() = profile_id);
-
--- The submission-gate trigger above needs to see photo rows, so it must be
--- created after profile_photos exists.
-create trigger profiles_enforce_submission
-  before update on public.profiles
-  for each row execute function public.enforce_application_submission();
+grant execute on function public.get_my_profile() to authenticated;
 
 -- invite_codes ------------------------------------------------------------
 
@@ -146,8 +128,10 @@ create table public.invite_codes (
 -- which runs as the function owner and bypasses RLS.
 alter table public.invite_codes enable row level security;
 
--- auth.users -> profiles -------------------------------------------------
+-- auth.users -> invite codes -----------------------------------------------
 
+-- Validates and consumes the invite code at signup. Deliberately creates no profile: that
+-- only happens once the user completes onboarding (submit_onboarding).
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -183,9 +167,6 @@ begin
   set use_count = use_count + 1
   where code = invite_code;
 
-  insert into public.profiles (id, application_status)
-  values (new.id, 'draft');
-
   return new;
 end;
 $$;
@@ -200,8 +181,8 @@ insert into storage.buckets (id, name, public)
 values ('photos', 'photos', false)
 on conflict (id) do nothing;
 
--- Files are stored under <user_id>/<filename>. Owner-only for now, matching
--- profiles having no public read yet; loosen when browse ships.
+-- Files are stored under <user_id>/<filename>, uploaded during onboarding before the profile
+-- row exists. Owner-only for now; loosen when browse ships.
 create policy "photos_select_own" on storage.objects
   for select using (bucket_id = 'photos' and auth.uid()::text = (storage.foldername(name))[1]);
 

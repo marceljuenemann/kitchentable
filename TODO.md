@@ -1,15 +1,11 @@
 # TODO
 
-- Authentication flow (landing, onboarding, main)
+- Implement onboarding flow
 - Deploy to staging
   - Recreate database (single migration)
 - Clean up CLAUDE etc. Improve infrastructure
-- Landing page: Redirect already logged in user
 - Add Terms & Conditions and Privacy Policy
-- Add database documentation
-- Delete old apply flow, review code under web/
-- Application fields to JSON?
-- Profile not updateable? Stored procedure only? Constraints on fields?
+- Security review
 
 ## Testing
 
