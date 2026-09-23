@@ -3,8 +3,6 @@ import { UserStorage } from '../../core/user-storage';
 
 export const ONBOARDING_STEPS = 4;
 
-export type OnboardingLocation = 'London' | 'Somewhere else';
-
 /** The in-progress onboarding answers (see prototype/onboarding/README.md, "State model"). */
 export interface OnboardingDraft {
   /** Current step, 1 to ONBOARDING_STEPS. */
@@ -14,9 +12,8 @@ export interface OnboardingDraft {
   pronouns: string[];
   gender: string[];
   sexuality: string[];
-  location: OnboardingLocation;
-  /** Required when location is "Somewhere else". */
-  locationOther: string;
+  /** "London" or the city the user typed in. */
+  location: string;
   /** "1"-"12" */
   birthMonth: string;
   birthYear: string;
@@ -29,7 +26,6 @@ const EMPTY_DRAFT: OnboardingDraft = {
   gender: [],
   sexuality: [],
   location: 'London',
-  locationOther: '',
   birthMonth: '',
   birthYear: '',
 };

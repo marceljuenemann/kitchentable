@@ -4,17 +4,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatRadioModule } from '@angular/material/radio';
-import { AgeSheetComponent, ageFrom, MONTHS } from '../age-sheet/age-sheet.component';
+import { AgeSheetComponent, ageFrom } from '../age-sheet/age-sheet.component';
+import { LocationSheetComponent } from '../location-sheet/location-sheet.component';
 import { OptionSheetComponent, OptionSheetData } from '../option-sheet/option-sheet.component';
-import { OnboardingLocation } from '../onboarding-draft.store';
 import { OnboardingDraftStore, ONBOARDING_STEPS } from '../onboarding-draft.store';
 import { GENDER_OPTIONS, PRONOUN_OPTIONS, SEXUALITY_OPTIONS } from '../onboarding-options';
 
 type ListField = 'pronouns' | 'gender' | 'sexuality';
 
 interface Row {
-  key: ListField | 'age';
+  key: ListField | 'age' | 'location';
   label: string;
   required: boolean;
   emptyText: string;
@@ -49,7 +48,7 @@ const SHEETS: Record<ListField, Omit<OptionSheetData, 'selected'>> = {
 @Component({
   selector: 'app-create-profile-step',
   standalone: true,
-  imports: [MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatRadioModule],
+  imports: [MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule],
   templateUrl: './create-profile-step.component.html',
   styleUrl: './create-profile-step.component.scss',
 })
@@ -90,34 +89,38 @@ export class CreateProfileStepComponent {
         label: 'Age',
         required: false,
         emptyText: 'Add birthday',
-        value:
-          age === null ? '' : `${MONTHS[Number(draft.birthMonth) - 1]} ${draft.birthYear} (${age})`,
+        value: age === null ? '' : `${age}`,
+      },
+      {
+        key: 'location',
+        label: 'Location',
+        required: true,
+        emptyText: 'Add location',
+        value: draft.location,
       },
     ];
   });
 
   readonly canContinue = computed(() => {
     const draft = this.draft();
-    return (
-      draft.name.trim() !== '' &&
-      draft.pronouns.length > 0 &&
-      (draft.location === 'London' || draft.locationOther.trim() !== '')
-    );
+    return draft.name.trim() !== '' && draft.pronouns.length > 0 && draft.location.trim() !== '';
   });
 
   setName(name: string) {
     this.store.update({ name });
   }
 
-  setLocation(location: OnboardingLocation) {
-    this.store.update({ location });
-  }
-
-  setLocationOther(locationOther: string) {
-    this.store.update({ locationOther });
-  }
-
   openRow(key: Row['key']) {
+    if (key === 'location') {
+      this.bottomSheet
+        .open(LocationSheetComponent, {
+          panelClass: 'kt-bottom-sheet',
+          data: { location: this.draft().location },
+        })
+        .afterDismissed()
+        .subscribe((location) => location && this.store.update({ location }));
+      return;
+    }
     if (key === 'age') {
       const { birthMonth, birthYear } = this.draft();
       this.bottomSheet

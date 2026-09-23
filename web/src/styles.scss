@@ -109,3 +109,11 @@ body {
     border-top-right-radius: var(--mat-bottom-sheet-container-shape) !important;
   }
 }
+
+// Form field labels (Name, Email, ...) share the look of the uppercase row labels in the
+// onboarding flow. An element selector, so it also reaches fields inside overlays and sheets.
+mat-form-field mat-label {
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
