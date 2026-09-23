@@ -1,0 +1,51 @@
+.sign-in-sheet {
+  padding: 12px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--kt-font-sans);
+}
+
+.grab-handle {
+  align-self: center;
+  width: 44px;
+  height: 5px;
+  border-radius: 99px;
+  background: var(--kt-outline-soft);
+  margin-bottom: 16px;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-family: var(--kt-font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--kt-violet);
+}
+
+.intro {
+  margin: 0 0 16px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--kt-muted);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+mat-form-field {
+  width: 100%;
+  --mat-form-field-outlined-container-shape: 14px;
+}
+
+.error {
+  margin: 0;
+  color: var(--mat-sys-error);
+  font-size: 13.5px;
+}
+
+button {
+  width: 100%;
+}

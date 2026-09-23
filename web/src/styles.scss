@@ -70,4 +70,36 @@ html, body { height: 100%; }
   --kt-shadow-lift: 0 2px 6px oklch(0.3 0.12 300 / .1), 0 22px 46px -20px oklch(0.3 0.12 300 / .3);
   --kt-font-display: "Baloo Bhaijaan 2", "Trebuchet MS", sans-serif;
   --kt-font-sans: "Nunito Sans", system-ui, sans-serif;
+  --kt-page-width: 430px;
+}
+
+// Applied via `panelClass` on MatBottomSheet.open() — the sheet's container is
+// appended outside any component's view, so it can only be themed globally.
+//
+// The outer pane (this class) is a flex container, and its child — the inner
+// `.mat-bottom-sheet-container` — defaults to `min-width: auto`, which lets a
+// flex item's content override a smaller max-width and grow past it (the
+// classic flexbox min-width overflow gotcha). That's what made the sheet's
+// width vary unpredictably by viewport instead of just capping at
+// --kt-page-width: `min-width: 0` on the child is the standard fix.
+.kt-bottom-sheet {
+  --mat-bottom-sheet-container-background-color: var(--kt-bg-soft);
+  --mat-bottom-sheet-container-shape: 32px;
+  --mat-bottom-sheet-container-text-color: var(--kt-ink);
+  width: 100% !important;
+  max-width: var(--kt-page-width) !important;
+  margin: 0 auto;
+
+  .mat-bottom-sheet-container {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: var(--kt-page-width) !important;
+    box-sizing: border-box !important;
+    // Material only rounds this element's top corners via its responsive
+    // breakpoint classes (-medium/-large/-xlarge, ~600px+); below that
+    // there's no border-radius at all, hence square corners on narrow
+    // viewports. Set it directly so it applies regardless of breakpoint.
+    border-top-left-radius: var(--mat-bottom-sheet-container-shape) !important;
+    border-top-right-radius: var(--mat-bottom-sheet-container-shape) !important;
+  }
 }

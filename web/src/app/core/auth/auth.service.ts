@@ -18,12 +18,12 @@ export class AuthService {
     });
   }
 
-  async requestMagicLink(email: string, inviteCode: string) {
+  async requestMagicLink(email: string, inviteCode?: string) {
     const { error } = await this.supabase.client.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-        data: { invite_code: inviteCode },
+        ...(inviteCode ? { data: { invite_code: inviteCode } } : {}),
       },
     });
     if (error) throw error;

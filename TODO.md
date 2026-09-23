@@ -1,12 +1,15 @@
 # TODO
 
+- Deploy to staging
+  - Add e2e tests
+  - GitHub workflow
+  - Recreate database (single migration)
+- Landing page: Redirect already logged in user
 - Add Terms & Conditions and Privacy Policy
 - Add database documentation
-- Review code under web/
+- Review code under web/ (or probably delete most of the old apply flow)
 - Application fields to JSON?
 - Profile not updateable? Stored procedure only? Constraints on fields?
-- Recreate database (single migration)
-- GitHub workflow
 
 ## Testing
 

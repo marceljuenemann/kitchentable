@@ -26,30 +26,60 @@
   </ul>
 
   <mat-card class="signup-card" appearance="outlined">
-    <h2>Sign Up</h2>
+    @if (inviteCode) {
+      @if (!sent()) {
+        <h2>Sign Up</h2>
 
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Email</mat-label>
-      <input
-        matInput
-        type="email"
-        placeholder="you@example.com"
-        [value]="email()"
-        (input)="setEmail($any($event.target).value)"
-      />
-    </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Email</mat-label>
+          <input
+            matInput
+            type="email"
+            placeholder="you@example.com"
+            [value]="email()"
+            (input)="setEmail($any($event.target).value)"
+          />
+        </mat-form-field>
 
-    <mat-checkbox [checked]="agree()" (change)="setAgree($event.checked)">
-      I agree to the
-      <a href="#" (click)="$event.preventDefault(); $event.stopPropagation()">Terms</a>
-      and
-      <a href="#" (click)="$event.preventDefault(); $event.stopPropagation()">Privacy Policy</a>.
-    </mat-checkbox>
+        <mat-checkbox [checked]="agree()" (change)="setAgree($event.checked)">
+          I agree to the
+          <a href="#" (click)="$event.preventDefault(); $event.stopPropagation()">Terms</a>
+          and
+          <a href="#" (click)="$event.preventDefault(); $event.stopPropagation()">Privacy Policy</a>.
+        </mat-checkbox>
 
-    <button mat-flat-button color="primary" type="button" [disabled]="!canSignUp()">
-      Sign up
-    </button>
+        @if (errorMessage()) {
+          <p class="error">{{ errorMessage() }}</p>
+        }
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="!canSignUp() || submitting()"
+          (click)="signUp()"
+        >
+          @if (submitting()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Sign up
+          }
+        </button>
+      } @else {
+        <h2>Check your email</h2>
+        <p>We've sent a login link to {{ email() }}. Open it on this device to continue.</p>
+      }
+    } @else {
+      <h2>Kitchen Table is currently invite-only</h2>
+      <p>Want to get involved? Just reach out to us!</p>
+      <a mat-flat-button color="primary" href="mailto:hello@kitchentable.dating">Email us</a>
+    }
   </mat-card>
+
+  <p class="signin-line">
+    Already have a profile?
+    <button mat-button type="button" (click)="openSignIn()">Sign in</button>
+  </p>
 
   <footer class="site-footer">
     <a href="mailto:hello@kitchentable.dating">Contact</a>
