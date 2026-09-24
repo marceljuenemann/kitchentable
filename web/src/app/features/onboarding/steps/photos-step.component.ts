@@ -1,3 +1,4 @@
+import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,7 +14,7 @@ import { PhotoStorageService } from '../photos/photo-storage.service';
 @Component({
   selector: 'app-photos-step',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [CdkDrag, CdkDropList, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './photos-step.component.html',
   styleUrl: './photos-step.component.scss',
 })
@@ -74,6 +75,14 @@ export class PhotosStepComponent {
     } catch {
       this.error.set("We couldn't remove that photo. Please try again.");
     }
+  }
+
+  /** The first photo is the main one, so dragging a photo to the first tile makes it the main. */
+  reorder(event: CdkDragDrop<unknown>) {
+    if (event.previousIndex === event.currentIndex) return;
+    const ids = [...this.photoIds()];
+    moveItemInArray(ids, event.previousIndex, event.currentIndex);
+    this.store.update({ photos: ids });
   }
 
   next() {

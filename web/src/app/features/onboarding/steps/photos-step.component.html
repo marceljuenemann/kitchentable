@@ -1,6 +1,6 @@
 <p class="eyebrow">Step 3 of {{ totalSteps }}</p>
 <h1>Add photos</h1>
-<p class="subtitle">Select up to six photos.</p>
+<p class="subtitle">Select up to six photos. Drag and drop to reorder.</p>
 
 @if (error()) {
   <p class="error" role="alert">{{ error() }}</p>
@@ -16,18 +16,16 @@
   (change)="onFilesChosen($event)"
 />
 
-<div class="grid">
-  @for (photo of slots(); track $index) {
+<div class="grid" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="reorder($event)">
+  @for (photo of slots(); track photo ? photo.id : 'empty-' + $index) {
     @if (photo) {
-      <div class="tile filled">
+      <div class="tile filled" cdkDrag [cdkDragStartDelay]="{ touch: 200, mouse: 0 }">
         @if (photo.url) {
           <img [src]="photo.url" [alt]="'Photo ' + ($index + 1)" />
         } @else {
           <mat-spinner class="loading" diameter="24" />
         }
-        @if ($index === 0) {
-          <span class="badge">Main</span>
-        }
+        <span class="badge">Main</span>
         <button
           class="remove"
           type="button"

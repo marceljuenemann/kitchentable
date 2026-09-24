@@ -85,9 +85,9 @@ async function tileColourAt(page: Page, x: number, y: number) {
   );
 }
 
-/** `<user id>/<photo id>`: where the first tile's photo is stored (see docs/photos.md). */
-async function storedPhotoDir(page: Page) {
-  const src = await page.getByRole('img', { name: 'Photo 1' }).getAttribute('src');
+/** `<user id>/<photo id>`: where the photo in the given tile is stored (see docs/photos.md). */
+async function storedPhotoDir(page: Page, position = 1) {
+  const src = await page.getByRole('img', { name: `Photo ${position}` }).getAttribute('src');
   const match = /\/photos\/([^/]+\/[^/]+)\/thumb\.jpg/.exec(src ?? '');
   if (!match) throw new Error(`Unexpected photo URL: ${src}`);
   return match[1];
@@ -270,4 +270,91 @@ test('photos stay when moving between steps', async ({ page }) => {
   await expect(page.getByText("This step isn't built yet.")).toBeVisible();
   await page.getByRole('button', { name: 'Back' }).click();
   await expect(page.getByRole('img', { name: 'Photo 1' })).toBeVisible();
+});
+
+/** Adds a photo through the crop sheet and waits for it to show in the given grid position. */
+async function addPhoto(page: Page, position: number) {
+  await choosePhoto(page, 1200, 1200);
+  await dialog(page).getByRole('button', { name: 'Use photo' }).click();
+  await expect(page.getByRole('img', { name: `Photo ${position}` })).toBeVisible();
+}
+
+/** The centre of a grid tile, once it has stopped moving. */
+async function tileCentre(page: Page, position: number) {
+  const tile = page.getByRole('img', { name: `Photo ${position}` });
+  await expect(tile).toBeVisible();
+  const box = (await tile.boundingBox())!;
+  return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+}
+
+test('photos can be reordered by dragging, and the first one is the main photo', async ({
+  page,
+}) => {
+  await goToPhotosStep(page);
+  await addPhoto(page, 1);
+  await addPhoto(page, 2);
+  const [first, second] = [await storedPhotoDir(page, 1), await storedPhotoDir(page, 2)];
+
+  // Drag the second photo onto the first tile.
+  const from = await tileCentre(page, 2);
+  const to = await tileCentre(page, 1);
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(to.x, to.y, { steps: 15 });
+  await page.mouse.up();
+
+  await expect.poll(() => storedPhotoDir(page, 1)).toBe(second);
+  expect(await storedPhotoDir(page, 2)).toBe(first);
+
+  // The new first photo is the main one (it is the big tile, with the MAIN label).
+  const big = (await page.getByRole('img', { name: 'Photo 1' }).boundingBox())!;
+  const small = (await page.getByRole('img', { name: 'Photo 2' }).boundingBox())!;
+  expect(big.width).toBeGreaterThan(small.width * 1.5);
+
+  // The order is saved with the draft.
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        Object.entries(localStorage)
+          .filter(([key]) => key.endsWith('onboarding-draft'))
+          .map(([, value]) => JSON.parse(value).photos[0] as string),
+      ),
+    )
+    .toEqual([second.split('/')[1]]);
+  await page.reload();
+  await expect.poll(() => storedPhotoDir(page, 1)).toBe(second);
+});
+
+test.describe('on a touch screen', () => {
+  test.use({ hasTouch: true });
+
+  test('a photo is picked up by touching and holding it, then dragged', async ({ page }) => {
+    await goToPhotosStep(page);
+    await addPhoto(page, 1);
+    await addPhoto(page, 2);
+    const [first, second] = [await storedPhotoDir(page, 1), await storedPhotoDir(page, 2)];
+
+    const from = await tileCentre(page, 2);
+    const to = await tileCentre(page, 1);
+    const cdp = await page.context().newCDPSession(page);
+    const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', x: number, y: number) =>
+      cdp.send('Input.dispatchTouchEvent', {
+        type,
+        touchPoints: type === 'touchEnd' ? [] : [{ x, y }],
+      });
+
+    await touch('touchStart', from.x, from.y);
+    await page.waitForTimeout(400); // held long enough to pick it up
+    for (let step = 1; step <= 15; step++) {
+      await touch(
+        'touchMove',
+        from.x + ((to.x - from.x) * step) / 15,
+        from.y + ((to.y - from.y) * step) / 15,
+      );
+    }
+    await touch('touchEnd', to.x, to.y);
+
+    await expect.poll(() => storedPhotoDir(page, 1)).toBe(second);
+    expect(await storedPhotoDir(page, 2)).toBe(first);
+  });
 });
