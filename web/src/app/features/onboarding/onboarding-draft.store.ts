@@ -1,5 +1,6 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { UserStorage } from '../../core/user-storage';
+import { MAX_PHOTOS } from './onboarding-options';
 
 export const ONBOARDING_STEPS = 4;
 
@@ -22,6 +23,8 @@ export interface OnboardingDraft {
   aboutText: string;
   /** Ids from LOOKING_FOR_OPTIONS, or the user's own text. */
   lookingFor: string[];
+  /** Step 3: ids of the uploaded photos, in display order (first = main); see docs/photos.md. */
+  photos: string[];
 }
 
 const EMPTY_DRAFT: OnboardingDraft = {
@@ -36,6 +39,7 @@ const EMPTY_DRAFT: OnboardingDraft = {
   tagline: '',
   aboutText: '',
   lookingFor: [],
+  photos: [],
 };
 
 const STORAGE_KEY = 'onboarding-draft';
@@ -57,6 +61,15 @@ export class OnboardingDraftStore {
     inject(DestroyRef).onDestroy(() => this.flush());
   }
 
+  /** Adds an already uploaded photo (by id) at the end. */
+  addPhoto(id: string) {
+    this.update({ photos: [...this.state().photos, id].slice(0, MAX_PHOTOS) });
+  }
+
+  removePhoto(id: string) {
+    this.update({ photos: this.state().photos.filter((photoId) => photoId !== id) });
+  }
+
   update(patch: Partial<OnboardingDraft>) {
     this.state.update((draft) => ({ ...draft, ...patch }));
     clearTimeout(this.saveTimer);
@@ -75,6 +88,9 @@ export class OnboardingDraftStore {
     const stored = this.storage.get<Partial<OnboardingDraft>>(STORAGE_KEY);
     const draft = { ...EMPTY_DRAFT, ...stored };
     draft.step = Math.min(Math.max(Math.trunc(Number(draft.step)) || 1, 1), ONBOARDING_STEPS);
+    draft.photos = Array.isArray(draft.photos)
+      ? draft.photos.filter((id) => typeof id === 'string').slice(0, MAX_PHOTOS)
+      : [];
     return draft;
   }
 }

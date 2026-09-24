@@ -1,0 +1,29 @@
+<div class="crop-sheet">
+  <div class="grab-handle"></div>
+
+  <h2>Crop photo</h2>
+
+  <div class="stage">
+    <div #frame class="frame">
+      <img #image [src]="imageUrl" alt="Your photo" draggable="false" />
+      <div class="dim" aria-hidden="true"></div>
+      <div class="grid" aria-hidden="true"></div>
+    </div>
+  </div>
+  <p class="hint">Drag the photo to move it. Pinch to zoom.</p>
+
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="actions">
+    <button mat-button type="button" [disabled]="working()" (click)="cancel()">Cancel</button>
+    <button mat-flat-button type="button" [disabled]="!ready() || working()" (click)="confirm()">
+      @if (working()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Use photo
+      }
+    </button>
+  </div>
+</div>

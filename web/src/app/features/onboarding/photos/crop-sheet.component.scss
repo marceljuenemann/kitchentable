@@ -1,0 +1,99 @@
+.crop-sheet {
+  padding: 12px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--kt-font-sans);
+}
+
+.grab-handle {
+  align-self: center;
+  width: 44px;
+  height: 5px;
+  border-radius: 99px;
+  background: var(--kt-outline-soft);
+  margin-bottom: 16px;
+}
+
+h2 {
+  margin: 0 0 16px;
+  font-family: var(--kt-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--kt-violet);
+}
+
+// The area in which the photo is visible: the square plus a margin around it (bleeding out to the
+// sheet's edges), where the rest of the photo shows faded. It clips the photo, which would
+// otherwise stick out of the sheet and make it scroll.
+.stage {
+  display: flex;
+  justify-content: center;
+  margin: 0 -20px;
+  padding: 24px 0;
+  overflow: hidden;
+}
+
+// The square viewport: what you see inside it is exactly what the photo will look like. The photo
+// is larger than the square and moves underneath it. On short screens the square shrinks, so the
+// whole sheet always fits within the sheet's maximum height (80% of the screen).
+.frame {
+  position: relative;
+  flex: none;
+  width: min(calc(100% - 40px), max(200px, calc(80vh - 300px)));
+  aspect-ratio: 1;
+  background: var(--kt-sunken);
+  touch-action: none;
+
+  img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-width: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+}
+
+// Fades everything outside the square (a huge outward shadow, clipped by the stage).
+.dim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  // The sheet's own background colour, so the empty parts of the stage don't show as a box.
+  box-shadow: 0 0 0 100vmax color-mix(in srgb, var(--kt-bg-soft) 70%, transparent);
+}
+
+// Rule-of-thirds guidelines.
+.grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  --line: rgba(255, 255, 255, 0.55);
+  background:
+    linear-gradient(var(--line), var(--line)) 33.333% 0 / 1px 100% no-repeat,
+    linear-gradient(var(--line), var(--line)) 66.666% 0 / 1px 100% no-repeat,
+    linear-gradient(var(--line), var(--line)) 0 33.333% / 100% 1px no-repeat,
+    linear-gradient(var(--line), var(--line)) 0 66.666% / 100% 1px no-repeat;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.4));
+}
+
+.hint {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--kt-muted);
+}
+
+.error {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--mat-sys-error);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}

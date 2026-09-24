@@ -1,5 +1,5 @@
 begin;
-select plan(7);
+select plan(6);
 
 insert into public.invite_codes (code, max_uses) values ('ACCESS-TEST', 2);
 
@@ -37,13 +37,6 @@ select throws_ok(
   '42501',
   'permission denied for table profiles',
   'profiles cannot be inserted directly'
-);
-
-select throws_ok(
-  $$ select * from public.profile_photos $$,
-  '42501',
-  'permission denied for table profile_photos',
-  'profile_photos cannot be selected directly'
 );
 
 select throws_ok(

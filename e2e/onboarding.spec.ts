@@ -71,7 +71,7 @@ test('step 2 needs an about text of 250 characters and something you are looking
   );
 
   await next.click();
-  await expect(page.getByText("This step isn't built yet.")).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Add photos' })).toBeVisible();
 });
 
 test('the draft survives a reload and an expired session, and is cleared on sign-out', async ({

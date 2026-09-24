@@ -4,9 +4,9 @@ Postgres via Supabase. The whole schema lives in `supabase/migrations/` (still a
 
 ## Access rules
 
-- **Clients never touch `profiles` or `profile_photos` directly.** All privileges are revoked from `anon` and `authenticated`, RLS is on with no policies (a backstop), and every read/write goes through a `security definer` function that checks `auth.uid()`. This keeps the flows and state changes in one auditable place instead of spread across RLS policies. Functions are added as the features that need them are built.
+- **Clients never touch the `profiles` table directly.** All privileges are revoked from `anon` and `authenticated`, RLS is on with no policies (a backstop), and every read/write goes through a `security definer` function that checks `auth.uid()`. This keeps the flows and state changes in one auditable place instead of spread across RLS policies. Functions are added as the features that need them are built.
 - `invite_codes` is likewise inaccessible to clients; only the signup trigger touches it.
-- The one RLS exception is the `photos` storage bucket: owner-only (`<user id>/<file>`), because uploads go straight from the browser.
+- The one RLS exception is the `photos` storage bucket: owner-only (`<user id>/<photo id>/...`), because uploads go straight from the browser. Sizes, limits and privacy rules are in [photos.md](photos.md).
 - The `service_role` has full table access (admin tooling, webhooks, e2e fixtures).
 
 ## Tables
@@ -14,7 +14,7 @@ Postgres via Supabase. The whole schema lives in `supabase/migrations/` (still a
 - `invite_codes` — `code`, `max_uses`, `use_count`. Consumed at signup.
 - `profiles` — one row per user who has **completed onboarding**; `id` = `auth.users.id`. Signing up creates only an `auth.users` row, so "no profile row" means the user still needs to onboard (draft answers live in the browser's localStorage until submitted).
   Answers to the vetting questions are stored in the `vetting_answers` jsonb column (keyed by question id) rather than one column per question, since the questions will change and are never filtered on.
-- `profile_photos` — ordered photo paths per profile.
+  Photos are the ordered `photos uuid[]` column (first = main photo, at most 6, enforced by a check), not a separate table; the files themselves live in the `photos` storage bucket. See [photos.md](photos.md).
 
 ## Signup
 
@@ -55,4 +55,4 @@ Anything that depends on status (search visibility, who may message) should deri
 
 ## Functions callable by signed-in users
 
-- `get_my_profile()` → the caller's profile plus a `photos` array, or `null` if there is no row. Drives which screen the app shows.
+- `get_my_profile()` → the caller's profile (including the `photos` id array), or `null` if there is no row. Drives which screen the app shows.

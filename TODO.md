@@ -1,9 +1,9 @@
 # TODO
 
 - Implement onboarding flow
-  - Pronoun selection nicer
-  - Test: Store in local user storage?
-  - e2e tests: Age selection, minimum length, photos etc.
+  - Photos: drag & drop
+  - Options selection: Allow specific order
+  - e2e tests: Age selection, photos etc.
 - Angular update
 - Angular karma tests
 - Set up eMail templates (with logo and whatnot)
@@ -14,6 +14,8 @@
   - eMail on registration
 - Add Terms & Conditions and Privacy Policy
 - Security review
+- Photos bucket cleanup
+- Report photos / profile
 
 ## Testing
 

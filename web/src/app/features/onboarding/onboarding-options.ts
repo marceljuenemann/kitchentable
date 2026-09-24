@@ -10,18 +10,14 @@ export const PRONOUN_OPTIONS = [
 ];
 
 export const GENDER_OPTIONS = [
-  'Woman',
-  'Man',
   'Non-binary',
-  'Agender',
-  'Genderfluid',
+  'Man',
+  'Woman',
+  'Trans',
   'Genderqueer',
-  'Trans woman',
-  'Trans man',
-  'Transmasculine',
-  'Transfeminine',
-  'Intersex',
-  'Questioning',
+  'Genderfluid',
+  'Agender',
+  'Gender Questioning',
 ];
 
 export const SEXUALITY_OPTIONS = [
@@ -38,6 +34,7 @@ export const SEXUALITY_OPTIONS = [
   'Questioning',
 ];
 
+export const MAX_PHOTOS = 6;
 export const TAGLINE_MAX_LENGTH = 60;
 export const ABOUT_MIN_LENGTH = 250;
 

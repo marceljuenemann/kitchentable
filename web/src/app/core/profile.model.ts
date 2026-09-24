@@ -2,13 +2,6 @@
 export type ProfileStatus =
   'vetting' | 'approved' | 'active' | 'disabled' | 'suspended' | 'deleted';
 
-export interface ProfilePhoto {
-  id: string;
-  profile_id: string;
-  storage_path: string;
-  position: number;
-}
-
 export interface Profile {
   id: string;
   status: ProfileStatus;
@@ -24,5 +17,6 @@ export interface Profile {
   birth_year: number | null;
   birth_month: number | null;
   looking_for: string[];
-  photos: ProfilePhoto[];
+  /** Photo ids in display order (first = main); files are described in docs/photos.md. */
+  photos: string[];
 }

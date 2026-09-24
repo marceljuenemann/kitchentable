@@ -7,6 +7,9 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? 'github' : 'html',
   timeout: 45_000,
+  // The dev server compiles lazy chunks (e.g. the photo cropper) on first use, which can take a
+  // few seconds on a cold start.
+  expect: { timeout: 15_000 },
   use: {
     baseURL: 'http://localhost:4200',
     trace: 'on-first-retry',

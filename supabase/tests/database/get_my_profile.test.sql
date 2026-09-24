@@ -10,12 +10,10 @@ values
   ('66666666-6666-6666-6666-666666666666', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
     'dave@example.com', '{"invite_code":"PROFILE-TEST"}'::jsonb, '', now(), now(), now());
 
-insert into public.profiles (id, name, status) values
-  ('55555555-5555-5555-5555-555555555555', 'Carol', 'active'),
-  ('66666666-6666-6666-6666-666666666666', 'Dave', 'vetting');
-insert into public.profile_photos (profile_id, storage_path, position) values
-  ('55555555-5555-5555-5555-555555555555', '55555555-5555-5555-5555-555555555555/b.jpg', 1),
-  ('55555555-5555-5555-5555-555555555555', '55555555-5555-5555-5555-555555555555/a.jpg', 0);
+insert into public.profiles (id, name, status, photos) values
+  ('55555555-5555-5555-5555-555555555555', 'Carol', 'active',
+    array['aaaaaaaa-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000001']::uuid[]),
+  ('66666666-6666-6666-6666-666666666666', 'Dave', 'vetting', '{}');
 
 set local role authenticated;
 set local request.jwt.claim.sub = '55555555-5555-5555-5555-555555555555';
@@ -23,9 +21,9 @@ set local request.jwt.claim.sub = '55555555-5555-5555-5555-555555555555';
 select is(public.get_my_profile() ->> 'name', 'Carol', 'returns the caller''s own profile, not another user''s');
 select is(public.get_my_profile() ->> 'status', 'active', 'includes the status');
 select is(
-  (select array_agg(p ->> 'storage_path') from jsonb_array_elements(public.get_my_profile() -> 'photos') p),
-  array['55555555-5555-5555-5555-555555555555/a.jpg', '55555555-5555-5555-5555-555555555555/b.jpg'],
-  'includes photos ordered by position'
+  public.get_my_profile() -> 'photos',
+  '["aaaaaaaa-0000-0000-0000-000000000002", "aaaaaaaa-0000-0000-0000-000000000001"]'::jsonb,
+  'includes the photo ids in their stored (display) order'
 );
 
 set local request.jwt.claim.sub = '77777777-7777-7777-7777-777777777777';
