@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatRadioModule } from '@angular/material/radio';
 
 export interface OptionSheetData {
   title: string;
@@ -15,14 +14,14 @@ export interface OptionSheetData {
   multi: boolean;
   placeholder: string;
   /** Theme colour of the selected chips; defaults to secondary. */
-  accent?: 'secondary' | 'tertiary';
+  accent?: 'primary' | 'secondary' | 'tertiary';
 }
 
 /** Bottom sheet to pick one or several options, or describe your own. Dismisses with the selection. */
 @Component({
   selector: 'app-option-sheet',
   standalone: true,
-  imports: [MatButtonModule, MatChipsModule, MatFormFieldModule, MatInputModule, MatRadioModule],
+  imports: [MatButtonModule, MatChipsModule, MatFormFieldModule, MatInputModule],
   templateUrl: './option-sheet.component.html',
   styleUrl: './option-sheet.component.scss',
 })
@@ -48,8 +47,13 @@ export class OptionSheetComponent {
     this.ref.dismiss([value]);
   }
 
-  setSelected(values: string[]) {
-    this.selected.set(values);
+  /** Multi-select updates the selection; single-select picks and closes (ignoring un-selecting). */
+  onChange(value: string | string[] | undefined) {
+    if (this.data.multi) {
+      this.selected.set(value as string[]);
+    } else if (value !== undefined) {
+      this.pick(value as string);
+    }
   }
 
   addCustom() {

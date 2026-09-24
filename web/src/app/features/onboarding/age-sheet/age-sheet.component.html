@@ -2,10 +2,7 @@
   <div class="grab-handle"></div>
 
   <h2>When were you born?</h2>
-  <p class="help">
-    To protect your privacy, we only ask for your month and year of birth. We only show your age on
-    your profile.
-  </p>
+  <p class="help">To protect your privacy, we only ask for your month and year of birth.</p>
 
   <div class="selects">
     <mat-form-field appearance="outline" class="month">
@@ -28,7 +25,7 @@
   </div>
 
   @if (age() !== null) {
-    <p class="echo set">That makes you {{ age() }}.</p>
+    <p class="echo set">Age shown on profile: {{ age() }}</p>
   } @else {
     <p class="echo">Pick a month and year.</p>
   }

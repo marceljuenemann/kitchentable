@@ -1,10 +1,10 @@
 // TODO: Come up with actual options. Just AI generated so far
 
 export const PRONOUN_OPTIONS = [
-  'she/her',
-  'he/him',
   'they/them',
+  'she/her',
   'she/they',
+  'he/him',
   'he/they',
   'any pronouns',
 ];

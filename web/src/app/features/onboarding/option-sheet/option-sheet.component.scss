@@ -38,8 +38,7 @@ h2 {
   margin-top: 16px;
 }
 
-// Rounded pills: off-white without a border when off; light secondary colour with a border
-// in the secondary colour when selected.
+// Rounded, borderless pills: off-white when off, light secondary colour when selected.
 mat-chip-listbox {
   --mat-chip-container-height: 36px;
   // No darker overlay on a focused chip (a chip stays focused after it's clicked).
@@ -49,25 +48,24 @@ mat-chip-listbox {
   --mat-chip-elevated-container-color: var(--kt-sunken);
   --mat-chip-elevated-selected-container-color: var(--mat-sys-secondary-container);
   --mat-chip-outline-width: 0;
-  --mat-chip-outline-color: var(--mat-sys-secondary);
-  --mat-chip-flat-selected-outline-width: 1px;
+  --mat-chip-flat-selected-outline-width: 0;
   --mat-chip-label-text-color: var(--kt-muted);
   --mat-chip-selected-label-text-color: var(--mat-sys-on-secondary-container);
   --mat-chip-with-icon-selected-icon-color: var(--mat-sys-on-secondary-container);
   --mat-chip-label-text-weight: 700;
   --mat-chip-label-text-size: 14px;
 
+  &.primary {
+    --mat-chip-elevated-selected-container-color: var(--mat-sys-primary-container);
+    --mat-chip-selected-label-text-color: var(--mat-sys-on-primary-container);
+    --mat-chip-with-icon-selected-icon-color: var(--mat-sys-on-primary-container);
+  }
+
   &.tertiary {
     --mat-chip-elevated-selected-container-color: var(--mat-sys-tertiary-container);
-    --mat-chip-outline-color: var(--mat-sys-tertiary);
     --mat-chip-selected-label-text-color: var(--mat-sys-on-tertiary-container);
     --mat-chip-with-icon-selected-icon-color: var(--mat-sys-on-tertiary-container);
   }
-}
-
-mat-radio-group {
-  display: flex;
-  flex-direction: column;
 }
 
 .custom {

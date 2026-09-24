@@ -10,25 +10,18 @@
   <p class="help">{{ data.help }}</p>
 
   <div class="body">
-    @if (data.multi) {
-      <mat-chip-listbox
-        multiple
-        [class.tertiary]="data.accent === 'tertiary'"
-        [aria-label]="data.title"
-        [value]="selected()"
-        (change)="setSelected($event.value)"
-      >
-        @for (option of options(); track option) {
-          <mat-chip-option [value]="option">{{ option }}</mat-chip-option>
-        }
-      </mat-chip-listbox>
-    } @else {
-      <mat-radio-group [value]="selected()[0]" (change)="pick($event.value)">
-        @for (option of options(); track option) {
-          <mat-radio-button [value]="option">{{ option }}</mat-radio-button>
-        }
-      </mat-radio-group>
-    }
+    <mat-chip-listbox
+      [multiple]="data.multi"
+      [class.primary]="data.accent === 'primary'"
+      [class.tertiary]="data.accent === 'tertiary'"
+      [aria-label]="data.title"
+      [value]="data.multi ? selected() : selected()[0]"
+      (change)="onChange($event.value)"
+    >
+      @for (option of options(); track option) {
+        <mat-chip-option [value]="option">{{ option }}</mat-chip-option>
+      }
+    </mat-chip-listbox>
 
     <mat-form-field
       class="custom"

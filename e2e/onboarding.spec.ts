@@ -13,7 +13,7 @@ test('step 1 only continues once name, pronouns and location are filled in', asy
   await expect(next).toBeDisabled();
 
   await page.getByRole('button', { name: /Preferred pronouns/ }).click();
-  await page.getByRole('radio', { name: 'they/them' }).check();
+  await page.getByRole('option', { name: 'they/them' }).click();
   await expect(page.getByRole('button', { name: /Preferred pronouns/ })).toContainText('they/them');
   await expect(next).toBeEnabled();
 
@@ -47,7 +47,7 @@ test('the draft survives a reload and an expired session, and is cleared on sign
   const email = await signInAs(page, null);
   await page.getByLabel('Name').fill('Sam');
   await page.getByRole('button', { name: /Preferred pronouns/ }).click();
-  await page.getByRole('radio', { name: 'they/them' }).check();
+  await page.getByRole('option', { name: 'they/them' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.getByText("This step isn't built yet.")).toBeVisible();
   await expect.poll(() => draftKeys(page)).toHaveLength(1);

@@ -29,10 +29,11 @@ interface Row {
 const SHEETS: Record<ListField, Omit<OptionSheetData, 'selected'>> = {
   pronouns: {
     title: 'Preferred pronouns',
-    help: 'Pick one, or add your own.',
+    help: 'Select what you want to be shown on your profile.',
     options: PRONOUN_OPTIONS,
     multi: false,
     placeholder: 'e.g. ze/hir',
+    accent: 'primary',
   },
   gender: {
     title: 'Gender',

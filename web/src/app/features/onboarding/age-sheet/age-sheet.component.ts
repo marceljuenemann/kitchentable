@@ -26,7 +26,7 @@ export const MONTHS = [
 
 /** Years someone can be born in: 18 years ago and the 73 before that. */
 export function birthYearOptions(now = new Date()): number[] {
-  const newest = now.getFullYear() - 18;
+  const newest = now.getFullYear() - 19;
   return Array.from({ length: 74 }, (_, i) => newest - i);
 }
 
