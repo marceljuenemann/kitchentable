@@ -6,7 +6,7 @@ Full product context — mission, principles, business model, MVP scope — live
 
 ## Tech stack
 
-- **Backend:** Supabase (Postgres, Auth via magic link, Storage). Schema/migrations in `supabase/migrations/`, pgTAP tests in `supabase/tests/database/`. Clients access `profiles` only through stored procedures, not tables/RLS — see [docs/database.md](docs/database.md) (profile statuses, transitions, access rules); keep it updated with schema changes.
+- **Backend:** Supabase (Postgres, Auth via magic link, Storage). Schema/migrations in `supabase/migrations/`, pgTAP tests in `supabase/tests/database/`. Clients access `profiles` only through stored procedures, not tables/RLS — see [docs/database.md](docs/database.md) (profile statuses, transitions, access rules); keep it updated with schema changes. Photo handling (sizes, storage layout, privacy) is in [docs/photos.md](docs/photos.md).
 - **Frontend:** Angular (standalone components + signals, no NgModules) + Angular Material, in `web/`. No custom branding/theme yet — stock Material. A Material 3 theme + brand palette (violet/magenta/gold/sky, "Baloo Bhaijaan 2" + "Nunito Sans") is specced but not yet implemented — see `prototype/onboarding/`.
 - **Local dev:** see [README.md](README.md) for setup. `supabase start` for the backend, `ng serve` for the frontend, Mailpit for magic-link emails. Keep both `supabase start` and `ng serve` running in the background rather than starting/stopping them per task — the user keeps them running too and is happy to share the same instance to preview changes live.
 

@@ -1,6 +1,6 @@
 -- Kitchentable schema. See docs/database.md for the rules behind it.
 --
--- Access model: clients never touch profiles/profile_photos directly. Every read and write goes
+-- Access model: clients never touch the profiles table directly. Every read and write goes
 -- through the security definer functions below, which check auth.uid() and enforce the allowed
 -- status transitions. The one exception is the `photos` storage bucket (owner-only RLS).
 
@@ -36,26 +36,19 @@ create table public.profiles (
   birth_year int,
   birth_month int,
   looking_for text[] not null default '{}',
+  -- Ids of the profile's photos, in display order (the first is the main photo). The image files
+  -- live in the `photos` bucket at <profile id>/<photo id>/full.jpg and thumb.jpg -- see
+  -- docs/photos.md.
+  photos uuid[] not null default '{}' check (cardinality(photos) <= 6),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
-create table public.profile_photos (
-  id uuid primary key default gen_random_uuid(),
-  profile_id uuid not null references public.profiles (id) on delete cascade,
-  storage_path text not null,
-  position int not null default 0,
-  created_at timestamptz not null default now()
-);
-
-create index profile_photos_profile_id_idx on public.profile_photos (profile_id);
-
 -- No client access at all: RLS on with no policies is the backstop, the revoke is the rule.
 alter table public.profiles enable row level security;
-alter table public.profile_photos enable row level security;
-revoke all on public.profiles, public.profile_photos from anon, authenticated;
+revoke all on public.profiles from anon, authenticated;
 -- Admin tooling, webhooks and e2e fixtures use the service role.
-grant all on public.profiles, public.profile_photos to service_role;
+grant all on public.profiles to service_role;
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -90,7 +83,7 @@ begin
 end;
 $$;
 
--- The caller's own profile (including photos), or null if they haven't onboarded yet.
+-- The caller's own profile, or null if they haven't onboarded yet.
 create or replace function public.get_my_profile()
 returns jsonb
 language sql
@@ -98,13 +91,7 @@ stable
 security definer
 set search_path = public
 as $$
-  select to_jsonb(p) || jsonb_build_object(
-    'photos',
-    coalesce(
-      (select jsonb_agg(to_jsonb(ph) order by ph.position) from public.profile_photos ph where ph.profile_id = p.id),
-      '[]'::jsonb
-    )
-  )
+  select to_jsonb(p)
   from public.profiles p
   where p.id = public.require_auth_uid();
 $$;
@@ -177,12 +164,16 @@ create trigger on_auth_user_created
 
 -- storage: photos ---------------------------------------------------------
 
-insert into storage.buckets (id, name, public)
-values ('photos', 'photos', false)
+-- Images are resized and re-encoded to JPEG in the browser before upload (docs/photos.md). The
+-- server can't check dimensions, so the limits here are a safety net: JPEG only, 2 MiB per file
+-- (a 1080x1080 JPEG is typically 150-350 kB, up to ~900 kB for very grainy photos).
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('photos', 'photos', false, 2097152, array['image/jpeg'])
 on conflict (id) do nothing;
 
--- Files are stored under <user_id>/<filename>, uploaded during onboarding before the profile
--- row exists. Owner-only for now; loosen when browse ships.
+-- Files are stored under <user_id>/<photo id>/full.jpg and thumb.jpg, uploaded during onboarding
+-- before the profile row exists (profiles.photos lists the photo ids). Owner-only for now;
+-- loosen when browse ships.
 create policy "photos_select_own" on storage.objects
   for select using (bucket_id = 'photos' and auth.uid()::text = (storage.foldername(name))[1]);
 
