@@ -13,23 +13,23 @@
   "dependencies": {
     "@angular/animations": "^20.3.27",
     "@angular/cdk": "^20.2.14",
-    "@angular/common": "^20.3.0",
-    "@angular/compiler": "^20.3.0",
-    "@angular/core": "^20.3.0",
-    "@angular/forms": "^20.3.0",
+    "@angular/common": "^20.3.31",
+    "@angular/compiler": "^20.3.31",
+    "@angular/core": "^20.3.31",
+    "@angular/forms": "^20.3.31",
     "@angular/material": "^20.2.14",
-    "@angular/platform-browser": "^20.3.0",
-    "@angular/router": "^20.3.0",
+    "@angular/platform-browser": "^20.3.31",
+    "@angular/router": "^20.3.31",
     "@panzoom/panzoom": "^4.6.2",
-    "@supabase/supabase-js": "^2.112.2",
+    "@supabase/supabase-js": "^2.116.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular/build": "^20.3.2",
-    "@angular/cli": "^20.3.2",
-    "@angular/compiler-cli": "^20.3.0",
+    "@angular/build": "^20.3.37",
+    "@angular/cli": "^20.3.37",
+    "@angular/compiler-cli": "^20.3.31",
     "@types/jasmine": "~5.1.0",
     "angular-eslint": "20.7.0",
     "eslint": "^9.39.1",
@@ -38,8 +38,8 @@
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.1.0",
+    "karma-jasmine-html-reporter": "~2.3.0",
     "typescript": "~5.9.2",
-    "typescript-eslint": "8.46.4"
+    "typescript-eslint": "8.70.0"
   }
 }
