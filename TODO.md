@@ -1,9 +1,9 @@
 # TODO
 
 - Implement onboarding flow
-  - Photos: drag & drop
   - Options selection: Allow specific order
   - e2e tests: Age selection, photos etc.
+  - Add event log / audit log table?
 - Angular update
 - Angular karma tests
 - Set up eMail templates (with logo and whatnot)
