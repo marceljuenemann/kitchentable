@@ -11,6 +11,7 @@
 
   <div class="body">
     <mat-chip-listbox
+      class="kt-chips"
       [multiple]="data.multi"
       [class.primary]="data.accent === 'primary'"
       [class.tertiary]="data.accent === 'tertiary'"
@@ -23,30 +24,13 @@
       }
     </mat-chip-listbox>
 
-    <mat-form-field
+    <app-add-value-field
       class="custom"
-      appearance="outline"
-      subscriptSizing="dynamic"
-      floatLabel="always"
-    >
-      <mat-label>Self describe</mat-label>
-      <input
-        matInput
-        [placeholder]="data.placeholder"
-        [value]="custom()"
-        (input)="custom.set($any($event.target).value)"
-        (keydown.enter)="addCustom()"
-      />
-      <button
-        matSuffix
-        mat-flat-button
-        type="button"
-        [disabled]="!canAddCustom()"
-        (click)="addCustom()"
-      >
-        Add
-      </button>
-    </mat-form-field>
+      label="Self describe"
+      [placeholder]="data.placeholder"
+      [isDuplicate]="isDuplicate"
+      (added)="addCustom($event)"
+    />
   </div>
 
   @if (data.multi) {

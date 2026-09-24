@@ -41,6 +41,39 @@ test('a custom value can be added in the option sheet', async ({ page }) => {
   await expect(page.getByRole('button', { name: /^Gender/ })).toContainText('Woman, bigender');
 });
 
+test('step 2 needs an about text of 250 characters and something you are looking for', async ({
+  page,
+}) => {
+  await signInAs(page, null);
+  await page.getByLabel('Name').fill('Sam');
+  await page.getByRole('button', { name: /Preferred pronouns/ }).click();
+  await page.getByRole('option', { name: 'they/them' }).click();
+  await page.getByRole('button', { name: 'Continue' }).click();
+
+  const next = page.getByRole('button', { name: 'Continue' });
+  await expect(next).toBeDisabled();
+
+  await page.getByLabel('About you').fill('x'.repeat(249));
+  await expect(page.getByText('1 characters to go')).toBeVisible();
+  await page.getByLabel('About you').fill('x'.repeat(250));
+  await expect(page.getByText('250 characters')).toBeVisible();
+  await expect(next).toBeDisabled();
+
+  await page.getByRole('option', { name: 'Solo poly' }).click();
+  await expect(next).toBeEnabled();
+
+  // Own entries appear as extra, selected chips.
+  await page.getByLabel('Add your own').fill('Polycule friends');
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await expect(page.getByRole('option', { name: 'Polycule friends' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+
+  await next.click();
+  await expect(page.getByText("This step isn't built yet.")).toBeVisible();
+});
+
 test('the draft survives a reload and an expired session, and is cleared on sign-out', async ({
   page,
 }) => {
@@ -49,11 +82,11 @@ test('the draft survives a reload and an expired session, and is cleared on sign
   await page.getByRole('button', { name: /Preferred pronouns/ }).click();
   await page.getByRole('option', { name: 'they/them' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(page.getByText("This step isn't built yet.")).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'About you' })).toBeVisible();
   await expect.poll(() => draftKeys(page)).toHaveLength(1);
 
   await page.reload();
-  await expect(page.getByText("This step isn't built yet.")).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'About you' })).toBeVisible();
 
   // Simulate the session expiring: the auth token goes, the draft must stay.
   await page.evaluate(() =>

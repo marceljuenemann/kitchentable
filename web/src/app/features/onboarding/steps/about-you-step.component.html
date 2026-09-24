@@ -1,0 +1,57 @@
+<p class="eyebrow">Step 2 of {{ totalSteps }}</p>
+<h1>About you</h1>
+
+<mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+  <mat-label>Tagline</mat-label>
+  <input
+    matInput
+    [attr.maxlength]="taglineMax"
+    placeholder="One line summary that people see first"
+    [value]="draft().tagline"
+    (input)="setTagline($any($event.target).value)"
+  />
+  <mat-hint align="end">{{ taglineLeft() }} left</mat-hint>
+</mat-form-field>
+
+<mat-form-field class="about" appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+  <mat-label>About you</mat-label>
+  <textarea
+    matInput
+    rows="7"
+    placeholder="Tell people more about yourself"
+    [value]="draft().aboutText"
+    (input)="setAbout($any($event.target).value)"
+  ></textarea>
+  <mat-hint align="end" [class.short]="aboutLeft() > 0">
+    @if (aboutLeft() > 0) {
+      {{ aboutLeft() }} characters to go
+    } @else {
+      {{ aboutLength() }} characters
+    }
+  </mat-hint>
+</mat-form-field>
+
+<h2 class="section-label">Looking for</h2>
+<mat-chip-listbox
+  class="kt-chips primary"
+  multiple
+  aria-label="Looking for"
+  [value]="draft().lookingFor"
+  (change)="setLookingFor($event.value)"
+>
+  @for (option of options(); track option) {
+    <mat-chip-option [value]="option">{{ label(option) }}</mat-chip-option>
+  }
+</mat-chip-listbox>
+
+<app-add-value-field
+  class="own"
+  label="Add your own"
+  placeholder="e.g. Running buddies"
+  [isDuplicate]="isDuplicate"
+  (added)="addOwn($event)"
+/>
+
+<button mat-flat-button class="continue" type="button" [disabled]="!canContinue()" (click)="next()">
+  Continue
+</button>

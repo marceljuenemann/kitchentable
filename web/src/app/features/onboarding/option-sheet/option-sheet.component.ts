@@ -1,9 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { AddValueFieldComponent } from '../../../shared/add-value-field/add-value-field.component';
 
 export interface OptionSheetData {
   title: string;
@@ -21,7 +20,7 @@ export interface OptionSheetData {
 @Component({
   selector: 'app-option-sheet',
   standalone: true,
-  imports: [MatButtonModule, MatChipsModule, MatFormFieldModule, MatInputModule],
+  imports: [MatButtonModule, MatChipsModule, AddValueFieldComponent],
   templateUrl: './option-sheet.component.html',
   styleUrl: './option-sheet.component.scss',
 })
@@ -37,11 +36,8 @@ export class OptionSheetComponent {
     ...this.data.selected.filter((value) => !this.data.options.includes(value)),
   ]);
 
-  readonly custom = signal('');
-  readonly canAddCustom = computed(() => {
-    const value = this.custom().trim().toLowerCase();
-    return value !== '' && !this.options().some((option) => option.toLowerCase() === value);
-  });
+  readonly isDuplicate = (value: string) =>
+    this.options().some((option) => option.toLowerCase() === value.toLowerCase());
 
   pick(value: string) {
     this.ref.dismiss([value]);
@@ -56,11 +52,8 @@ export class OptionSheetComponent {
     }
   }
 
-  addCustom() {
-    if (!this.canAddCustom()) return;
-    const value = this.custom().trim();
+  addCustom(value: string) {
     this.options.update((options) => [...options, value]);
-    this.custom.set('');
     if (this.data.multi) {
       this.selected.update((selected) => [...selected, value]);
     } else {

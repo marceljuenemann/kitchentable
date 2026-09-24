@@ -13,6 +13,20 @@ app-header {
   gap: 8px;
   margin-top: 12px;
 
+  // A solid circular button, like the design prototype's back button.
+  button {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--kt-sunken);
+    --mat-icon-button-icon-color: var(--kt-violet);
+  }
+
   mat-progress-bar {
     flex: 1;
     --mat-progress-bar-track-shape: 99px;

@@ -17,6 +17,11 @@ export interface OnboardingDraft {
   /** "1"-"12" */
   birthMonth: string;
   birthYear: string;
+  /** Step 2. */
+  tagline: string;
+  aboutText: string;
+  /** Ids from LOOKING_FOR_OPTIONS, or the user's own text. */
+  lookingFor: string[];
 }
 
 const EMPTY_DRAFT: OnboardingDraft = {
@@ -28,6 +33,9 @@ const EMPTY_DRAFT: OnboardingDraft = {
   location: 'London',
   birthMonth: '',
   birthYear: '',
+  tagline: '',
+  aboutText: '',
+  lookingFor: [],
 };
 
 const STORAGE_KEY = 'onboarding-draft';

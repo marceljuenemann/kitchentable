@@ -5,6 +5,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
 import { ONBOARDING_STEPS, OnboardingDraftStore } from './onboarding-draft.store';
+import { AboutYouStepComponent } from './steps/about-you-step.component';
 import { CreateProfileStepComponent } from './steps/create-profile-step.component';
 
 /** The onboarding flow: header with progress, the current step, footer. */
@@ -15,6 +16,7 @@ import { CreateProfileStepComponent } from './steps/create-profile-step.componen
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
+    AboutYouStepComponent,
     CreateProfileStepComponent,
     FooterComponent,
     HeaderComponent,

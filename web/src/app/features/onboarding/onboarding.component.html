@@ -18,6 +18,9 @@
     @case (1) {
       <app-create-profile-step />
     }
+    @case (2) {
+      <app-about-you-step />
+    }
     @default {
       <p class="eyebrow">Step {{ draft().step }} of {{ totalSteps }}</p>
       <p>This step isn't built yet.</p>
