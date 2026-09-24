@@ -1,0 +1,31 @@
+<app-header />
+
+<div class="progress">
+  @if (draft().step > 1) {
+    <button mat-icon-button type="button" aria-label="Back" (click)="back()">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+  }
+  <mat-progress-bar
+    mode="determinate"
+    [value]="(draft().step / totalSteps) * 100"
+    [attr.aria-label]="'Step ' + draft().step + ' of ' + totalSteps"
+  />
+</div>
+
+<main>
+  @switch (draft().step) {
+    @case (1) {
+      <app-create-profile-step />
+    }
+    @case (2) {
+      <app-about-you-step />
+    }
+    @default {
+      <p class="eyebrow">Step {{ draft().step }} of {{ totalSteps }}</p>
+      <p>This step isn't built yet.</p>
+    }
+  }
+</main>
+
+<app-footer />

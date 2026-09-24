@@ -1,0 +1,39 @@
+<div class="option-sheet">
+  <div class="grab-handle"></div>
+
+  <div class="title-row">
+    <h2>{{ data.title }}</h2>
+    @if (data.multi) {
+      <button mat-button type="button" (click)="clear()">Clear</button>
+    }
+  </div>
+  <p class="help">{{ data.help }}</p>
+
+  <div class="body">
+    <mat-chip-listbox
+      class="kt-chips"
+      [multiple]="data.multi"
+      [class.primary]="data.accent === 'primary'"
+      [class.tertiary]="data.accent === 'tertiary'"
+      [aria-label]="data.title"
+      [value]="data.multi ? selected() : selected()[0]"
+      (change)="onChange($event.value)"
+    >
+      @for (option of options(); track option) {
+        <mat-chip-option [value]="option">{{ option }}</mat-chip-option>
+      }
+    </mat-chip-listbox>
+
+    <app-add-value-field
+      class="custom"
+      label="Self describe"
+      [placeholder]="data.placeholder"
+      [isDuplicate]="isDuplicate"
+      (added)="addCustom($event)"
+    />
+  </div>
+
+  @if (data.multi) {
+    <button mat-flat-button class="done" type="button" (click)="done()">Done</button>
+  }
+</div>

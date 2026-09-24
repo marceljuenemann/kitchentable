@@ -1,0 +1,38 @@
+<div class="location-sheet">
+  <div class="grab-handle"></div>
+
+  <h2>Location</h2>
+
+  <mat-radio-group
+    aria-label="Location"
+    [value]="inLondon() ? 'london' : 'elsewhere'"
+    (change)="inLondon.set($event.value === 'london')"
+  >
+    <mat-radio-button value="london">London</mat-radio-button>
+    <mat-radio-button value="elsewhere">Somewhere else</mat-radio-button>
+  </mat-radio-group>
+
+  @if (!inLondon()) {
+    <div class="notice">
+      <mat-icon>warning</mat-icon>
+      <p>
+        <b>We've only launched in London so far.</b> You can still submit your application and we
+        will notify you once we launch in your area.
+      </p>
+    </div>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+      <mat-label>Where are you?</mat-label>
+      <input
+        matInput
+        placeholder="e.g. Manchester, Berlin"
+        [value]="city()"
+        (input)="city.set($any($event.target).value)"
+        (keydown.enter)="save()"
+      />
+    </mat-form-field>
+  }
+
+  <button mat-flat-button class="done" type="button" [disabled]="!canSave()" (click)="save()">
+    Done
+  </button>
+</div>

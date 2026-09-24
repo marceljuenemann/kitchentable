@@ -1,12 +1,52 @@
-import { Component } from '@angular/core';
+import { Component, computed, effect, HostListener, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { FooterComponent } from '../../shared/footer/footer.component';
+import { HeaderComponent } from '../../shared/header/header.component';
+import { ONBOARDING_STEPS, OnboardingDraftStore } from './onboarding-draft.store';
+import { AboutYouStepComponent } from './steps/about-you-step.component';
+import { CreateProfileStepComponent } from './steps/create-profile-step.component';
 
-/** Placeholder: the onboarding flow (rewrite of the old apply flow) is not built yet. */
+/** The onboarding flow: header with progress, the current step, footer. */
 @Component({
   selector: 'app-onboarding',
   standalone: true,
-  template: `
-    <h1>Welcome</h1>
-    <p>The onboarding flow will go here.</p>
-  `,
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    MatProgressBarModule,
+    AboutYouStepComponent,
+    CreateProfileStepComponent,
+    FooterComponent,
+    HeaderComponent,
+  ],
+  providers: [OnboardingDraftStore],
+  templateUrl: './onboarding.component.html',
+  styleUrl: './onboarding.component.scss',
 })
-export class OnboardingComponent {}
+export class OnboardingComponent {
+  private readonly store = inject(OnboardingDraftStore);
+
+  readonly draft = this.store.draft;
+  readonly step = computed(() => this.draft().step);
+  readonly totalSteps = ONBOARDING_STEPS;
+
+  constructor() {
+    // Every step starts at the top.
+    // TODO: This should trigger when the step changes.
+    effect(() => {
+      this.step();
+      window.scrollTo(0, 0);
+    });
+  }
+
+  back() {
+    this.store.update({ step: this.draft().step - 1 });
+  }
+
+  @HostListener('window:pagehide')
+  saveDraft() {
+    this.store.flush();
+  }
+}

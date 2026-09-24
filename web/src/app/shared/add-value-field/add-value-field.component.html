@@ -1,0 +1,13 @@
+<mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+  <mat-label>{{ label() }}</mat-label>
+  <input
+    matInput
+    [placeholder]="placeholder()"
+    [value]="value()"
+    (input)="value.set($any($event.target).value)"
+    (keydown.enter)="add()"
+  />
+  <button matSuffix mat-flat-button type="button" [disabled]="!canAdd()" (click)="add()">
+    Add
+  </button>
+</mat-form-field>

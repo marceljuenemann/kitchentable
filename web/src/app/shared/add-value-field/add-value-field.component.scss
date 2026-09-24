@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+mat-form-field {
+  width: 100%;
+  --mat-form-field-outlined-container-shape: 14px;
+
+  // The Add button sits inside the outline, like a Bootstrap input group.
+  button[matSuffix] {
+    margin-right: 8px;
+  }
+}

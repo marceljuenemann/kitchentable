@@ -12,23 +12,6 @@
   padding: 0 24px 48px;
 }
 
-/* TODO: Move into component. */
-.masthead {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding-top: 40px;
-}
-
-.wordmark {
-  font-family: var(--kt-font-display);
-  font-size: 23px;
-  font-weight: 800;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--kt-violet);
-}
-
 .headline {
   margin: 34px 0 0;
   font-family: var(--kt-font-display);
@@ -150,26 +133,5 @@
 
   button {
     vertical-align: baseline;
-  }
-}
-
-.site-footer {
-  margin-top: 56px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 6px 14px;
-  padding-bottom: 24px;
-
-  a {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--kt-muted);
-    text-decoration: none;
-
-    &:hover {
-      color: var(--kt-ink);
-    }
   }
 }

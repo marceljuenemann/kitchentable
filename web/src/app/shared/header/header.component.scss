@@ -1,0 +1,15 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 40px;
+}
+
+.wordmark {
+  font-family: var(--kt-font-display);
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--kt-violet);
+}

@@ -1,0 +1,48 @@
+.option-sheet {
+  padding: 12px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--kt-font-sans);
+}
+
+.grab-handle {
+  align-self: center;
+  width: 44px;
+  height: 5px;
+  border-radius: 99px;
+  background: var(--kt-outline-soft);
+  margin-bottom: 16px;
+}
+
+.title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+h2 {
+  margin: 0;
+  font-family: var(--kt-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--kt-violet);
+}
+
+.help {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--kt-muted);
+}
+
+.body {
+  margin-top: 16px;
+}
+
+.custom {
+  margin-top: 24px;
+}
+
+.done {
+  margin-top: 20px;
+  width: 100%;
+}

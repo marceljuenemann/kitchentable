@@ -1,0 +1,32 @@
+<p class="eyebrow">Step 1 of {{ totalSteps }}</p>
+<h1>Create profile</h1>
+<p class="subtitle">Anything you enter here will be shown to other users.</p>
+
+<mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always" class="name">
+  <mat-label>Name</mat-label>
+  <input
+    matInput
+    autocomplete="given-name"
+    placeholder="What should people call you?"
+    [value]="draft().name"
+    (input)="setName($any($event.target).value)"
+  />
+</mat-form-field>
+
+<div class="rows">
+  @for (row of rows(); track row.key) {
+    <button type="button" class="row" [class.set]="row.value" (click)="openRow(row.key)">
+      <span class="text">
+        <span class="label">
+          {{ row.label }}<span class="suffix"> · {{ row.required ? 'required' : 'optional' }}</span>
+        </span>
+        <span class="value">{{ row.value || row.emptyText }}</span>
+      </span>
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  }
+</div>
+
+<button mat-flat-button class="continue" type="button" [disabled]="!canContinue()" (click)="next()">
+  Continue
+</button>

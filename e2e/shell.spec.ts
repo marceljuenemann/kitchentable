@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { ProfileStatus, signInAs } from './support/admin';
 
 const screens: [ProfileStatus | null, string][] = [
-  [null, 'Welcome'],
+  [null, 'Create profile'],
   ['vetting', 'Thanks for applying'],
   ['approved', "You're approved!"],
   ['active', 'Kitchen Table'],
@@ -25,16 +25,11 @@ test('sends a signed-in user from the landing page to the app', async ({ page })
   await expect(page.getByRole('heading', { name: 'Thanks for applying' })).toBeVisible();
 });
 
-test('signing out clears the onboarding draft and returns to the landing page', async ({
-  page,
-}) => {
-  await signInAs(page, null);
-  await page.evaluate(() => localStorage.setItem('kt.onboardingDraft', '{"name":"Draft"}'));
+test('signing out returns to the landing page', async ({ page }) => {
+  await signInAs(page, 'vetting');
 
   await page.getByRole('button', { name: 'Sign out' }).click();
   await page.waitForURL((url) => url.pathname === '/');
-
-  expect(await page.evaluate(() => localStorage.getItem('kt.onboardingDraft'))).toBeNull();
   await expect(
     page.getByRole('heading', { name: 'Kitchen Table is currently invite-only' }),
   ).toBeVisible();

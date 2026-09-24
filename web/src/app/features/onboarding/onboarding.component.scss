@@ -1,0 +1,49 @@
+:host {
+  display: block;
+}
+
+// Centred above the progress bar; everywhere else the header is left-aligned.
+app-header {
+  justify-content: center;
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+
+  // A solid circular button, like the design prototype's back button.
+  button {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--kt-sunken);
+    --mat-icon-button-icon-color: var(--kt-violet);
+  }
+
+  mat-progress-bar {
+    flex: 1;
+    --mat-progress-bar-track-shape: 99px;
+    --mat-progress-bar-active-indicator-height: 6px;
+    --mat-progress-bar-track-height: 6px;
+  }
+}
+
+main {
+  margin-top: 16px;
+}
+
+.eyebrow {
+  margin: 18px 0 0;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kt-magenta);
+}
