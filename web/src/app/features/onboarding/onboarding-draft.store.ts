@@ -1,16 +1,8 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { UserStorage } from '../../core/user-storage';
 import { MAX_PHOTOS } from './onboarding-options';
-import { ProcessedPhoto } from './photos/photo-processor';
 
 export const ONBOARDING_STEPS = 4;
-
-/** A processed photo that has not been uploaded yet. */
-export interface PendingPhoto extends ProcessedPhoto {
-  id: string;
-  /** Object URL of the thumbnail, for display. */
-  thumbUrl: string;
-}
 
 /** The in-progress onboarding answers (see prototype/onboarding/README.md, "State model"). */
 export interface OnboardingDraft {
@@ -31,6 +23,8 @@ export interface OnboardingDraft {
   aboutText: string;
   /** Ids from LOOKING_FOR_OPTIONS, or the user's own text. */
   lookingFor: string[];
+  /** Step 3: ids of the uploaded photos, in display order (first = main); see docs/photos.md. */
+  photos: string[];
 }
 
 const EMPTY_DRAFT: OnboardingDraft = {
@@ -45,6 +39,7 @@ const EMPTY_DRAFT: OnboardingDraft = {
   tagline: '',
   aboutText: '',
   lookingFor: [],
+  photos: [],
 };
 
 const STORAGE_KEY = 'onboarding-draft';
@@ -62,33 +57,17 @@ export class OnboardingDraftStore {
   private readonly state = signal<OnboardingDraft>(this.restore());
   readonly draft = this.state.asReadonly();
 
-  /**
-   * Photos the user has added, in display order (first = main). Kept in memory only for now: they
-   * are not uploaded or persisted yet (see docs/photos.md), so a reload loses them.
-   */
-  private readonly photoList = signal<PendingPhoto[]>([]);
-  readonly photos = this.photoList.asReadonly();
-
   constructor() {
-    inject(DestroyRef).onDestroy(() => {
-      this.flush();
-      this.photoList().forEach((photo) => URL.revokeObjectURL(photo.thumbUrl));
-    });
+    inject(DestroyRef).onDestroy(() => this.flush());
   }
 
-  addPhoto(photo: ProcessedPhoto) {
-    const pending = {
-      ...photo,
-      id: crypto.randomUUID(),
-      thumbUrl: URL.createObjectURL(photo.thumb),
-    };
-    this.photoList.update((photos) => [...photos, pending].slice(0, MAX_PHOTOS));
+  /** Adds an already uploaded photo (by id) at the end. */
+  addPhoto(id: string) {
+    this.update({ photos: [...this.state().photos, id].slice(0, MAX_PHOTOS) });
   }
 
   removePhoto(id: string) {
-    const photo = this.photoList().find((candidate) => candidate.id === id);
-    if (photo) URL.revokeObjectURL(photo.thumbUrl);
-    this.photoList.update((photos) => photos.filter((candidate) => candidate.id !== id));
+    this.update({ photos: this.state().photos.filter((photoId) => photoId !== id) });
   }
 
   update(patch: Partial<OnboardingDraft>) {
@@ -109,6 +88,9 @@ export class OnboardingDraftStore {
     const stored = this.storage.get<Partial<OnboardingDraft>>(STORAGE_KEY);
     const draft = { ...EMPTY_DRAFT, ...stored };
     draft.step = Math.min(Math.max(Math.trunc(Number(draft.step)) || 1, 1), ONBOARDING_STEPS);
+    draft.photos = Array.isArray(draft.photos)
+      ? draft.photos.filter((id) => typeof id === 'string').slice(0, MAX_PHOTOS)
+      : [];
     return draft;
   }
 }

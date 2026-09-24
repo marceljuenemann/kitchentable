@@ -26,6 +26,18 @@ async function api(path: string, body: unknown, method = 'POST') {
   return text ? JSON.parse(text) : null;
 }
 
+/** A file in the private `photos` bucket, read (or deleted) with the service role. */
+export async function photoObject(
+  path: string,
+  method: 'GET' | 'DELETE' = 'GET',
+): Promise<{ ok: boolean; bytes: Buffer }> {
+  const response = await fetch(`${API_URL}/storage/v1/object/photos/${path}`, {
+    method,
+    headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}` },
+  });
+  return { ok: response.ok, bytes: Buffer.from(await response.arrayBuffer()) };
+}
+
 /**
  * Creates a user (consuming a seeded invite code, so the signup trigger still runs) without
  * going through the UI/email, optionally with a profile in the given status, and signs the

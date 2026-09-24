@@ -12,8 +12,12 @@
   </div>
   <p class="hint">Drag the photo to move it. Pinch to zoom.</p>
 
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+
   <div class="actions">
-    <button mat-button type="button" (click)="cancel()">Cancel</button>
+    <button mat-button type="button" [disabled]="working()" (click)="cancel()">Cancel</button>
     <button mat-flat-button type="button" [disabled]="!ready() || working()" (click)="confirm()">
       @if (working()) {
         <mat-spinner diameter="20" />

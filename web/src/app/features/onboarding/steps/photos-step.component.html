@@ -20,7 +20,11 @@
   @for (photo of slots(); track $index) {
     @if (photo) {
       <div class="tile filled">
-        <img [src]="photo.thumbUrl" [alt]="'Photo ' + ($index + 1)" />
+        @if (photo.url) {
+          <img [src]="photo.url" [alt]="'Photo ' + ($index + 1)" />
+        } @else {
+          <mat-spinner class="loading" diameter="24" />
+        }
         @if ($index === 0) {
           <span class="badge">Main</span>
         }
@@ -41,10 +45,6 @@
     }
   }
 </div>
-
-@if (photos().length === 0) {
-  <p class="empty-hint">Add at least one photo to continue.</p>
-}
 
 <button mat-flat-button class="continue" type="button" [disabled]="!canContinue()" (click)="next()">
   Continue

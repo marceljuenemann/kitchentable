@@ -1,37 +1,53 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { firstValueFrom } from 'rxjs';
 import { OnboardingDraftStore, ONBOARDING_STEPS } from '../onboarding-draft.store';
 import { MAX_PHOTOS } from '../onboarding-options';
-import { checkPhotoFile, PhotoError, ProcessedPhoto } from '../photos/photo-processor';
+import { checkPhotoFile, PhotoError } from '../photos/photo-processor';
+import { PhotoStorageService } from '../photos/photo-storage.service';
 
 /** Onboarding step 3: add and crop up to six photos. */
 @Component({
   selector: 'app-photos-step',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule],
+  imports: [MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './photos-step.component.html',
   styleUrl: './photos-step.component.scss',
 })
 export class PhotosStepComponent {
   private readonly store = inject(OnboardingDraftStore);
   private readonly bottomSheet = inject(MatBottomSheet);
+  private readonly storage = inject(PhotoStorageService);
 
-  readonly photos = this.store.photos;
+  readonly photoIds = computed(() => this.store.draft().photos);
   readonly totalSteps = ONBOARDING_STEPS;
   readonly maxPhotos = MAX_PHOTOS;
 
-  /** One entry per grid tile: the photo, or null for an empty tile. */
+  /** Signed thumbnail URLs by photo id, fetched from storage (so photos survive a reload). */
+  private readonly urls = signal<Record<string, string>>({});
+
+  /** One entry per grid tile: the photo (its URL is null while loading), or null if empty. */
   readonly slots = computed(() =>
-    Array.from({ length: MAX_PHOTOS }, (_, index) => this.photos()[index] ?? null),
+    Array.from({ length: MAX_PHOTOS }, (_, index) => {
+      const id = this.photoIds()[index];
+      return id ? { id, url: this.urls()[id] ?? null } : null;
+    }),
   );
 
   readonly busy = signal(false);
   readonly error = signal<string | null>(null);
 
-  readonly canContinue = computed(() => this.photos().length > 0);
+  readonly canContinue = computed(() => this.photoIds().length > 0);
+
+  constructor() {
+    effect(() => {
+      const ids = this.photoIds();
+      untracked(() => void this.loadUrls(ids));
+    });
+  }
 
   /** Crops and adds each chosen photo, one after the other (up to the six-photo limit). */
   async onFilesChosen(event: Event) {
@@ -42,7 +58,7 @@ export class PhotosStepComponent {
     this.busy.set(true);
     try {
       for (const file of files) {
-        if (this.photos().length >= MAX_PHOTOS) break;
+        if (this.photoIds().length >= MAX_PHOTOS) break;
         await this.addFile(file);
       }
     } finally {
@@ -50,9 +66,14 @@ export class PhotosStepComponent {
     }
   }
 
-  remove(id: string) {
-    this.store.removePhoto(id);
+  async remove(id: string) {
     this.error.set(null);
+    try {
+      await this.storage.remove(id);
+      this.store.removePhoto(id);
+    } catch {
+      this.error.set("We couldn't remove that photo. Please try again.");
+    }
   }
 
   next() {
@@ -62,8 +83,8 @@ export class PhotosStepComponent {
   private async addFile(file: File) {
     try {
       await checkPhotoFile(file);
-      const photo = await this.crop(file);
-      if (photo) this.store.addPhoto(photo);
+      const id = await this.crop(file);
+      if (id) this.store.addPhoto(id);
     } catch (error) {
       this.error.set(
         error instanceof PhotoError ? error.message : 'Something went wrong with that photo.',
@@ -71,7 +92,8 @@ export class PhotosStepComponent {
     }
   }
 
-  private async crop(file: File): Promise<ProcessedPhoto | undefined> {
+  /** Opens the crop sheet, which uploads the photo; resolves with the new photo's id. */
+  private async crop(file: File): Promise<string | undefined> {
     // Loaded on demand: the crop sheet (with panzoom) is only needed here.
     const { CropSheetComponent } = await import('../photos/crop-sheet.component');
     const ref = this.bottomSheet.open(CropSheetComponent, {
@@ -80,5 +102,22 @@ export class PhotosStepComponent {
       autoFocus: 'dialog',
     });
     return firstValueFrom(ref.afterDismissed());
+  }
+
+  /** Fetches URLs for photos we don't have one for yet, and drops photos whose file is gone. */
+  private async loadUrls(ids: string[]) {
+    const missing = ids.filter((id) => !(id in this.urls()));
+    if (missing.length === 0) return;
+    try {
+      const fetched = await this.storage.thumbUrls(missing);
+      const found = Object.fromEntries(
+        [...fetched].filter((entry): entry is [string, string] => entry[1] !== null),
+      );
+      this.urls.update((urls) => ({ ...urls, ...found }));
+      // A draft can outlive its files (e.g. after a local database reset): forget those photos.
+      [...fetched].filter(([, url]) => url === null).forEach(([id]) => this.store.removePhoto(id));
+    } catch {
+      this.error.set("We couldn't load your photos. Please reload the page.");
+    }
   }
 }

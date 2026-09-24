@@ -11,7 +11,8 @@ import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bott
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import Panzoom, { PanzoomObject } from '@panzoom/panzoom';
-import { MIN_SOURCE_SIZE, ProcessedPhoto, renderPhoto, visibleSquare } from './photo-processor';
+import { MIN_SOURCE_SIZE, renderPhoto, visibleSquare } from './photo-processor';
+import { PhotoStorageService } from './photo-storage.service';
 
 export interface CropSheetData {
   file: File;
@@ -21,8 +22,9 @@ const MAX_ZOOM = 4;
 
 /**
  * Bottom sheet to frame a photo as a square: the square is fixed, and the photo moves underneath
- * it (drag to move; pinch or mouse wheel to zoom), like the dating apps do. Dismisses with the two
- * images to upload (see docs/photos.md), or undefined if cancelled. Loaded lazily.
+ * it (drag to move; pinch or mouse wheel to zoom), like the dating apps do. "Use photo" uploads the
+ * two images (see docs/photos.md) and dismisses with the new photo's id; it dismisses with
+ * undefined if cancelled. Loaded lazily.
  */
 @Component({
   selector: 'app-crop-sheet',
@@ -32,8 +34,8 @@ const MAX_ZOOM = 4;
   styleUrl: './crop-sheet.component.scss',
 })
 export class CropSheetComponent implements OnDestroy {
-  private readonly ref =
-    inject<MatBottomSheetRef<CropSheetComponent, ProcessedPhoto>>(MatBottomSheetRef);
+  private readonly ref = inject<MatBottomSheetRef<CropSheetComponent, string>>(MatBottomSheetRef);
+  private readonly storage = inject(PhotoStorageService);
   private readonly data = inject<CropSheetData>(MAT_BOTTOM_SHEET_DATA);
 
   private readonly frame = viewChild.required<ElementRef<HTMLElement>>('frame');
@@ -46,6 +48,7 @@ export class CropSheetComponent implements OnDestroy {
   readonly imageUrl = URL.createObjectURL(this.data.file);
   readonly ready = signal(false);
   readonly working = signal(false);
+  readonly error = signal<string | null>(null);
 
   constructor() {
     afterNextRender(() => void this.setUp());
@@ -61,9 +64,12 @@ export class CropSheetComponent implements OnDestroy {
     this.ref.dismiss();
   }
 
+  /** Renders the two images, uploads them, and dismisses with the new photo's id. */
   async confirm() {
     if (!this.panzoom || !this.bitmap) return;
     this.working.set(true);
+    this.error.set(null);
+    this.ref.disableClose = true; // don't abandon a half-finished upload
     try {
       const crop = visibleSquare(
         this.bitmap,
@@ -71,7 +77,13 @@ export class CropSheetComponent implements OnDestroy {
         this.panzoom.getPan(),
         this.panzoom.getScale(),
       );
-      this.ref.dismiss(await renderPhoto(this.bitmap, crop));
+      const id = crypto.randomUUID();
+      await this.storage.upload(id, await renderPhoto(this.bitmap, crop));
+      this.ref.disableClose = false;
+      this.ref.dismiss(id);
+    } catch {
+      this.ref.disableClose = false;
+      this.error.set("We couldn't upload that photo. Check your connection and try again.");
     } finally {
       this.working.set(false);
     }

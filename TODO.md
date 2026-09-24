@@ -1,6 +1,7 @@
 # TODO
 
 - Implement onboarding flow
+  - Photos: drag & drop
   - Options selection: Allow specific order
   - e2e tests: Age selection, photos etc.
 - Angular update
