@@ -1,0 +1,136 @@
+:host {
+  display: block;
+}
+
+.eyebrow {
+  margin: 18px 0 0;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kt-magenta);
+}
+
+h1 {
+  margin: 6px 0 0;
+  font-family: var(--kt-font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--kt-violet);
+}
+
+.subtitle {
+  margin: 6px 0 20px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--kt-muted);
+}
+
+.error {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--mat-sys-error);
+}
+
+.picker {
+  display: none;
+}
+
+// One large tile (the main photo) spanning 2x2, then two beside it and three below.
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tile {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 14px;
+
+  &:first-child {
+    grid-area: 1 / 1 / 3 / 3;
+  }
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 0;
+  border: 1.5px dashed var(--kt-input);
+  background: var(--kt-sunken);
+  color: var(--kt-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+
+  mat-icon {
+    color: var(--kt-violet);
+  }
+
+  &:disabled {
+    cursor: progress;
+    opacity: 0.6;
+  }
+}
+
+.filled img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.badge {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 5px 10px;
+  border-radius: 99px;
+  background: var(--kt-violet);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: oklch(0.22 0.03 300 / 0.62);
+  color: #fff;
+  cursor: pointer;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.empty-hint {
+  margin: 12px 0 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--kt-magenta);
+}
+
+.continue {
+  width: 100%;
+  margin-top: 32px;
+}

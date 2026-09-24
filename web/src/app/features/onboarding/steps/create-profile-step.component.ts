@@ -29,7 +29,7 @@ interface Row {
 const SHEETS: Record<ListField, Omit<OptionSheetData, 'selected'>> = {
   pronouns: {
     title: 'Preferred pronouns',
-    help: 'Select what you want to be shown on your profile.',
+    help: "Choose what you'd like to show on your profile.",
     options: PRONOUN_OPTIONS,
     multi: false,
     placeholder: 'e.g. ze/hir',
@@ -37,14 +37,14 @@ const SHEETS: Record<ListField, Omit<OptionSheetData, 'selected'>> = {
   },
   gender: {
     title: 'Gender',
-    help: 'Select what you want to be shown on your profile.',
+    help: "Choose what you'd like to show on your profile.",
     options: GENDER_OPTIONS,
     multi: true,
-    placeholder: 'e.g. genderfluid, bigender',
+    placeholder: 'e.g. Demiboy, Transfeminine',
   },
   sexuality: {
     title: 'Sexuality',
-    help: 'Select what you want to be shown on your profile.',
+    help: "Choose what you'd like to show on your profile.",
     options: SEXUALITY_OPTIONS,
     multi: true,
     placeholder: 'e.g. sapphic, achillean',
