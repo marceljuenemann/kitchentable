@@ -30,6 +30,43 @@ test('step 1 only continues once name, pronouns and location are filled in', asy
   await expect(next).toBeEnabled();
 });
 
+test('age is worked out from the birth month and year in the age sheet', async ({ page }) => {
+  await signInAs(page, null);
+  // The age and the years on offer depend on today's date, so pin it: 15 June 2026.
+  await page.clock.setFixedTime(new Date('2026-06-15T12:00:00'));
+
+  const ageRow = page.getByRole('button', { name: /^Age/ });
+  await expect(ageRow).toContainText('Add birthday');
+  await ageRow.click();
+  await expect(page.getByText('Pick a month and year.')).toBeVisible();
+
+  // The newest year offered is someone who turns 19 this year (so nobody under 18 slips in),
+  // and the list goes back 73 years from there.
+  await page.getByRole('combobox', { name: 'Year' }).click();
+  const years = page.getByRole('option');
+  await expect(years.first()).toHaveText('2007');
+  await expect(years.last()).toHaveText('1934');
+  await years.first().click();
+
+  // Born in July 2007: the birthday hasn't happened yet this year.
+  await page.getByRole('combobox', { name: 'Month' }).click();
+  await page.getByRole('option', { name: 'July' }).click();
+  await expect(page.getByText('Age shown on profile: 18')).toBeVisible();
+
+  // Born in June 2007: already had it.
+  await page.getByRole('combobox', { name: 'Month' }).click();
+  await page.getByRole('option', { name: 'June' }).click();
+  await expect(page.getByText('Age shown on profile: 19')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Done' }).click();
+  await expect(ageRow).toContainText('19');
+
+  // Reopening shows what was picked.
+  await ageRow.click();
+  await expect(page.getByRole('combobox', { name: 'Month' })).toContainText('June');
+  await expect(page.getByRole('combobox', { name: 'Year' })).toContainText('2007');
+});
+
 test('a custom value can be added in the option sheet', async ({ page }) => {
   await signInAs(page, null);
   await page.getByRole('button', { name: /^Gender/ }).click();
