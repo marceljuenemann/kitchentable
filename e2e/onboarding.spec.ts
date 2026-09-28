@@ -74,6 +74,46 @@ test('step 2 needs an about text of 250 characters and something you are looking
   await expect(page.getByRole('heading', { name: 'Add photos' })).toBeVisible();
 });
 
+test('step 4 needs both vetting answers to have 80 characters, and keeps them across a reload', async ({
+  page,
+}) => {
+  await signInAs(page, null);
+  // Jump straight to step 4 by editing the stored draft (getting there by the UI needs photos).
+  await page.getByLabel('Name').fill('Sam');
+  await expect.poll(() => draftKeys(page)).toHaveLength(1);
+  await page.evaluate(() => {
+    const key = Object.keys(localStorage).find((k) => k.startsWith('kt.user.'))!;
+    localStorage.setItem(
+      key,
+      JSON.stringify({ ...JSON.parse(localStorage.getItem(key)!), step: 4 }),
+    );
+  });
+  await page.reload();
+
+  await expect(page.getByRole('heading', { name: 'Vetting' })).toBeVisible();
+  await expect(page.getByText('These answers are not shown on your profile.')).toBeVisible();
+  const submit = page.getByRole('button', { name: 'Submit application' });
+  await expect(submit).toBeDisabled();
+
+  const consent = page.getByLabel('In your own words, what is consent and why is it important?');
+  const guidelines = page.getByLabel(/^What guidelines do you think everyone/);
+  await consent.fill('x'.repeat(79));
+  await expect(page.getByText('1 characters to go')).toBeVisible();
+  await consent.fill('x'.repeat(80));
+  await expect(submit).toBeDisabled();
+
+  await guidelines.fill('y'.repeat(80));
+  await expect(submit).toBeEnabled();
+
+  await page.reload();
+  await expect(consent).toHaveValue('x'.repeat(80));
+  await expect(guidelines).toHaveValue('y'.repeat(80));
+  await expect(submit).toBeEnabled();
+
+  await page.getByRole('button', { name: 'Back' }).click();
+  await expect(page.getByRole('heading', { name: 'Add photos' })).toBeVisible();
+});
+
 test('the draft survives a reload and an expired session, and is cleared on sign-out', async ({
   page,
 }) => {

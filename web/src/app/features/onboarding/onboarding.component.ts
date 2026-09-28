@@ -8,6 +8,7 @@ import { ONBOARDING_STEPS, OnboardingDraftStore } from './onboarding-draft.store
 import { AboutYouStepComponent } from './steps/about-you-step.component';
 import { CreateProfileStepComponent } from './steps/create-profile-step.component';
 import { PhotosStepComponent } from './steps/photos-step.component';
+import { VettingStepComponent } from './steps/vetting-step.component';
 
 /** The onboarding flow: header with progress, the current step, footer. */
 @Component({
@@ -22,6 +23,7 @@ import { PhotosStepComponent } from './steps/photos-step.component';
     FooterComponent,
     HeaderComponent,
     PhotosStepComponent,
+    VettingStepComponent,
   ],
   providers: [OnboardingDraftStore],
   templateUrl: './onboarding.component.html',

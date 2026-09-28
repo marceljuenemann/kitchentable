@@ -25,6 +25,8 @@ export interface OnboardingDraft {
   lookingFor: string[];
   /** Step 3: ids of the uploaded photos, in display order (first = main); see docs/photos.md. */
   photos: string[];
+  /** Step 4: answers to the private vetting questions, keyed by VETTING_QUESTIONS id. */
+  vettingAnswers: Record<string, string>;
 }
 
 const EMPTY_DRAFT: OnboardingDraft = {
@@ -40,6 +42,7 @@ const EMPTY_DRAFT: OnboardingDraft = {
   aboutText: '',
   lookingFor: [],
   photos: [],
+  vettingAnswers: {},
 };
 
 const STORAGE_KEY = 'onboarding-draft';
@@ -91,6 +94,9 @@ export class OnboardingDraftStore {
     draft.photos = Array.isArray(draft.photos)
       ? draft.photos.filter((id) => typeof id === 'string').slice(0, MAX_PHOTOS)
       : [];
+    if (typeof draft.vettingAnswers !== 'object' || draft.vettingAnswers === null) {
+      draft.vettingAnswers = {};
+    }
     return draft;
   }
 }

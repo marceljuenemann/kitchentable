@@ -1,0 +1,28 @@
+<p class="eyebrow">Step 4 of {{ totalSteps }}</p>
+<h1>Vetting</h1>
+<p class="subtitle">These answers are not shown on your profile.</p>
+
+@for (question of questions; track question.id) {
+  <p class="question" [id]="'question-' + question.id">{{ question.prompt }}</p>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <textarea
+      matInput
+      rows="4"
+      placeholder="Write as much or as little as you need"
+      [attr.aria-labelledby]="'question-' + question.id"
+      [value]="answer(question.id)"
+      (input)="setAnswer(question.id, $any($event.target).value)"
+    ></textarea>
+    <mat-hint align="end" [class.short]="charsToGo()[question.id] > 0">
+      @if (charsToGo()[question.id] > 0) {
+        {{ charsToGo()[question.id] }} characters to go
+      } @else {
+        {{ length(question.id) }} characters
+      }
+    </mat-hint>
+  </mat-form-field>
+}
+
+<button mat-flat-button class="continue" type="button" [disabled]="!canSubmit()" (click)="submit()">
+  Submit application
+</button>
