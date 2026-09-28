@@ -1,15 +1,14 @@
 # TODO
 
-- Angular karma tests
 - Implement onboarding flow
   - Options selection: Allow specific order
-  - eMail on registration
-- Set up eMail templates (with logo and whatnot)
-- Clean up CLAUDE etc. Improve infrastructure
-- Add license
+  - eMail admin on applications submission
+- Clean up CLAUDE etc. Improve infrastructure. Add copyright etc.
 - Security review (repeat occasionally)
 - Deploy to staging
   - Staging disclaimer
+  - New account
+
 - Add Terms & Conditions and Privacy Policy
 
 - Publish repo

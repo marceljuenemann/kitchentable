@@ -252,6 +252,18 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# The sign-in email. With enable_confirmations = false (above) new users get the Magic Link
+# template too, so that is the one that matters; "Confirm signup" points at the same file so
+# the emails stay identical if that setting is ever turned on (it is on by default in hosted
+# projects). Paths are relative to the project root.
+[auth.email.template.magic_link]
+subject = "Kitchen Table sign-in link"
+content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.confirmation]
+subject = "Kitchen Table sign-in link"
+content_path = "./supabase/templates/magic_link.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"

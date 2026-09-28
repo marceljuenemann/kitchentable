@@ -26,6 +26,11 @@ async function api(path: string, body: unknown, method = 'POST') {
   return text ? JSON.parse(text) : null;
 }
 
+/** Asks GoTrue to email a sign-in link to an existing user, without going through the UI. */
+export async function sendSignInEmail(email: string) {
+  await api('/auth/v1/otp', { email, create_user: false });
+}
+
 /** The profile rows with the given name, read with the service role. */
 export async function profilesNamed(name: string): Promise<Record<string, unknown>[]> {
   const response = await fetch(

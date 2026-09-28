@@ -47,15 +47,20 @@ test('age is worked out from the birth month and year in the age sheet', async (
   await expect(years.first()).toHaveText('2007');
   await expect(years.last()).toHaveText('1934');
   await years.first().click();
+  // Wait for each dropdown to finish closing before opening the next: clicking while the old
+  // panel is still animating away detaches the option we are about to click.
+  await expect(page.getByRole('listbox')).toBeHidden();
 
   // Born in July 2007: the birthday hasn't happened yet this year.
   await page.getByRole('combobox', { name: 'Month' }).click();
   await page.getByRole('option', { name: 'July' }).click();
+  await expect(page.getByRole('listbox')).toBeHidden();
   await expect(page.getByText('Age shown on profile: 18')).toBeVisible();
 
   // Born in June 2007: already had it.
   await page.getByRole('combobox', { name: 'Month' }).click();
   await page.getByRole('option', { name: 'June' }).click();
+  await expect(page.getByRole('listbox')).toBeHidden();
   await expect(page.getByText('Age shown on profile: 19')).toBeVisible();
 
   await page.getByRole('button', { name: 'Done' }).click();

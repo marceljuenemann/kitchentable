@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<!--
+  The sign-in email (Supabase's "Magic Link" template, also used for "Confirm signup" so new
+  and existing users get the same message: see supabase/config.toml).
+
+  Email clients ignore most modern CSS, so this is a table layout with inline styles and hex
+  colours (the app's oklch variables don't work here). Keep the sign-in button as the FIRST
+  link in the file: the e2e tests read the first href (e2e/support/mailpit.ts).
+  Variables: https://supabase.com/docs/guides/auth/auth-email-templates
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="supported-color-schemes" content="light" />
+    <title>Kitchen Table sign-in link</title>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #f3f1eb;">
+    <!-- Preview text shown next to the subject in the inbox. -->
+    <div style="display: none; max-height: 0; overflow: hidden; opacity: 0; color: #f3f1eb;">
+      Tap the button to sign in. The link works once and expires shortly.
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+      style="background-color: #f3f1eb;">
+      <tr>
+        <td align="center" style="padding: 32px 16px;">
+          <table role="presentation" width="480" cellpadding="0" cellspacing="0" border="0"
+            style="width: 100%; max-width: 480px; background-color: #ffffff; border-radius: 24px;">
+            <tr>
+              <td style="padding: 36px 32px 8px 32px;">
+                <!-- Logo and wordmark, like the app header. -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding-right: 12px;">
+                      <img src="{{ .SiteURL }}/email/logo-v1.png" width="60" height="60" alt=""
+                        style="display: block; width: 60px; height: 60px; border: 0;" />
+                    </td>
+                    <td style="font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 2.2px; text-transform: uppercase; color: #3b176f;">
+                      Kitchen Table
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 20px 32px 0 32px; font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif; font-size: 26px; line-height: 1.2; font-weight: 700; color: #3b176f;">
+                Your sign-in link
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 32px 0 32px; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #21123f;">
+                Tap the button below to sign in to Kitchen Table. The link works once and
+                expires shortly.
+              </td>
+            </tr>
+
+            <!-- The button: a coloured table cell with a padded link, which also works in Outlook. -->
+            <tr>
+              <td style="padding: 28px 32px 0 32px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="center" bgcolor="#3b176f" style="border-radius: 99px; background-color: #3b176f;">
+                      <a href="{{ .ConfirmationURL }}"
+                        style="display: inline-block; padding: 16px 40px; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 700; color: #ffffff; text-decoration: none; border-radius: 99px;">Sign in</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 28px 32px 0 32px; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 1.5; color: #5f5175;">
+                Button not working? Copy this link into your browser:<br />
+                <span style="word-break: break-all; color: #6c3ab2;">{{ .ConfirmationURL }}</span>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 28px 32px 36px 32px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="border-top: 1px solid #e6e3db; padding-top: 20px; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 1.5; color: #5f5175;">
+                      Didn't ask for this? You can ignore this email: nobody can sign in
+                      without the link.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
