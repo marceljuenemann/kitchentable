@@ -1,18 +1,17 @@
 # TODO
 
+- Angular karma tests
 - Implement onboarding flow
   - Options selection: Allow specific order
-- Angular update
-- Angular karma tests
+  - eMail on registration
 - Set up eMail templates (with logo and whatnot)
 - Clean up CLAUDE etc. Improve infrastructure
 - Add license
-- Security review
+- Security review (repeat occasionally)
 - Deploy to staging
-  - Recreate database (single migration)
   - Staging disclaimer
-  - eMail on registration
 - Add Terms & Conditions and Privacy Policy
+
 - Publish repo
 - Add event log / audit log table?
 - Photos bucket cleanup
