@@ -30,7 +30,7 @@ If the search layout changes (edge-to-edge cards, three columns), revisit the th
 - Drawing to a canvas and re-encoding **strips EXIF data, including GPS location**, which matters for privacy.
 - It keeps storage and bandwidth small.
 - The asymmetry to remember: we can always derive smaller images from the 1080 master, but never larger. So `full` should err generous, and any future size (say a 720 px card size) has to be generated from it, not from an original.
-- A crop smaller than 1080 px is not upscaled. Source photos whose short side is under about 480 px are rejected ("photo too small").
+- A crop smaller than 1080 px is not upscaled. Source photos whose short side is under 600 px (`MIN_SOURCE_SIZE`, the thumbnail size) are rejected ("photo too small").
 
 ## Where resizing happens
 
@@ -42,7 +42,7 @@ If the search layout changes (edge-to-edge cards, three columns), revisit the th
 
 ## Cropping
 
-The user picks a photo and a **crop sheet** (a bottom sheet, like the other pickers) opens every time. It follows the pattern of the big dating apps rather than a draggable crop box: a **fixed square viewport shows exactly what the photo will look like**, and the full photo moves underneath it. Drag to move; pinch or mouse wheel to zoom (a hint says so; there is no zoom slider); rule-of-thirds guidelines are drawn over the square. The photo always covers the square (no empty edges), and zoom is capped so the visible part never falls below the 480 px minimum.
+The user picks a photo and a **crop sheet** (a bottom sheet, like the other pickers) opens every time. It follows the pattern of the big dating apps rather than a draggable crop box: a **fixed square viewport shows exactly what the photo will look like**, and the full photo moves underneath it. Drag to move; pinch or mouse wheel to zoom (a hint says so; there is no zoom slider); rule-of-thirds guidelines are drawn over the square. The photo always covers the square (no empty edges), and zoom is capped so the visible part never falls below the 600 px minimum.
 
 Gestures are handled by [`@panzoom/panzoom`](https://github.com/timmywil/panzoom) (`contain: 'outside'`, which keeps the photo covering its parent). The sheet reads its pan and scale, computes the visible square in source pixels (`visibleSquare` in `photo-processor.ts`), and renders `full` and `thumb` **directly from the original decoded photo**, so each image is encoded once (no re-encoding of an already compressed crop). Browsers apply EXIF orientation when decoding, so photos taken sideways come out upright.
 
