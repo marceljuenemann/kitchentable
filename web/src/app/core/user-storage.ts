@@ -43,6 +43,16 @@ export class UserStorage {
     }
   }
 
+  remove(name: string) {
+    const key = this.key(name);
+    if (!key) return;
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      // Storage unavailable: nothing to remove.
+    }
+  }
+
   /**
    * Call when the user explicitly signs out: removes everything stored for them and forgets the
    * user right away, so nothing (e.g. a debounced save firing mid sign-out) is written again

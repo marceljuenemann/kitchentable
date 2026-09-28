@@ -26,6 +26,16 @@ async function api(path: string, body: unknown, method = 'POST') {
   return text ? JSON.parse(text) : null;
 }
 
+/** The profile rows with the given name, read with the service role. */
+export async function profilesNamed(name: string): Promise<Record<string, unknown>[]> {
+  const response = await fetch(
+    `${API_URL}/rest/v1/profiles?select=*&name=eq.${encodeURIComponent(name)}`,
+    { headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}` } },
+  );
+  if (!response.ok) throw new Error(`Reading profiles failed: ${await response.text()}`);
+  return response.json();
+}
+
 /** A file in the private `photos` bucket, read (or deleted) with the service role. */
 export async function photoObject(
   path: string,
@@ -53,9 +63,16 @@ export async function signInAs(page: Page, status: ProfileStatus | null): Promis
   });
 
   if (status) {
-    // Service role bypasses the client lockdown on `profiles` (no function creates these
-    // rows yet).
-    await api('/rest/v1/profiles', { id: user.id, status, name: 'E2E User' });
+    // Service role bypasses the client lockdown on `profiles` (only `submit_onboarding` creates
+    // these rows for real users, and it needs photos etc.).
+    await api('/rest/v1/profiles', {
+      id: user.id,
+      status,
+      name: 'E2E User',
+      pronouns: 'they/them',
+      bio: 'About the E2E user',
+      location: 'London',
+    });
   }
 
   await signIn(page, email);

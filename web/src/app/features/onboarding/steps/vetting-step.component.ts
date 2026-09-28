@@ -1,8 +1,9 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { OnboardingDraftStore, ONBOARDING_STEPS } from '../onboarding-draft.store';
+import { ProfileService } from '../../../core/profile.service';
+import { OnboardingDraftStore, ONBOARDING_STEPS, toNewProfile } from '../onboarding-draft.store';
 import { VETTING_MIN_LENGTH, VETTING_QUESTIONS } from '../onboarding-options';
 
 /** Onboarding step 4: the private vetting questions, then submit. */
@@ -15,8 +16,11 @@ import { VETTING_MIN_LENGTH, VETTING_QUESTIONS } from '../onboarding-options';
 })
 export class VettingStepComponent {
   private readonly store = inject(OnboardingDraftStore);
+  private readonly profiles = inject(ProfileService);
 
   readonly draft = this.store.draft;
+  readonly submitting = signal(false);
+  readonly failed = signal(false);
   readonly totalSteps = ONBOARDING_STEPS;
   readonly questions = VETTING_QUESTIONS;
 
@@ -30,8 +34,10 @@ export class VettingStepComponent {
     ),
   );
 
-  readonly canSubmit = computed(() =>
-    VETTING_QUESTIONS.every((question) => this.length(question.id) >= VETTING_MIN_LENGTH),
+  readonly canSubmit = computed(
+    () =>
+      !this.submitting() &&
+      VETTING_QUESTIONS.every((question) => this.length(question.id) >= VETTING_MIN_LENGTH),
   );
 
   /** The answer so far; a question that hasn't been touched has no entry. */
@@ -47,8 +53,16 @@ export class VettingStepComponent {
     this.store.update({ vettingAnswers: { ...this.draft().vettingAnswers, [id]: text } });
   }
 
-  submit() {
+  /** Creates the profile; the shell then shows the next screen, so nothing is navigated here. */
+  async submit() {
     if (!this.canSubmit()) return;
-    // TODO: Submit the application (creates the profile row) once `submit_onboarding` exists.
+    this.submitting.set(true);
+    this.failed.set(false);
+    try {
+      await this.profiles.submitOnboarding(toNewProfile(this.draft()));
+    } catch {
+      this.failed.set(true);
+      this.submitting.set(false);
+    }
   }
 }

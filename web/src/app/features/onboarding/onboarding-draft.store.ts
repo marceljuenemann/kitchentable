@@ -1,4 +1,5 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
+import { NewProfile } from '../../core/profile.model';
 import { UserStorage } from '../../core/user-storage';
 import { MAX_PHOTOS } from './onboarding-options';
 
@@ -44,6 +45,25 @@ const EMPTY_DRAFT: OnboardingDraft = {
   photos: [],
   vettingAnswers: {},
 };
+
+/** The finished draft as what gets submitted. Only call this once every step is complete. */
+export function toNewProfile(draft: OnboardingDraft): NewProfile {
+  const hasBirthday = draft.birthMonth !== '' && draft.birthYear !== '';
+  return {
+    name: draft.name.trim(),
+    pronouns: draft.pronouns[0] ?? '',
+    tagline: draft.tagline.trim(),
+    bio: draft.aboutText.trim(),
+    location: draft.location.trim(),
+    gender: draft.gender,
+    sexuality: draft.sexuality,
+    birth_year: hasBirthday ? Number(draft.birthYear) : null,
+    birth_month: hasBirthday ? Number(draft.birthMonth) : null,
+    looking_for: draft.lookingFor,
+    photos: draft.photos,
+    vetting_answers: draft.vettingAnswers,
+  };
+}
 
 const STORAGE_KEY = 'onboarding-draft';
 const SAVE_DELAY_MS = 300;

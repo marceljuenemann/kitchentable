@@ -43,6 +43,12 @@ h1 {
   color: var(--kt-magenta);
 }
 
+.error {
+  margin: 24px 0 0;
+  font-size: 14px;
+  color: var(--mat-sys-error);
+}
+
 .continue {
   width: 100%;
   margin-top: 32px;

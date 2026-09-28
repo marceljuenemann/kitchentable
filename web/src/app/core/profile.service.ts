@@ -12,8 +12,11 @@ import {
   switchMap,
 } from 'rxjs';
 import { AuthService } from './auth/auth.service';
-import { Profile } from './profile.model';
+import { NewProfile, Profile } from './profile.model';
 import { SupabaseService } from './supabase.service';
+
+/** Postgres `unique_violation`, which `submit_onboarding` raises if a profile already exists. */
+const ALREADY_APPLIED = '23505';
 
 /**
  * - `loading`: fetching
@@ -46,6 +49,21 @@ export class ProfileService {
 
   refresh() {
     this.refreshTrigger.next();
+  }
+
+  /**
+   * Creates the profile (in `vetting`) from a finished onboarding, then reloads the profile so
+   * the shell moves on to the next screen. If the user already applied (say, in another tab)
+   * this reloads too, since the shell then has the screen to show.
+   */
+  async submitOnboarding(profile: NewProfile): Promise<void> {
+    // Every field is the function argument of the same name, with a `p_` prefix.
+    const args = Object.fromEntries(
+      Object.entries(profile).map(([field, value]) => [`p_${field}`, value]),
+    );
+    const { error } = await this.supabase.client.rpc('submit_onboarding', args);
+    if (error && error.code !== ALREADY_APPLIED) throw error;
+    this.refresh();
   }
 
   private fetchState(): Observable<ProfileState> {

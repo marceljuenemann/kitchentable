@@ -7,7 +7,8 @@ insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, e
 values ('88888888-8888-8888-8888-888888888888', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
   'erin@example.com', '{"invite_code":"PHOTOS-TEST"}'::jsonb, '', now(), now(), now());
 
-insert into public.profiles (id) values ('88888888-8888-8888-8888-888888888888');
+insert into public.profiles (id, name, pronouns, bio, location)
+values ('88888888-8888-8888-8888-888888888888', 'Erin', 'they/them', 'About Erin', 'London');
 
 select is(
   (select photos from public.profiles where id = '88888888-8888-8888-8888-888888888888'),

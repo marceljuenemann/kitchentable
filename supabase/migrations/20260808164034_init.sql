@@ -19,18 +19,18 @@ create type public.profile_status as enum (
 );
 
 -- A row only exists once onboarding has been submitted; users without a row still need to
--- onboard. (Rows are not created by any function yet -- onboarding submission is not built.)
+-- onboard. Rows are only created by submit_onboarding().
 create table public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   status public.profile_status not null default 'vetting',
   -- Answers to the vetting questions, keyed by question id. Free-form JSON because the
   -- questions will change and we never filter or search on them.
   vetting_answers jsonb not null default '{}',
-  name text,
-  pronouns text,
-  tagline text,
-  bio text,
-  location text,
+  name text not null,
+  pronouns text not null,
+  tagline text not null default '',  -- may be empty
+  bio text not null,
+  location text not null,
   gender text[] not null default '{}',
   sexuality text[] not null default '{}',
   birth_year int,
