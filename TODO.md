@@ -2,18 +2,19 @@
 
 - Implement onboarding flow
   - Options selection: Allow specific order
-  - e2e tests: Age selection, photos etc.
-  - Add event log / audit log table?
 - Angular update
 - Angular karma tests
 - Set up eMail templates (with logo and whatnot)
 - Clean up CLAUDE etc. Improve infrastructure
+- Add license
+- Security review
 - Deploy to staging
   - Recreate database (single migration)
   - Staging disclaimer
   - eMail on registration
 - Add Terms & Conditions and Privacy Policy
-- Security review
+- Publish repo
+- Add event log / audit log table?
 - Photos bucket cleanup
 - Report photos / profile
 
