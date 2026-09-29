@@ -64,4 +64,26 @@ npm run typecheck:e2e  # type-check e2e/ (Playwright transpiles TS without check
 
 `check` also runs a production `ng build` (strict TypeScript + templates). CI (`.github/workflows/ci.yml`) runs the same checks as one job, in parallel with the e2e/pgTAP job.
 
+## Staging
+
+https://staging.kitchentable.dating — Supabase project "Kitchen Table - Staging" (`ceqkaciklgqzfwycrrfx`, London), frontend on Cloudflare Pages (`kitchentable-staging`), auth emails via Mailtrap. The staging build shows a "Staging" badge and is served with `X-Robots-Tag: noindex`.
+
+Every push to `main` deploys automatically once `check` and `e2e` pass (the `deploy-staging` job in `.github/workflows/ci.yml`):
+
+1. `supabase db push` — applies new migrations. `seed.sql` is never pushed; create real invite codes by hand in Studio.
+2. `supabase config push` — auth settings and email templates from `supabase/config.toml`, with the `[remotes.staging]` block overriding the local-only values (URLs, rate limits, Mailtrap SMTP instead of Mailpit). Auth settings changed in the dashboard get overwritten here, so change them in `config.toml` instead.
+3. `ng build --configuration staging` (`environment.staging.ts`), deployed with `wrangler pages deploy`.
+
+Secrets live in the `staging` GitHub environment: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_AUTH_SMTP_PASS` (Mailtrap API token), `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
+
+To push by hand instead (e.g. the first time), from the repo root:
+
+```bash
+npx supabase link --project-ref ceqkaciklgqzfwycrrfx
+npx supabase db push
+SUPABASE_AUTH_SMTP_PASS=<mailtrap token> npx supabase config push
+```
+
+Note `config push` applies without waiting for confirmation when stdin isn't a terminal, so don't pipe into it expecting a dry run.
+
 See [TODO.md](TODO.md) for remaining gaps.

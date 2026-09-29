@@ -433,3 +433,38 @@ enabled = true
 # declarative_schema_path = "./database"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+# Overrides applied when the CLI is linked to the staging project (`supabase config push`,
+# run by the deploy-staging CI job). Everything above is tuned for local dev -- these replace
+# the local-only bits: URLs, the generous email rate limits, and Mailpit instead of real SMTP.
+[remotes.staging]
+project_id = "ceqkaciklgqzfwycrrfx"
+
+[remotes.staging.auth]
+site_url = "https://staging.kitchentable.dating"
+additional_redirect_urls = ["https://staging.kitchentable.dating/auth/callback"]
+
+[remotes.staging.auth.rate_limit]
+email_sent = 30
+
+[remotes.staging.auth.email]
+max_frequency = "60s"
+
+# Mailtrap's transactional stream. The password is a Mailtrap API token with sending access:
+# a GitHub secret in CI, or exported in your shell when pushing config locally.
+[remotes.staging.auth.email.smtp]
+enabled = true
+host = "live.smtp.mailtrap.io"
+port = 587
+user = "api"
+pass = "env(SUPABASE_AUTH_SMTP_PASS)"
+admin_email = "no-reply@kitchentable.dating"
+sender_name = "Kitchen Table"
+
+[remotes.staging.auth.email.template.magic_link]
+subject = "[Staging] Kitchen Table sign-in link"
+content_path = "./supabase/templates/magic_link.html"
+
+[remotes.staging.auth.email.template.confirmation]
+subject = "[Staging] Kitchen Table sign-in link"
+content_path = "./supabase/templates/magic_link.html"

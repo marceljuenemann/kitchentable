@@ -8,7 +8,9 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Superseded PR runs are cancelled, but runs on main are not: that could kill the staging
+  # deploy halfway through a migration. Pushes to main queue up instead.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # Fast checks, no Docker: fails within a couple of minutes on formatting, lint, type errors
@@ -97,3 +99,74 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  # Deploys main to staging once both jobs above pass: migrations and auth config (including
+  # the [remotes.staging] overrides in supabase/config.toml) to Supabase, then the frontend
+  # to Cloudflare Pages. Secrets live in the `staging` GitHub environment and are passed only
+  # to the steps that use them, so npm install scripts and the build never see them.
+  deploy-staging:
+    needs: [check, e2e]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.kitchentable.dating
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    env:
+      SUPABASE_PROJECT_REF: ceqkaciklgqzfwycrrfx
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+
+      - name: Install root dependencies (Supabase CLI)
+        run: npm ci
+
+      - name: Install web app dependencies
+        run: npm ci --prefix web
+
+      - name: Link Supabase project
+        run: npx supabase link --project-ref "$SUPABASE_PROJECT_REF"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      # Migrations only; seed.sql (test invite codes) is deliberately never pushed.
+      - name: Apply database migrations
+        run: npx supabase db push --yes
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Push auth config and email templates
+        run: npx supabase config push --yes
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_AUTH_SMTP_PASS: ${{ secrets.SUPABASE_AUTH_SMTP_PASS }}
+
+      - name: Build frontend (staging configuration)
+        run: npm run build:staging --prefix web
+
+      # Keep staging out of search engines. Written here rather than in web/public so it
+      # never ships with a production build.
+      - name: Add noindex header
+        run: |
+          printf '/*\n  X-Robots-Tag: noindex, nofollow\n' > web/dist/web/browser/_headers
+
+      # With no 404.html in the output, Pages serves index.html for unknown paths (SPA mode).
+      - name: Deploy frontend to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy web/dist/web/browser --project-name=kitchentable-staging --branch=main

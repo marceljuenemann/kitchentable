@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  staging: false,
   // Standard Supabase CLI local dev values -- identical on every machine
   // running `supabase start`, not secrets.
   supabaseUrl: 'http://127.0.0.1:54321',

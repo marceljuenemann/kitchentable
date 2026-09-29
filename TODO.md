@@ -1,13 +1,13 @@
 # TODO
 
-- Implement onboarding flow
-  - eMail admin on applications submission
+- Deploy to staging
+  - Automated deployment
+- eMail admin on applications submission
+- Upgrade node to 24
 - Clean up CLAUDE etc. Improve infrastructure. Add copyright etc.
 - Security review (repeat occasionally)
-- Deploy to staging
-  - Staging disclaimer
-  - New account
 
+- Reconfigure chunks (see npm run build)
 - Add Terms & Conditions and Privacy Policy
 
 - Publish repo
