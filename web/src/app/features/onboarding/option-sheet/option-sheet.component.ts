@@ -43,10 +43,20 @@ export class OptionSheetComponent {
     this.ref.dismiss([value]);
   }
 
-  /** Multi-select updates the selection; single-select picks and closes (ignoring un-selecting). */
+  /**
+   * Multi-select updates the selection; single-select picks and closes (ignoring un-selecting).
+   *
+   * `mat-chip-listbox` reports the new selection in the chips' display order, not the order
+   * they were picked in. We want the pick order (it becomes the display order for the field,
+   * e.g. gender tags on a profile), so keep the existing order for values that are still
+   * selected and append newly-picked ones at the end.
+   */
   onChange(value: string | string[] | undefined) {
     if (this.data.multi) {
-      this.selected.set(value as string[]);
+      const next = new Set(value as string[]);
+      const stillSelected = this.selected().filter((option) => next.has(option));
+      const newlyPicked = (value as string[]).filter((option) => !stillSelected.includes(option));
+      this.selected.set([...stillSelected, ...newlyPicked]);
     } else if (value !== undefined) {
       this.pick(value as string);
     }
