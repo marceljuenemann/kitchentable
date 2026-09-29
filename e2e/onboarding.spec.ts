@@ -30,6 +30,48 @@ test('step 1 only continues once name, pronouns and location are filled in', asy
   await expect(next).toBeEnabled();
 });
 
+test('age is worked out from the birth month and year in the age sheet', async ({ page }) => {
+  await signInAs(page, null);
+  // The age and the years on offer depend on today's date, so pin it: 15 June 2026.
+  await page.clock.setFixedTime(new Date('2026-06-15T12:00:00'));
+
+  const ageRow = page.getByRole('button', { name: /^Age/ });
+  await expect(ageRow).toContainText('Add birthday');
+  await ageRow.click();
+  await expect(page.getByText('Pick a month and year.')).toBeVisible();
+
+  // The newest year offered is someone who turns 19 this year (so nobody under 18 slips in),
+  // and the list goes back 73 years from there.
+  await page.getByRole('combobox', { name: 'Year' }).click();
+  const years = page.getByRole('option');
+  await expect(years.first()).toHaveText('2007');
+  await expect(years.last()).toHaveText('1934');
+  await years.first().click();
+  // Wait for each dropdown to finish closing before opening the next: clicking while the old
+  // panel is still animating away detaches the option we are about to click.
+  await expect(page.getByRole('listbox')).toBeHidden();
+
+  // Born in July 2007: the birthday hasn't happened yet this year.
+  await page.getByRole('combobox', { name: 'Month' }).click();
+  await page.getByRole('option', { name: 'July' }).click();
+  await expect(page.getByRole('listbox')).toBeHidden();
+  await expect(page.getByText('Age shown on profile: 18')).toBeVisible();
+
+  // Born in June 2007: already had it.
+  await page.getByRole('combobox', { name: 'Month' }).click();
+  await page.getByRole('option', { name: 'June' }).click();
+  await expect(page.getByRole('listbox')).toBeHidden();
+  await expect(page.getByText('Age shown on profile: 19')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Done' }).click();
+  await expect(ageRow).toContainText('19');
+
+  // Reopening shows what was picked.
+  await ageRow.click();
+  await expect(page.getByRole('combobox', { name: 'Month' })).toContainText('June');
+  await expect(page.getByRole('combobox', { name: 'Year' })).toContainText('2007');
+});
+
 test('a custom value can be added in the option sheet', async ({ page }) => {
   await signInAs(page, null);
   await page.getByRole('button', { name: /^Gender/ }).click();
@@ -71,6 +113,46 @@ test('step 2 needs an about text of 250 characters and something you are looking
   );
 
   await next.click();
+  await expect(page.getByRole('heading', { name: 'Add photos' })).toBeVisible();
+});
+
+test('step 4 needs both vetting answers to have 80 characters, and keeps them across a reload', async ({
+  page,
+}) => {
+  await signInAs(page, null);
+  // Jump straight to step 4 by editing the stored draft (getting there by the UI needs photos).
+  await page.getByLabel('Name').fill('Sam');
+  await expect.poll(() => draftKeys(page)).toHaveLength(1);
+  await page.evaluate(() => {
+    const key = Object.keys(localStorage).find((k) => k.startsWith('kt.user.'))!;
+    localStorage.setItem(
+      key,
+      JSON.stringify({ ...JSON.parse(localStorage.getItem(key)!), step: 4 }),
+    );
+  });
+  await page.reload();
+
+  await expect(page.getByRole('heading', { name: 'Vetting' })).toBeVisible();
+  await expect(page.getByText('These answers are not shown on your profile.')).toBeVisible();
+  const submit = page.getByRole('button', { name: 'Submit application' });
+  await expect(submit).toBeDisabled();
+
+  const consent = page.getByLabel('In your own words, what is consent and why is it important?');
+  const guidelines = page.getByLabel(/^What guidelines do you think everyone/);
+  await consent.fill('x'.repeat(79));
+  await expect(page.getByText('1 characters to go')).toBeVisible();
+  await consent.fill('x'.repeat(80));
+  await expect(submit).toBeDisabled();
+
+  await guidelines.fill('y'.repeat(80));
+  await expect(submit).toBeEnabled();
+
+  await page.reload();
+  await expect(consent).toHaveValue('x'.repeat(80));
+  await expect(guidelines).toHaveValue('y'.repeat(80));
+  await expect(submit).toBeEnabled();
+
+  await page.getByRole('button', { name: 'Back' }).click();
   await expect(page.getByRole('heading', { name: 'Add photos' })).toBeVisible();
 });
 

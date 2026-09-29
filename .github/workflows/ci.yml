@@ -46,6 +46,9 @@ jobs:
       - name: Production build (strict TypeScript + templates)
         run: npm run build --prefix web
 
+      - name: Unit tests (Karma)
+        run: npm run test:unit
+
   e2e:
     runs-on: ubuntu-latest
     steps:

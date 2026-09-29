@@ -9,8 +9,9 @@
     "format": "prettier --write \"web/src/**/*.{ts,html,scss,json}\" \"e2e/**/*.ts\" playwright.config.ts",
     "format:check": "prettier --check \"web/src/**/*.{ts,html,scss,json}\" \"e2e/**/*.ts\" playwright.config.ts",
     "lint": "npm run lint --prefix web",
+    "test:unit": "npm run test:ci --prefix web",
     "typecheck:e2e": "tsc --noEmit -p e2e/tsconfig.json",
-    "check": "npm run format:check && npm run lint && npm run typecheck:e2e && npm run build --prefix web"
+    "check": "npm run format:check && npm run lint && npm run typecheck:e2e && npm run build --prefix web && npm run test:unit"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

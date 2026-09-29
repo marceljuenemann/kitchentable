@@ -10,10 +10,10 @@ values
   ('66666666-6666-6666-6666-666666666666', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
     'dave@example.com', '{"invite_code":"PROFILE-TEST"}'::jsonb, '', now(), now(), now());
 
-insert into public.profiles (id, name, status, photos) values
-  ('55555555-5555-5555-5555-555555555555', 'Carol', 'active',
+insert into public.profiles (id, name, pronouns, bio, location, status, photos) values
+  ('55555555-5555-5555-5555-555555555555', 'Carol', 'she/her', 'About Carol', 'London', 'active',
     array['aaaaaaaa-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000001']::uuid[]),
-  ('66666666-6666-6666-6666-666666666666', 'Dave', 'vetting', '{}');
+  ('66666666-6666-6666-6666-666666666666', 'Dave', 'he/him', 'About Dave', 'London', 'vetting', '{}');
 
 set local role authenticated;
 set local request.jwt.claim.sub = '55555555-5555-5555-5555-555555555555';

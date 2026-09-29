@@ -2,6 +2,7 @@ const MAILPIT_URL = process.env.MAILPIT_URL ?? 'http://127.0.0.1:54324';
 
 interface MailpitMessageSummary {
   ID: string;
+  Subject: string;
   To: { Address: string }[];
 }
 
@@ -9,11 +10,16 @@ interface MailpitMessage {
   HTML: string;
 }
 
+export interface Email {
+  subject: string;
+  html: string;
+}
+
 /**
  * Polls Mailpit (Supabase's local dev SMTP capture, see README.md) for the most recent
- * message sent to `email` and extracts the magic-link URL from its HTML body.
+ * message sent to `email`.
  */
-export async function getLatestMagicLink(email: string, timeoutMs = 10_000): Promise<string> {
+export async function getLatestEmail(email: string, timeoutMs = 10_000): Promise<Email> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const list = (await (await fetch(`${MAILPIT_URL}/api/v1/messages`)).json()) as {
@@ -24,10 +30,21 @@ export async function getLatestMagicLink(email: string, timeoutMs = 10_000): Pro
       const full = (await (
         await fetch(`${MAILPIT_URL}/api/v1/message/${match.ID}`)
       ).json()) as MailpitMessage;
-      const hrefMatch = full.HTML.match(/href="([^"]+)"/);
-      if (hrefMatch) return hrefMatch[1].replace(/&amp;/g, '&');
+      return { subject: match.Subject, html: full.HTML };
     }
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
-  throw new Error(`No email with a magic link arrived for ${email} within ${timeoutMs}ms`);
+  throw new Error(`No email arrived for ${email} within ${timeoutMs}ms`);
+}
+
+/** The first link in an email (the sign-in link; the template keeps the button first). */
+export function firstLink(html: string): string {
+  const hrefMatch = html.match(/href="([^"]+)"/);
+  if (!hrefMatch) throw new Error('The email has no link');
+  return hrefMatch[1].replace(/&amp;/g, '&');
+}
+
+/** Extracts the magic-link URL from the most recent message sent to `email`. */
+export async function getLatestMagicLink(email: string, timeoutMs = 10_000): Promise<string> {
+  return firstLink((await getLatestEmail(email, timeoutMs)).html);
 }

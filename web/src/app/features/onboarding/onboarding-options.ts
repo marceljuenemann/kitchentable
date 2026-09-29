@@ -37,6 +37,17 @@ export const SEXUALITY_OPTIONS = [
 export const MAX_PHOTOS = 6;
 export const TAGLINE_MAX_LENGTH = 60;
 export const ABOUT_MIN_LENGTH = 250;
+export const VETTING_MIN_LENGTH = 80;
+
+/** The private vetting questions (step 4). The id is the key the answers are stored under. */
+export const VETTING_QUESTIONS = [
+  { id: 'consent', prompt: 'In your own words, what is consent and why is it important?' },
+  {
+    id: 'guidelines',
+    prompt:
+      'What guidelines do you think everyone in the Kitchen Table community should adhere to?',
+  },
+];
 
 /**
  * Standard "looking for" options. The id is what gets stored (so a label can be reworded without

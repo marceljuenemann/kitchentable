@@ -8,7 +8,7 @@ import { HeaderComponent } from '../../shared/header/header.component';
 import { AgeVerificationComponent } from '../age-verification/age-verification.component';
 import { MainComponent } from '../main/main.component';
 import { OnboardingComponent } from '../onboarding/onboarding.component';
-import { VettingComponent } from '../vetting/vetting.component';
+import { SubmittedComponent } from '../onboarding/submitted/submitted.component';
 
 /**
  * Everything a signed-in user sees lives behind this one component: it shows the screen that
@@ -26,7 +26,7 @@ import { VettingComponent } from '../vetting/vetting.component';
     AgeVerificationComponent,
     MainComponent,
     OnboardingComponent,
-    VettingComponent,
+    SubmittedComponent,
   ],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',

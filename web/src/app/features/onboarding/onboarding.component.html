@@ -24,9 +24,8 @@
     @case (3) {
       <app-photos-step />
     }
-    @default {
-      <p class="eyebrow">Step {{ draft().step }} of {{ totalSteps }}</p>
-      <p>This step isn't built yet.</p>
+    @case (4) {
+      <app-vetting-step />
     }
   }
 </main>

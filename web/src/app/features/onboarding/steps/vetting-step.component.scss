@@ -1,0 +1,55 @@
+:host {
+  display: block;
+}
+
+mat-form-field {
+  width: 100%;
+  --mat-form-field-outlined-container-shape: 14px;
+}
+
+.eyebrow {
+  margin: 18px 0 0;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kt-magenta);
+}
+
+h1 {
+  margin: 6px 0 0;
+  font-family: var(--kt-font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--kt-violet);
+}
+
+.subtitle {
+  margin: 6px 0 4px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--kt-muted);
+}
+
+.question {
+  margin: 22px 0 10px;
+  font-size: 16.5px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--kt-ink);
+}
+
+.short {
+  color: var(--kt-magenta);
+}
+
+.error {
+  margin: 24px 0 0;
+  font-size: 14px;
+  color: var(--mat-sys-error);
+}
+
+.continue {
+  width: 100%;
+  margin-top: 32px;
+}

@@ -1,4 +1,5 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
+import { NewProfile } from '../../core/profile.model';
 import { UserStorage } from '../../core/user-storage';
 import { MAX_PHOTOS } from './onboarding-options';
 
@@ -25,6 +26,8 @@ export interface OnboardingDraft {
   lookingFor: string[];
   /** Step 3: ids of the uploaded photos, in display order (first = main); see docs/photos.md. */
   photos: string[];
+  /** Step 4: answers to the private vetting questions, keyed by VETTING_QUESTIONS id. */
+  vettingAnswers: Record<string, string>;
 }
 
 const EMPTY_DRAFT: OnboardingDraft = {
@@ -40,7 +43,27 @@ const EMPTY_DRAFT: OnboardingDraft = {
   aboutText: '',
   lookingFor: [],
   photos: [],
+  vettingAnswers: {},
 };
+
+/** The finished draft as what gets submitted. Only call this once every step is complete. */
+export function toNewProfile(draft: OnboardingDraft): NewProfile {
+  const hasBirthday = draft.birthMonth !== '' && draft.birthYear !== '';
+  return {
+    name: draft.name.trim(),
+    pronouns: draft.pronouns[0] ?? '',
+    tagline: draft.tagline.trim(),
+    bio: draft.aboutText.trim(),
+    location: draft.location.trim(),
+    gender: draft.gender,
+    sexuality: draft.sexuality,
+    birth_year: hasBirthday ? Number(draft.birthYear) : null,
+    birth_month: hasBirthday ? Number(draft.birthMonth) : null,
+    looking_for: draft.lookingFor,
+    photos: draft.photos,
+    vetting_answers: draft.vettingAnswers,
+  };
+}
 
 const STORAGE_KEY = 'onboarding-draft';
 const SAVE_DELAY_MS = 300;
@@ -91,6 +114,9 @@ export class OnboardingDraftStore {
     draft.photos = Array.isArray(draft.photos)
       ? draft.photos.filter((id) => typeof id === 'string').slice(0, MAX_PHOTOS)
       : [];
+    if (typeof draft.vettingAnswers !== 'object' || draft.vettingAnswers === null) {
+      draft.vettingAnswers = {};
+    }
     return draft;
   }
 }
