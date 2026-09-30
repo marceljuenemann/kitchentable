@@ -44,7 +44,11 @@ test('submitting the application creates the profile and moves on to "being vett
     looking_for: ['solo-poly'],
     gender: [],
     birth_year: null,
-    vetting_answers: { consent: 'a'.repeat(80), guidelines: 'b'.repeat(80) },
+    vetting_answers: {
+      consent: 'a'.repeat(80),
+      guidelines: 'b'.repeat(80),
+      invite_code: 'E2E-INVITE', // from the sign-up metadata, see signInAs
+    },
   });
   expect(profile['photos']).toHaveLength(1);
 

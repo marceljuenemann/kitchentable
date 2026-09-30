@@ -1,8 +1,6 @@
 begin;
 select plan(5);
 
-insert into public.invite_codes (code, max_uses) values ('PHOTOS-TEST', 2);
-
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, encrypted_password, email_confirmed_at, created_at, updated_at)
 values ('88888888-8888-8888-8888-888888888888', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
   'erin@example.com', '{"invite_code":"PHOTOS-TEST"}'::jsonb, '', now(), now(), now());

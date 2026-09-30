@@ -26,8 +26,8 @@ export interface NewProfile {
   vetting_answers: Record<string, string>;
 }
 
-/** A stored profile, as returned by `get_my_profile()`. */
-export interface Profile extends NewProfile {
+/** A stored profile, as returned by `get_my_profile()` (which leaves out the vetting answers). */
+export interface Profile extends Omit<NewProfile, 'vetting_answers'> {
   id: string;
   status: ProfileStatus;
 }

@@ -1,4 +1,5 @@
 import { expect, Page, test } from '@playwright/test';
+import { getLatestMagicLink } from './support/mailpit';
 import { uniqueEmail } from './support/test-email';
 
 function openSignInSheet(page: Page) {
@@ -8,14 +9,33 @@ function openSignInSheet(page: Page) {
 /** Creates a real, GoTrue-native user via the landing page's own sign-up flow, without
  *  clicking the magic link -- just enough to exist for a later sign-in test. */
 async function createExistingUser(page: Page, email: string) {
-  await page.goto('/?invite=E2E-FRESH');
+  await page.goto('/?invite=E2E-INVITE');
   await page.getByLabel('Email').fill(email);
   await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Sign up' }).click();
   await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible();
 }
 
-test('shows a fixed error for an email with no existing account', async ({ page }) => {
+// The sheet must not reveal whether an address is registered, so an unknown one gets the same
+// answer as a known one, and a working link (which leads into onboarding).
+test('an email with no existing account gets a sign-in link too', async ({ page }) => {
+  const email = uniqueEmail();
+  await page.goto('/');
+  await openSignInSheet(page);
+
+  const sheet = page.locator('.sign-in-sheet');
+  await sheet.getByLabel('Email').fill(email);
+  await sheet.getByRole('button', { name: 'Sign in' }).click();
+
+  await expect(sheet.getByRole('heading', { name: 'Check your email' })).toBeVisible();
+
+  await page.goto(await getLatestMagicLink(email));
+  await page.waitForURL('**/app');
+  await expect(page.getByRole('heading', { name: 'Create profile' })).toBeVisible();
+});
+
+test('shows a generic error when the request fails', async ({ page }) => {
+  await page.route('**/auth/v1/otp*', (route) => route.abort());
   await page.goto('/');
   await openSignInSheet(page);
 
@@ -23,7 +43,9 @@ test('shows a fixed error for an email with no existing account', async ({ page 
   await sheet.getByLabel('Email').fill(uniqueEmail());
   await sheet.getByRole('button', { name: 'Sign in' }).click();
 
-  await expect(sheet.getByText('No user with this Email found')).toBeVisible();
+  await expect(
+    sheet.getByText('Something went wrong. Please try again in a minute.'),
+  ).toBeVisible();
 });
 
 test('an existing user can request a sign-in link', async ({ page }) => {

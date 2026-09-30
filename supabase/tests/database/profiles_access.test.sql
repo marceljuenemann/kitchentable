@@ -1,7 +1,5 @@
 begin;
-select plan(6);
-
-insert into public.invite_codes (code, max_uses) values ('ACCESS-TEST', 2);
+select plan(5);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, encrypted_password, email_confirmed_at, created_at, updated_at)
 values
@@ -38,13 +36,6 @@ select throws_ok(
   '42501',
   'permission denied for table profiles',
   'profiles cannot be inserted directly'
-);
-
-select throws_ok(
-  $$ select count(*) from public.invite_codes $$,
-  '42501',
-  'permission denied for table invite_codes',
-  'invite_codes is not selectable by authenticated users'
 );
 
 -- an anonymous caller (no sub claim) can't use the procedures either

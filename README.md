@@ -22,7 +22,7 @@ npm install
 npm start                   # ng serve, http://localhost:4200
 ```
 
-The app is invite-only. `supabase/seed.sql` pre-seeds a reusable invite code on every `supabase start` / `supabase db reset` — no manual step needed:
+The app is invite-only, but the sign-up form only needs _an_ invite code in the URL: codes aren't validated at sign-up, they are stored on the profile and checked by hand during vetting (see [docs/database.md](docs/database.md)). Any code works locally:
 
 http://localhost:4200/?invite=TESTCODE
 
@@ -35,7 +35,7 @@ Useful local URLs (from `supabase start` output):
 
 ### Backend tests
 
-Schema, access rules, stored procedures and triggers (invite gating, profile lifecycle) are covered by pgTAP tests. See [docs/database.md](docs/database.md) for the data model:
+Schema, access rules, stored procedures and triggers (profile lifecycle, onboarding submission) are covered by pgTAP tests. See [docs/database.md](docs/database.md) for the data model:
 
 ```bash
 npx supabase db reset                              # reapplies migrations from scratch
@@ -70,7 +70,7 @@ https://staging.kitchentable.dating — Supabase project "Kitchen Table - Stagin
 
 Every push to `main` deploys automatically once `check` and `e2e` pass (the `deploy-staging` job in `.github/workflows/ci.yml`):
 
-1. `supabase db push` — applies new migrations. `seed.sql` is never pushed; create real invite codes by hand in Studio.
+1. `supabase db push` — applies new migrations.
 2. `supabase config push` — auth settings and email templates from `supabase/config.toml`, with the `[remotes.staging]` block overriding the local-only values (URLs, rate limits, Mailtrap SMTP instead of Mailpit). Auth settings changed in the dashboard get overwritten here, so change them in `config.toml` instead.
 3. `ng build --configuration staging` (`environment.staging.ts`), deployed with `wrangler pages deploy`.
 

@@ -1,8 +1,6 @@
 begin;
 select plan(4);
 
-insert into public.invite_codes (code, max_uses) values ('PROFILE-TEST', 2);
-
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, encrypted_password, email_confirmed_at, created_at, updated_at)
 values
   ('55555555-5555-5555-5555-555555555555', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',

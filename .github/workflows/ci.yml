@@ -141,7 +141,6 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
-      # Migrations only; seed.sql (test invite codes) is deliberately never pushed.
       - name: Apply database migrations
         run: npx supabase db push --yes
         env:

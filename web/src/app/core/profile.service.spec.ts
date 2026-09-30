@@ -19,7 +19,6 @@ const PROFILE: Profile = {
   birth_month: null,
   looking_for: ['solo-poly'],
   photos: ['photo-1'],
-  vetting_answers: { consent: 'a' },
 };
 
 const NEW_PROFILE: NewProfile = {

@@ -65,7 +65,7 @@ schema_paths = []
 
 [db.seed]
 # If enabled, seeds the database after migrations during a db reset.
-enabled = true
+enabled = false
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
 sql_paths = ["./seed.sql"]
@@ -232,7 +232,10 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = false
+# On, so that nobody gets an account (or a session) for an address they don't own by calling the
+# password sign-up endpoint directly, and so that it doesn't say "already registered". The app
+# itself only uses sign-in links, which confirm the address anyway.
+enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
@@ -252,10 +255,9 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# The sign-in email. With enable_confirmations = false (above) new users get the Magic Link
-# template too, so that is the one that matters; "Confirm signup" points at the same file so
-# the emails stay identical if that setting is ever turned on (it is on by default in hosted
-# projects). Paths are relative to the project root.
+# The sign-in email. With enable_confirmations = true (above) a new user's first link uses the
+# "Confirm signup" template and later ones the Magic Link template, so both point at the same
+# file to keep the emails identical. Paths are relative to the project root.
 [auth.email.template.magic_link]
 subject = "Kitchen Table sign-in link"
 content_path = "./supabase/templates/magic_link.html"

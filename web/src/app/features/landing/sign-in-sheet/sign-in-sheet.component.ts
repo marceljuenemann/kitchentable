@@ -38,10 +38,12 @@ export class SignInSheetComponent {
 
     const { email } = this.form.getRawValue();
     try {
+      // Sends a link to any address (creating the account if there is none), so the answer
+      // never says whether the address is already registered.
       await this.auth.requestMagicLink(email!);
       this.sent.set(true);
     } catch {
-      this.errorMessage.set('No user with this Email found');
+      this.errorMessage.set('Something went wrong. Please try again in a minute.');
     } finally {
       this.submitting.set(false);
     }

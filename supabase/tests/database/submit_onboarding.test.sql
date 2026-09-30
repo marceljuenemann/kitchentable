@@ -1,11 +1,13 @@
 begin;
-select plan(13);
+select plan(16);
 
-insert into public.invite_codes (code, max_uses) values ('SUBMIT-TEST', 1);
-
+-- Erin signed up with an invite code, Finn without one.
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, encrypted_password, email_confirmed_at, created_at, updated_at)
-values ('88888888-8888-8888-8888-888888888888', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
-    'erin@example.com', '{"invite_code":"SUBMIT-TEST"}'::jsonb, '', now(), now(), now());
+values
+  ('88888888-8888-8888-8888-888888888888', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+    'erin@example.com', '{"invite_code":"SUBMIT-TEST"}'::jsonb, '', now(), now(), now()),
+  ('99999999-9999-9999-9999-999999999999', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+    'finn@example.com', '{}'::jsonb, '', now(), now(), now());
 
 -- A valid call, with one argument overridden per test below (rolled back with the rest).
 create function public.test_submit(
@@ -59,16 +61,28 @@ select is(
     "id": "88888888-8888-8888-8888-888888888888", "status": "vetting", "name": "Erin",
     "pronouns": "they/them", "tagline": "", "bio": "About Erin", "location": "London",
     "gender": ["Woman"], "sexuality": ["Queer"], "birth_year": 1990, "birth_month": 6,
-    "looking_for": ["solo-poly"], "vetting_answers": {"consent": "yes"},
+    "looking_for": ["solo-poly"],
     "photos": ["aaaaaaaa-0000-0000-0000-000000000001", "aaaaaaaa-0000-0000-0000-000000000002"]
   }'::jsonb,
-  'the profile is created in vetting with the trimmed, submitted values'
+  'the profile is created in vetting with the trimmed, submitted values (and is read back without the vetting answers)'
 );
 
 select throws_ok($$ select public.test_submit() $$, '23505', 'You have already applied.',
   'submitting twice is rejected');
 
+set local request.jwt.claim.sub = '99999999-9999-9999-9999-999999999999';
+select lives_ok($$ select public.test_submit() $$, 'someone who signed up without an invite code can submit');
+
 reset role;
+select is(
+  (select vetting_answers from public.profiles where id = '88888888-8888-8888-8888-888888888888'),
+  '{"consent": "yes", "invite_code": "SUBMIT-TEST"}'::jsonb,
+  'the vetting answers are stored together with the sign-up invite code');
+select is(
+  (select vetting_answers from public.profiles where id = '99999999-9999-9999-9999-999999999999'),
+  '{"consent": "yes"}'::jsonb,
+  'without an invite code, only the answers are stored');
+
 set local role anon;
 select throws_ok(
   $$ select public.submit_onboarding('a', 'b', null, 'c', 'd', '{}', '{}', null, null, '{x}', '{}', '{}') $$,

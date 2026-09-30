@@ -26,6 +26,7 @@ as $$
 declare
   uid uuid := public.require_auth_uid();
   age int;
+  invite_code text;
 begin
   if coalesce(trim(p_name), '') = ''
     or coalesce(trim(p_pronouns), '') = ''
@@ -72,12 +73,21 @@ begin
     raise exception 'Add between 1 and 6 different photos.';
   end if;
 
+  -- The invite code comes from the sign-up metadata, which the user can edit, so it is only a
+  -- hint for the person vetting (and capped in length). Stored with the vetting answers, as
+  -- `invite_code`, and left out if there is none.
+  select left(u.raw_user_meta_data ->> 'invite_code', 100) into invite_code
+  from auth.users u
+  where u.id = uid;
+
   insert into public.profiles (
     id, status, vetting_answers, name, pronouns, tagline, bio, location, gender, sexuality,
     birth_year, birth_month, looking_for, photos
   )
   values (
-    uid, 'vetting', p_vetting_answers, trim(p_name), trim(p_pronouns),
+    uid, 'vetting',
+    p_vetting_answers || jsonb_strip_nulls(jsonb_build_object('invite_code', invite_code)),
+    trim(p_name), trim(p_pronouns),
     trim(coalesce(p_tagline, '')), trim(p_bio), trim(p_location),
     coalesce(p_gender, '{}'), coalesce(p_sexuality, '{}'),
     p_birth_year, p_birth_month, p_looking_for, p_photos

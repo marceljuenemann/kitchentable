@@ -54,9 +54,9 @@ export async function photoObject(
 }
 
 /**
- * Creates a user (consuming a seeded invite code, so the signup trigger still runs) without
- * going through the UI/email, optionally with a profile in the given status, and signs the
- * page in with a generated magic link. The status stands in for the admin/age-verification
+ * Creates a user (with an invite code in the sign-up metadata, as the landing page sends it)
+ * without going through the UI/email, optionally with a profile in the given status, and signs
+ * the page in with a generated magic link. The status stands in for the admin/age-verification
  * steps that happen outside the app.
  */
 export async function signInAs(page: Page, status: ProfileStatus | null): Promise<string> {
@@ -64,7 +64,7 @@ export async function signInAs(page: Page, status: ProfileStatus | null): Promis
   const user = await api('/auth/v1/admin/users', {
     email,
     email_confirm: true,
-    user_metadata: { invite_code: 'E2E-FRESH' },
+    user_metadata: { invite_code: 'E2E-INVITE' },
   });
 
   if (status) {

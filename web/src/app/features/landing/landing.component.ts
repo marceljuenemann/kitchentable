@@ -61,7 +61,7 @@ export class LandingComponent {
       await this.auth.requestMagicLink(this.email(), this.inviteCode);
       this.sent.set(true);
     } catch {
-      this.errorMessage.set('Invalid invite link, could not create profile.');
+      this.errorMessage.set('Something went wrong. Please try again in a minute.');
     } finally {
       this.submitting.set(false);
     }

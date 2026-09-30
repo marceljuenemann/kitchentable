@@ -23,7 +23,8 @@ create type public.profile_status as enum (
 create table public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   status public.profile_status not null default 'vetting',
-  -- Answers to the vetting questions, keyed by question id. Free-form JSON because the
+  -- What the person vetting needs: the answers to the vetting questions, keyed by question id,
+  -- plus `invite_code` (the code the user signed up with, if any). Free-form JSON because the
   -- questions will change and we never filter or search on them.
   vetting_answers jsonb not null default '{}',
   name text not null,
@@ -83,7 +84,8 @@ begin
 end;
 $$;
 
--- The caller's own profile, or null if they haven't onboarded yet.
+-- The caller's own profile, or null if they haven't onboarded yet. Without the vetting answers:
+-- those are for the person vetting, the app has no use for them.
 create or replace function public.get_my_profile()
 returns jsonb
 language sql
@@ -91,7 +93,7 @@ stable
 security definer
 set search_path = public
 as $$
-  select to_jsonb(p)
+  select to_jsonb(p) - 'vetting_answers'
   from public.profiles p
   where p.id = public.require_auth_uid();
 $$;
@@ -101,66 +103,27 @@ from public, anon, authenticated;
 
 grant execute on function public.get_my_profile() to authenticated;
 
--- invite_codes ------------------------------------------------------------
+-- auth: no passwords ------------------------------------------------------
 
-create table public.invite_codes (
-  code text primary key,
-  max_uses int not null default 1,
-  use_count int not null default 0,
-  created_at timestamptz not null default now()
-);
-
--- Deliberately no RLS policies at all: this table is fully inaccessible to
--- anon/authenticated clients. It's only ever touched by handle_new_user(),
--- which runs as the function owner and bypasses RLS.
-alter table public.invite_codes enable row level security;
-
--- auth.users -> invite codes -----------------------------------------------
-
--- Validates and consumes the invite code at signup. Deliberately creates no profile: that
--- only happens once the user completes onboarding (submit_onboarding).
-create or replace function public.handle_new_user()
+-- Sign-in is by emailed link only, but Supabase Auth has no switch to turn passwords off: its
+-- password sign-up endpoint stays callable. Without this, someone could sign up another person's
+-- address with a password of their choosing, wait for that person to join (which confirms the
+-- account), and then sign in to it with the password. So no password is ever stored, and every
+-- password sign-in fails.
+create or replace function public.discard_password()
 returns trigger
 language plpgsql
-security definer
-set search_path = public
+set search_path = ''
 as $$
-declare
-  invite_code text;
-  matched_code public.invite_codes;
 begin
-  invite_code := new.raw_user_meta_data ->> 'invite_code';
-
-  if invite_code is null or invite_code = '' then
-    raise exception 'An invite code is required to apply.';
-  end if;
-
-  -- Lock the row so concurrent signups against the same shared code can't
-  -- both squeeze past the max_uses check.
-  select * into matched_code
-  from public.invite_codes
-  where code = invite_code
-  for update;
-
-  if matched_code is null then
-    raise exception 'Invalid invite code.';
-  end if;
-
-  if matched_code.use_count >= matched_code.max_uses then
-    raise exception 'This invite code has already been used.';
-  end if;
-
-  update public.invite_codes
-  set use_count = use_count + 1
-  where code = invite_code;
-
+  new.encrypted_password := null;
   return new;
 end;
 $$;
 
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function public.handle_new_user();
+create trigger discard_password
+  before insert or update of encrypted_password on auth.users
+  for each row execute function public.discard_password();
 
 -- storage: photos ---------------------------------------------------------
 
