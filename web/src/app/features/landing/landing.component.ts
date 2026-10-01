@@ -68,6 +68,11 @@ export class LandingComponent {
   }
 
   openSignIn() {
-    this.bottomSheet.open(SignInSheetComponent, { panelClass: 'kt-bottom-sheet' });
+    this.bottomSheet.open(SignInSheetComponent, {
+      panelClass: 'kt-bottom-sheet',
+      // Not the email field: focusing it while the sheet is still sliding in opens the phone
+      // keyboard over the sheet, hiding the field. Tapping it scrolls it into view instead.
+      autoFocus: 'dialog',
+    });
   }
 }
