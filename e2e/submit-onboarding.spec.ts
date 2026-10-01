@@ -1,6 +1,10 @@
 import { expect, Page, test } from '@playwright/test';
 import { profilesNamed } from './support/admin';
+import { getLatestEmail } from './support/mailpit';
 import { choosePhoto, dialog, goToPhotosStep } from './support/onboarding';
+
+/** ADMIN_EMAIL in supabase/functions/.env. */
+const ADMIN_EMAIL = 'admin@kitchentable.dating';
 
 const draftKeys = (page: Page) =>
   page.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('kt.user.')));
@@ -29,10 +33,17 @@ test('submitting the application creates the profile and moves on to "being vett
   const name = `Sam ${Date.now()}`;
   await fillInEverything(page, name);
 
+  const submittedAt = new Date();
   await page.getByRole('button', { name: 'Submit application' }).click();
 
   // The shell reloads the profile and shows the screen for the new `vetting` status.
   await expect(page.getByText('Thanks for applying')).toBeVisible();
+
+  // The admin gets an email with a link to review it, and no personal data.
+  const email = await getLatestEmail(ADMIN_EMAIL, 10_000, submittedAt);
+  expect(email.subject).toBe('New application to review');
+  expect(email.text).toContain('http://localhost:4200/admin/vetting');
+  expect(email.text).not.toContain(name);
 
   const [profile] = await profilesNamed(name);
   expect(profile).toMatchObject({

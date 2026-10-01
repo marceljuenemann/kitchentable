@@ -72,9 +72,27 @@ Every push to `main` deploys automatically once `check` and `e2e` pass (the `dep
 
 1. `supabase db push` — applies new migrations.
 2. `supabase config push` — auth settings and email templates from `supabase/config.toml`, with the `[remotes.staging]` block overriding the local-only values (URLs, rate limits, Mailtrap SMTP instead of Mailpit). Auth settings changed in the dashboard get overwritten here, so change them in `config.toml` instead.
-3. `ng build --configuration staging` (`environment.staging.ts`), deployed with `wrangler pages deploy`.
+3. `supabase functions deploy` — the edge functions in `supabase/functions/` (settings below).
+4. `ng build --configuration staging` (`environment.staging.ts`), deployed with `wrangler pages deploy`.
 
 Secrets live in the `staging` GitHub environment: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_AUTH_SMTP_PASS` (Mailtrap API token), `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
+
+The edge functions' settings aren't in GitHub: they're set once by hand in the Supabase project and kept across deploys. For the admin notification on new applications (see "Admin notification" in [docs/database.md](docs/database.md)), pick a random shared secret (`openssl rand -hex 32`) and:
+
+```bash
+npx supabase secrets set --project-ref ceqkaciklgqzfwycrrfx \
+  NOTIFY_ADMIN_SECRET=<secret> \
+  ADMIN_EMAIL=admin@kitchentable.dating \
+  SITE_URL=https://staging.kitchentable.dating \
+  MAILTRAP_TOKEN=<mailtrap token>
+```
+
+Then in the Studio SQL editor:
+
+```sql
+select vault.create_secret('https://ceqkaciklgqzfwycrrfx.supabase.co/functions/v1/notify-admin', 'notify_admin_url');
+select vault.create_secret('<secret>', 'notify_admin_secret');
+```
 
 To push by hand instead (e.g. the first time), from the repo root:
 

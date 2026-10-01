@@ -13,7 +13,6 @@ export const GENDER_OPTIONS = [
   'Non-binary',
   'Man',
   'Woman',
-  'Trans',
   'Genderqueer',
   'Genderfluid',
   'Agender',

@@ -4,33 +4,42 @@ interface MailpitMessageSummary {
   ID: string;
   Subject: string;
   To: { Address: string }[];
+  Created: string;
 }
 
 interface MailpitMessage {
   HTML: string;
+  Text: string;
 }
 
 export interface Email {
   subject: string;
   html: string;
+  text: string;
 }
 
 /**
  * Polls Mailpit (Supabase's local dev SMTP capture, see README.md) for the most recent
- * message sent to `email`.
+ * message sent to `email`, optionally only one that arrived after `since`.
  */
-export async function getLatestEmail(email: string, timeoutMs = 10_000): Promise<Email> {
+export async function getLatestEmail(
+  email: string,
+  timeoutMs = 10_000,
+  since?: Date,
+): Promise<Email> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const list = (await (await fetch(`${MAILPIT_URL}/api/v1/messages`)).json()) as {
       messages: MailpitMessageSummary[];
     };
-    const match = list.messages.find((m) => m.To?.some((to) => to.Address === email));
+    const match = list.messages.find(
+      (m) => m.To?.some((to) => to.Address === email) && (!since || new Date(m.Created) >= since),
+    );
     if (match) {
       const full = (await (
         await fetch(`${MAILPIT_URL}/api/v1/message/${match.ID}`)
       ).json()) as MailpitMessage;
-      return { subject: match.Subject, html: full.HTML };
+      return { subject: match.Subject, html: full.HTML, text: full.Text };
     }
     await new Promise((resolve) => setTimeout(resolve, 500));
   }

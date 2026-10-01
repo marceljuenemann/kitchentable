@@ -25,6 +25,15 @@ Product analytics stay in our own database: no third-party service and nothing s
 - **Objections** (GDPR Art. 21): there's no opt-out setting yet, so delete the user's rows by hand.
 - **Reading the data:** the Studio SQL editor (service role). There are no views yet. Write them when there's an analysis to do.
 
+## Admin notification
+
+When a profile row is inserted in `vetting` (that is, an application was submitted), the `notify_admin_of_application` trigger uses `pg_net` to POST to the `notify-admin` edge function. The function emails `ADMIN_EMAIL` a link to `/admin/vetting`, and nothing else: the request has no body and the email holds no personal data.
+
+- **No email for failed submissions:** `pg_net` sends the request only after the transaction commits, so a rolled-back submission sends nothing. It retries nothing either: if sending fails, the edge function's logs show it, and the application is saved regardless.
+- **Per-environment settings:** the function's URL and a shared secret are the vault secrets `notify_admin_url` and `notify_admin_secret`. If either is missing, the trigger logs a warning and skips the request. The function compares the secret against its `NOTIFY_ADMIN_SECRET`, because it runs with `verify_jwt = false`.
+- **Where the settings live:** `supabase/seed.sql` and `supabase/functions/.env` locally; on staging they're set by hand, see "Staging" in README.md.
+- **Locally,** the function sends to Mailpit; elsewhere, through Mailtrap's sending API.
+
 ## Signup and invite codes
 
 Signing up is open: requesting a sign-in link for an address without an account creates one, and nothing in the database validates invite codes. This is deliberate. Sign-up and sign-in must answer the same for every email address, otherwise the forms reveal who is a member.

@@ -36,7 +36,8 @@ select throws_ok(
 
 reset role;
 select results_eq(
-  $$ select user_id, name, props from public.analytics_events order by id $$,
+  $$ select user_id, name, props from public.analytics_events
+     where user_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' order by id $$,
   $$ values
     ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid, 'onboarding_step_viewed', '{"step": 2}'::jsonb),
     ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid, 'onboarding_step_viewed', null::jsonb) $$,
@@ -45,10 +46,10 @@ select results_eq(
 
 -- Run the scheduled purge: events older than 3 months go, the rest stay.
 update public.analytics_events set created_at = now() - interval '3 months 1 day'
-where props is null;
+where user_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' and props is null;
 do $$ begin execute (select command from cron.job where jobname = 'purge-analytics-events'); end $$;
 select results_eq(
-  $$ select props from public.analytics_events $$,
+  $$ select props from public.analytics_events where user_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' $$,
   $$ values ('{"step": 2}'::jsonb) $$,
   'the daily purge deletes events older than 3 months'
 );
