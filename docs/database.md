@@ -12,6 +12,19 @@ Postgres via Supabase. The whole schema lives in `supabase/migrations/`, and is 
   `name`, `pronouns`, `bio` and `location` are `not null` (they are required, and rows only come from `submit_onboarding`); `tagline` is `not null` too but may be an empty string. Birth month and year are the only nullable columns, since they are optional.
   Answers to the vetting questions are stored in the `vetting_answers` jsonb column (keyed by question id) rather than one column per question, since the questions will change and are never filtered on. The same object holds `invite_code`, the code the user signed up with, if there was one (see below).
   Photos are the ordered `photos uuid[]` column (first = main photo, at most 6, enforced by a check), not a separate table; the files themselves live in the `photos` storage bucket. See [photos.md](photos.md).
+- `analytics_events`: first-party product analytics (see below). No client access, the same as `profiles`.
+
+## Analytics
+
+Product analytics stay in our own database: no third-party service and nothing stored in the browser for it. Events are recorded on the server against the signed-in user's session, so no cookie consent is needed. The legal basis is legitimate interests (GDPR).
+
+- **Use existing data first.** Sign-ups (`auth.users.created_at`), clicked links (`email_confirmed_at`, `last_sign_in_at`) and profile statuses are already in the database. Events are only for things that leave no other trace, such as onboarding progress, because the draft stays in the browser until it is submitted.
+- **Never record** other people's ids (e.g. "viewed profile X"), free text or profile content. `props` is for small facts like a step number.
+- **Each event name is allowlisted** in `track_event`, so adding an event needs a migration. Current events: `onboarding_step_viewed` (`{"step": n}`, sent each time a step is shown, including after a reload).
+- **Retention:** the `purge-analytics-events` pg_cron job deletes events older than 3 months every night, and deleting an account deletes its events.
+- **Objections** (GDPR Art. 21): there's no opt-out setting yet, so delete the user's rows by hand.
+- **Reading the data:** the Studio SQL editor (service role). There are no views yet. Write them when there's an analysis to do.
+
 ## Signup and invite codes
 
 Signing up is open: requesting a sign-in link for an address without an account creates one, and nothing in the database validates invite codes. This is deliberate. Sign-up and sign-in must answer the same for every email address, otherwise the forms reveal who is a member.
@@ -61,4 +74,5 @@ Anything that depends on status (search visibility, who may message) should deri
 ## Functions callable by signed-in users
 
 - `get_my_profile()` → the caller's profile (including the `photos` id array, but without `vetting_answers`, which only the person vetting needs), or `null` if there is no row. Drives which screen the app shows.
+- `track_event(p_name, p_props)` → records an analytics event for the caller. Rejects unknown names and `p_props` that isn't a JSON object of at most 500 characters. See [Analytics](#analytics).
 - `submit_onboarding(p_name, p_pronouns, p_tagline, p_bio, p_location, p_gender, p_sexuality, p_birth_year, p_birth_month, p_looking_for, p_photos, p_vetting_answers)` → creates the caller's profile in status `vetting` (the only way a row gets created), with the invite code from their sign-up metadata added to the vetting answers, or raises `unique_violation` (`23505`) if they already have one.

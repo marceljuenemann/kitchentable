@@ -2,6 +2,7 @@ import { Component, computed, effect, HostListener, inject } from '@angular/core
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { AnalyticsService } from '../../core/analytics.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
 import { ONBOARDING_STEPS, OnboardingDraftStore } from './onboarding-draft.store';
@@ -31,6 +32,7 @@ import { VettingStepComponent } from './steps/vetting-step.component';
 })
 export class OnboardingComponent {
   private readonly store = inject(OnboardingDraftStore);
+  private readonly analytics = inject(AnalyticsService);
 
   readonly draft = this.store.draft;
   readonly step = computed(() => this.draft().step);
@@ -43,6 +45,9 @@ export class OnboardingComponent {
       this.step();
       window.scrollTo(0, 0);
     });
+
+    // To see where people drop off in onboarding.
+    effect(() => this.analytics.track('onboarding_step_viewed', { step: this.step() }));
   }
 
   back() {
