@@ -1,6 +1,8 @@
 {
   "name": "kitchentable",
   "private": true,
+  "license": "AGPL-3.0-only",
+  "author": "HTTP 403 Limited",
   "description": "An open-source, non-profit dating app, starting with a focus on the ENM (ethically non-monogamous) community in London.",
   "scripts": {
     "supabase": "supabase",

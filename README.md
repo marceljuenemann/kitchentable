@@ -87,3 +87,13 @@ SUPABASE_AUTH_SMTP_PASS=<mailtrap token> npx supabase config push
 Note `config push` applies without waiting for confirmation when stdin isn't a terminal, so don't pipe into it expecting a dry run.
 
 See [TODO.md](TODO.md) for remaining gaps.
+
+## License
+
+Copyright (C) 2026 HTTP 403 Limited
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the [GNU Affero General Public License](LICENSE) for more details.
+
+Bundled third-party code and fonts keep their own licenses (see each package under `node_modules`); the fonts are under the SIL Open Font License and Apache License 2.0.

@@ -31,6 +31,7 @@ Not built yet: age verification, browse, connections/intros, messaging (planned 
 
 - **Look and feel is iterated with the user in small steps.** Match the existing look (brand fonts, colours, chips, sheets) and keep styles consistent across screens. Put repeated styling (labels, placeholders, chips, textareas) in `web/src/styles.scss` as global styles instead of per-component copies.
 - **Pickers are bottom sheets** (`MatBottomSheet`, panelClass `kt-bottom-sheet`), not dialogs. Use `autoFocus: 'dialog'` so no button is focused on open.
+- **No third-party requests for assets:** fonts and the icon font are self-hosted from npm packages (`@fontsource/*`, `material-icons`), listed under `styles` in `web/angular.json`. Don't load anything from Google Fonts or other CDNs: it sends visitors' IP addresses to them.
 - **Form fields:** `floatLabel="always"` with a visible placeholder. Colours follow the theme tokens (`--mat-sys-*`, `--kt-*`) rather than hard-coded values.
 - **State and storage:** signals for component state; the current profile comes from `ProfileService.state$` (rxjs). Anything user-scoped that lives in the browser goes through `UserStorage`. Don't add unrelated cross-service dependencies (avoid circular injection; prefer an explicit call, like `onSignOut()`).
 - **Prefer a small library for hard gestures** (for example `@panzoom/panzoom`) and the Angular CDK for drag and drop, over hand-rolled code.

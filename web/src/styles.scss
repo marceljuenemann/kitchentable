@@ -14,7 +14,7 @@ html {
         tertiary: brand-theme.$tertiary-palette,
       ),
       typography: (
-        plain-family: '"Nunito Sans", system-ui, sans-serif',
+        plain-family: '"Nunito Sans Variable", system-ui, sans-serif',
         brand-family: '"Baloo Bhaijaan 2", "Trebuchet MS", sans-serif',
       ),
       density: 0,
@@ -75,7 +75,9 @@ body {
   --kt-shadow-lift:
     0 2px 6px oklch(0.3 0.12 300 / 0.1), 0 22px 46px -20px oklch(0.3 0.12 300 / 0.3);
   --kt-font-display: 'Baloo Bhaijaan 2', 'Trebuchet MS', sans-serif;
-  --kt-font-sans: 'Nunito Sans', system-ui, sans-serif;
+  // Self-hosted (Fontsource packages, see the "styles" list in angular.json), so visitors' IP
+  // addresses don't go to Google. The variable Nunito Sans is named differently.
+  --kt-font-sans: 'Nunito Sans Variable', system-ui, sans-serif;
   --kt-page-width: 430px;
 }
 

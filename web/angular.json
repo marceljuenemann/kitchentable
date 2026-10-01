@@ -31,7 +31,16 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"]
+            "styles": [
+              "@fontsource/baloo-bhaijaan-2/500.css",
+              "@fontsource/baloo-bhaijaan-2/600.css",
+              "@fontsource/baloo-bhaijaan-2/700.css",
+              "@fontsource/baloo-bhaijaan-2/800.css",
+              "@fontsource-variable/nunito-sans/opsz.css",
+              "@fontsource-variable/nunito-sans/opsz-italic.css",
+              "material-icons/iconfont/filled.css",
+              "src/styles.scss"
+            ]
           },
           "configurations": {
             "production": {

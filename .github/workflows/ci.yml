@@ -75,10 +75,10 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Start Supabase (runs migrations + seed.sql)
+      - name: Start Supabase (runs migrations)
         run: npx supabase start
 
-      - name: Reset database for a clean, deterministic seeded state
+      - name: Reset database for a clean, deterministic state
         run: npx supabase db reset
 
       # Restricted to our own schema: the default also lints pgTAP's `extensions` schema,
