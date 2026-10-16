@@ -24,7 +24,7 @@ These Terms of Use set out the agreement between you and us for your use of Kitc
 - (c) **Your data won't be sold or used for advertising.** We will not sell your personal data, and we will not use it, or allow anyone else to use it, to target or personalise advertising.
 - (d) **We will work closely with the community.** We will develop Community Guidelines together with Members, and we will ask Members for their views before making significant changes to Kitchen Table, including major new features.
 
-2.2 **Non-profit intention.** If Kitchen Table grows significantly, we intend to transfer it to a non-profit organisation, such as a Community Interest Company, that is bound by the commitments in section 2.1. If we do so, we will notify you in advance, give you the opportunity to close your account first.
+2.2 **Non-profit intention.** If Kitchen Table grows significantly, we intend to transfer it to a non-profit organisation, such as a Community Interest Company, that is bound by the commitments in section 2.1. If we do so, we will notify you in advance and give you the opportunity to close your account first.
 
 2.3 **Transfers.** We may transfer this agreement to another organisation, under section 2.2 or otherwise, only if that organisation is bound by the commitments in section 2.1. We will notify you in advance of any transfer.
 
@@ -32,7 +32,7 @@ These Terms of Use set out the agreement between you and us for your use of Kitc
 
 In these Terms:
 
-- <mark>"</mark>**<mark>Kitchen Table</mark>**<mark>" or the "</mark>**<mark>Service</mark>**<mark>" means the Kitchen Table website, app and related services, including profiles, introductions, messaging and events, as they exist from time to time;</mark>
+- "**Kitchen Table**" or the "**Service**" means the Kitchen Table website, app and related services, including profiles, introductions, messaging and events, as they exist from time to time;
 - "**Member**" means a person whose application has been approved and who holds an active account;
 - "**Applicant**" means a person who has created an account but whose application has not yet been approved;
 - "**Content**" means anything a user adds to Kitchen Table, including profile information, text, photos and messages;
