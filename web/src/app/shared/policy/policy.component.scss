@@ -1,0 +1,81 @@
+app-policy {
+  display: block;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--kt-ink);
+  overflow-wrap: break-word;
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--kt-font-display);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--kt-violet);
+    text-wrap: balance;
+  }
+
+  h1 {
+    margin: 32px 0 0;
+    font-size: 28px;
+  }
+
+  // The version line under the title.
+  h1 + p {
+    margin-top: 6px;
+    color: var(--kt-muted);
+  }
+
+  h2 {
+    margin: 32px 0 0;
+    font-size: 20px;
+  }
+
+  h3 {
+    margin: 24px 0 0;
+    font-size: 17px;
+  }
+
+  p,
+  ul,
+  ol {
+    margin: 12px 0 0;
+  }
+
+  ul,
+  ol {
+    padding-left: 20px;
+  }
+
+  li + li {
+    margin-top: 6px;
+  }
+
+  a {
+    color: var(--kt-violet-soft);
+  }
+
+  // Too wide for a phone, so the table scrolls sideways instead of squashing its columns.
+  table {
+    display: block;
+    overflow-x: auto;
+    margin-top: 16px;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    line-height: 1.45;
+  }
+
+  th,
+  td {
+    min-width: 10em;
+    padding: 8px 12px 8px 0;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--kt-outline-soft);
+  }
+
+  th {
+    font-weight: 800;
+    color: var(--kt-muted);
+  }
+}

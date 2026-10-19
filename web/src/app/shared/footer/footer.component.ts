@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../core/auth/auth.service';
 import { UserStorage } from '../../core/user-storage';
@@ -8,7 +8,7 @@ import { UserStorage } from '../../core/user-storage';
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [MatButtonModule],
+  imports: [MatButtonModule, RouterLink],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.scss',
 })

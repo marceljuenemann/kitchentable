@@ -21,5 +21,18 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/shell/shell.component').then((m) => m.ShellComponent),
   },
+  // Legal documents, public whether signed in or not.
+  {
+    path: 'about/terms',
+    data: { policy: 'terms' },
+    loadComponent: () =>
+      import('./features/about/policy-page.component').then((m) => m.PolicyPageComponent),
+  },
+  {
+    path: 'about/privacy',
+    data: { policy: 'privacy' },
+    loadComponent: () =>
+      import('./features/about/policy-page.component').then((m) => m.PolicyPageComponent),
+  },
   { path: '**', redirectTo: '' },
 ];
