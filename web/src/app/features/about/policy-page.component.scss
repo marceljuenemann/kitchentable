@@ -1,0 +1,13 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: var(--kt-bg);
+  color: var(--kt-ink);
+  font-family: var(--kt-font-sans);
+}
+
+.page {
+  max-width: var(--kt-page-width);
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
