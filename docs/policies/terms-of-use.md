@@ -131,7 +131,7 @@ In these Terms:
 - (b) they are unhappy with how we handled a report; or
 - (c) they believe we have not complied with these Terms or with our duties under the Online Safety Act 2023.
 
-9.6 We will acknowledge each complaint within 5 working days and tell the complainant how long we expect to take to resolve it. We will review the complaint and tell the complainant the outcome and any action taken. If we find that we acted wrongly, we will reverse the decision where possible, including restoring Content and lifting restrictions on an account. We keep a record of complaints and how we handled them. \[CHECK: confirm against the complaints measures in Ofcom's Illegal Content Codes of Practice for user-to-user services.\]
+9.6 We will acknowledge each complaint within 5 working days and tell the complainant how long we expect to take to resolve it. We will review the complaint and tell the complainant the outcome and any action taken. If we find that we acted wrongly, we will reverse the decision where possible, including restoring Content and lifting restrictions on an account. We keep a record of complaints and how we handled them.
 
 ## 10. Our intellectual property
 
