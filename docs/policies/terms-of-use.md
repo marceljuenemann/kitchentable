@@ -165,7 +165,7 @@ In these Terms:
 
 13.2 Subject to section 13.1, we are not liable for:
 
-- (a) the conduct of any Member or other person, on or off Kitchen Table;
+- (a) the conduct of any Member or other person, on or off Kitchen Table, except to the extent caused by our breach of these Terms or our negligence;
 - (b) any loss or damage that was not reasonably foreseeable when you accepted these Terms;
 - (c) any loss or damage caused by events outside our reasonable control; or
 - (d) any business loss. Kitchen Table is for personal, non-commercial use only.

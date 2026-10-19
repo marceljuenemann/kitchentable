@@ -70,7 +70,7 @@ This Privacy Policy sets out how HTTP 403 LIMITED collects, uses, shares and pro
 
 5.2 Your consent covers the use of your special category data to operate and improve Kitchen Table, including reviewing your application, displaying your profile to Members and facilitating connections with other Members.
 
-5.3 You may withdraw your consent at any time. Because the Service cannot be provided without this data, withdrawing consent requires your account to be closed. To withdraw consent, email **privacy@kitchentable.dating** from the email address associated with your account, and we will delete your data in accordance with section 9. Alternatively, you may ask us to hide your profile from other Members without closing your account.
+5.3 You may withdraw your consent at any time. Because the Service cannot be provided without this data, withdrawing consent requires your account to be closed. To withdraw consent, email **privacy@kitchentable.dating** from the email address associated with your account, and we will delete your data in accordance with section 9. You may also edit or remove any profile information at any time without closing your account, or ask us to hide your profile from other Members.
 
 5.4 Withdrawal of consent does not affect the lawfulness of processing carried out before it was withdrawn.
 
