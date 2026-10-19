@@ -128,7 +128,7 @@ This Privacy Policy sets out how HTTP 403 LIMITED collects, uses, shares and pro
 - (b) private photo storage, accessible only through time-limited links;
 - (c) server-side access controls preventing Members from directly accessing one another's data;
 - (d) passwordless authentication by email link; and
-- (e) restricting access to personal data to those who require it
+- (e) restricting access to personal data to those who require it.
 
 10.2 Where a personal data breach is likely to result in a risk to individuals' rights and freedoms, we will notify the ICO within 72 hours of becoming aware of it. Where the risk is high, we will also notify the individuals affected without undue delay.
 
@@ -158,15 +158,16 @@ This Privacy Policy sets out how HTTP 403 LIMITED collects, uses, shares and pro
 
 ## 13. Cookies and local storage
 
-13.1 Kitchen Table does not use cookies. The Service stores the following on your device, using your browser's local storage and cache:
+13.1 We use only cookies and similar technologies that are strictly necessary to provide the Service. We do not use cookies for advertising, analytics or tracking. The Service stores the following on your device, using cookies, your browser's local storage and its cache:
 
 - (a) your sign-in session, so that you remain signed in;
-- (b) your unfinished application, so that your answers are retained if you leave the page; and
-- (c) copies of content you have already loaded, such as profiles, photos and, where available, your messages, so that the Service loads faster and remains usable without an internet connection.
+- (b) your unfinished application, so that your answers are retained if you leave the page;
+- (c) copies of content you have already loaded, such as profiles, photos and, where available, your messages, so that the Service loads faster and remains usable without an internet connection; and
+- (d) security cookies set by our hosting provider, Cloudflare, to protect the Service against automated abuse and attacks, for example to record that your browser has passed a security check.
 
 13.2 These items are strictly necessary to provide the Service you have requested, and consent is therefore not required. Usage statistics do not store any data on your device.
 
-13.3 Data stored on your device remains there until you sign out, when the Service deletes it. Anyone with access to your unlocked device may be able to see it, so you should sign out after using a shared device and protect your device with a passcode.
+13.3 Data in items (a) to (c) remains on your device until you sign out, when the Service deletes it. Security cookies expire automatically, typically within 30 minutes to a day. Anyone with access to your unlocked device may be able to see this data, so you should sign out after using a shared device and protect your device with a passcode.
 
 ## 14. Automated processing
 
