@@ -22,7 +22,6 @@ test('completes the full sign-up flow with an invite code', async ({ page }) => 
 
   await page.goto('/?invite=ANY-CODE');
   await page.getByLabel('Email').fill(email);
-  await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Sign up' }).click();
 
   await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible();

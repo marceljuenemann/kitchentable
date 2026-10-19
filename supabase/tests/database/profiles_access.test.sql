@@ -8,6 +8,9 @@ values
   ('44444444-4444-4444-4444-444444444444', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
     'bob@example.com', '{"invite_code":"ACCESS-TEST"}'::jsonb, '', now(), now(), now());
 
+insert into public.terms_acceptances (user_id, version)
+values ('44444444-4444-4444-4444-444444444444', 1);
+
 insert into public.profiles (id, name, pronouns, bio, location)
 values ('44444444-4444-4444-4444-444444444444', 'Bob', 'he/him', 'About Bob', 'London');
 

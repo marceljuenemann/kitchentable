@@ -1,0 +1,38 @@
+<app-header />
+
+<main>
+  <h1>Before we start (TODO: Update)</h1>
+  <p class="subtitle">
+    Kitchen Table is built on trust. Please read our Terms of Use and Privacy Policy, and agree to
+    them to continue.
+  </p>
+
+  <mat-checkbox [checked]="termsAgreed()" (change)="termsAgreed.set($event.checked)">
+    I agree to the
+    <a href="/about/terms" (click)="openPolicy($event, 'terms')">Terms of Use</a>.
+  </mat-checkbox>
+
+  <mat-checkbox [checked]="consentGiven()" (change)="consentGiven.set($event.checked)">
+    I consent to Kitchen Table using what I share about my gender, sexuality, relationships and sex
+    life to run and improve Kitchen Table, including reviewing my application, showing my profile to
+    members and connecting me with other members, as described in the
+    <a href="/about/privacy" (click)="openPolicy($event, 'privacy')">Privacy Policy</a>. I can
+    withdraw my consent at any time.
+  </mat-checkbox>
+
+  @if (failed()) {
+    <p class="error" role="alert">We couldn't save this. Check your connection and try again.</p>
+  }
+
+  <button
+    mat-flat-button
+    class="continue"
+    type="button"
+    [disabled]="!canContinue()"
+    (click)="continue()"
+  >
+    {{ submitting() ? 'Saving…' : 'Continue' }}
+  </button>
+</main>
+
+<app-footer />

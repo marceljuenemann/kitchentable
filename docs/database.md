@@ -3,7 +3,9 @@
 Postgres via Supabase. The whole schema lives in `supabase/migrations/`, and is covered by pgTAP tests in `supabase/tests/database/`. **Update this file with any schema change.**## Access rules
 
 - **Clients never touch the `profiles` table directly.** All privileges are revoked from `anon` and `authenticated`, RLS is on with no policies (a backstop), and every read/write goes through a `security definer` function that checks `auth.uid()`. This keeps the flows and state changes in one auditable place instead of spread across RLS policies. Functions are added as the features that need them are built.
-- The one RLS exception is the `photos` storage bucket: owner-only (`<user id>/<photo id>/...`), because uploads go straight from the browser. Sizes, limits and privacy rules are in [photos.md](photos.md).
+- RLS exceptions, where the rules are simple enough for policies:
+  - the `photos` storage bucket: owner-only (`<user id>/<photo id>/...`), because uploads go straight from the browser. Sizes, limits and privacy rules are in [photos.md](photos.md).
+  - `terms_acceptances`: users read their own rows and insert their own, through the REST API (see [Terms acceptance](#terms-acceptance)).
 - The `service_role` has full table access (admin tooling, webhooks, e2e fixtures).
 
 ## Tables
@@ -13,6 +15,17 @@ Postgres via Supabase. The whole schema lives in `supabase/migrations/`, and is 
   Answers to the vetting questions are stored in the `vetting_answers` jsonb column (keyed by question id) rather than one column per question, since the questions will change and are never filtered on. The same object holds `invite_code`, the code the user signed up with, if there was one (see below).
   Photos are the ordered `photos uuid[]` column (first = main photo, at most 6, enforced by a check), not a separate table; the files themselves live in the `photos` storage bucket. See [photos.md](photos.md).
 - `analytics_events`: first-party product analytics (see below). No client access, the same as `profiles`.
+- `terms_acceptances`: who accepted which version of the terms, and when (see below). Clients use it directly, under RLS.
+
+## Terms acceptance
+
+Before anything else, a signed-in user accepts the Terms of Use and gives the explicit consent the Privacy Policy asks for (section 5, for special category data). Both are on one screen, as separate checkboxes, after the email address is confirmed. One row in `terms_acceptances` records both.
+
+- **Versions** are integers, raised only for changes everyone needs to accept again, separately from the version printed on each document. The current one is `TERMS_VERSION` in `profile.service.ts`. Rows are keyed by `(user_id, version)`, so accepting a new version keeps the earlier record.
+- **Client access** is RLS on the table, without procedures: `select` of the user's own rows, and `insert` of the `version` column only. `user_id` defaults to `auth.uid()` and `accepted_at` to `now()`, so the user and the time always come from the server. There is no `update` or `delete`. Accepting the same version again fails as a duplicate (`23505`), which the app treats as done, keeping the first time.
+- **Kept until the account is deleted,** and deleted with it: this is the consent record the Privacy Policy describes.
+- **Enforced in the database:** the `profiles_require_terms_accepted` trigger refuses any profile insert (from `submit_onboarding`, Studio or a fixture) for a user without an acceptance of any version, so a profile always implies accepted terms.
+- **The app checks only users without a profile** (a row with `version >= TERMS_VERSION`, after `get_my_profile` returns null), because of the trigger above. Once there is a version 2, users with a profile need checking too.
 
 ## Analytics
 
@@ -51,7 +64,8 @@ Sign-in is by emailed link only, but Supabase Auth cannot switch passwords off, 
 
 | Status      | Meaning                                                            | Client sees            |
 | ----------- | ------------------------------------------------------------------ | ---------------------- |
-| _(no row)_  | signed up, onboarding not submitted                                | onboarding             |
+| _(no row)_  | signed up, terms not accepted                                      | terms screen           |
+| _(no row)_  | terms accepted, onboarding not submitted                           | onboarding             |
 | `vetting`   | submitted, an admin is reviewing                                   | "being vetted" message |
 | `approved`  | admin approved, age verification pending                           | age verification       |
 | `active`    | verified and live                                                  | main app               |
@@ -84,4 +98,4 @@ Anything that depends on status (search visibility, who may message) should deri
 
 - `get_my_profile()` → the caller's profile (including the `photos` id array, but without `vetting_answers`, which only the person vetting needs), or `null` if there is no row. Drives which screen the app shows.
 - `track_event(p_name, p_props)` → records an analytics event for the caller. Rejects unknown names and `p_props` that isn't a JSON object of at most 500 characters. See [Analytics](#analytics).
-- `submit_onboarding(p_name, p_pronouns, p_tagline, p_bio, p_location, p_gender, p_sexuality, p_birth_year, p_birth_month, p_looking_for, p_photos, p_vetting_answers)` → creates the caller's profile in status `vetting` (the only way a row gets created), with the invite code from their sign-up metadata added to the vetting answers, or raises `unique_violation` (`23505`) if they already have one.
+- `submit_onboarding(p_name, p_pronouns, p_tagline, p_bio, p_location, p_gender, p_sexuality, p_birth_year, p_birth_month, p_looking_for, p_photos, p_vetting_answers)` → creates the caller's profile in status `vetting` (the only way a row gets created; it needs accepted terms), with the invite code from their sign-up metadata added to the vetting answers, or raises `unique_violation` (`23505`) if they already have one.

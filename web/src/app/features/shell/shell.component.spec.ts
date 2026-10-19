@@ -25,6 +25,12 @@ describe('ShellComponent', () => {
     expect(createShell().view()).toBe('loading');
   });
 
+  it('asks a user who has not accepted the terms to accept them', () => {
+    state$.next({ kind: 'needs-terms' });
+
+    expect(createShell().view()).toBe('needs-terms');
+  });
+
   it('shows onboarding to a user without a profile', () => {
     state$.next({ kind: 'none' });
 

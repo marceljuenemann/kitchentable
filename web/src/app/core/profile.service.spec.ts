@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
 import { AuthService } from './auth/auth.service';
 import { NewProfile, Profile } from './profile.model';
-import { ProfileService, ProfileState } from './profile.service';
+import { ProfileService, ProfileState, TERMS_VERSION } from './profile.service';
 import { SupabaseService } from './supabase.service';
 
 const PROFILE: Profile = {
@@ -36,10 +36,36 @@ const NEW_PROFILE: NewProfile = {
   vetting_answers: { consent: 'a', guidelines: 'b' },
 };
 
+interface PostgrestError {
+  code: string;
+  message: string;
+}
+
 describe('ProfileService', () => {
   let userId$: BehaviorSubject<string | null>;
   let rpc: jasmine.Spy;
   let service: ProfileService;
+  /** The `terms_acceptances` table as the user sees it: the versions they have accepted. */
+  let acceptedVersions: number[];
+  /** What inserting into `terms_acceptances` fails with, if anything. */
+  let insertError: PostgrestError | null;
+  let insert: jasmine.Spy;
+
+  /** Just the queries ProfileService makes on `terms_acceptances`. */
+  const from = (table: string) => {
+    expect(table).toBe('terms_acceptances');
+    return {
+      insert,
+      select: () => ({
+        gte: (_column: string, min: number) => ({
+          limit: async () => ({
+            data: acceptedVersions.filter((v) => v >= min).map((version) => ({ version })),
+            error: null,
+          }),
+        }),
+      }),
+    };
+  };
 
   /** The next state once the profile has been fetched (skips the loading state). */
   const settled = () =>
@@ -48,10 +74,16 @@ describe('ProfileService', () => {
   beforeEach(() => {
     userId$ = new BehaviorSubject<string | null>('user-1');
     rpc = jasmine.createSpy('rpc').and.resolveTo({ data: PROFILE, error: null });
+    acceptedVersions = [TERMS_VERSION];
+    insertError = null;
+    insert = jasmine.createSpy('insert').and.callFake(async (row: { version: number }) => {
+      if (!insertError) acceptedVersions.push(row.version);
+      return { error: insertError };
+    });
     TestBed.configureTestingModule({
       providers: [
         { provide: AuthService, useValue: { userId$ } },
-        { provide: SupabaseService, useValue: { client: { rpc } } },
+        { provide: SupabaseService, useValue: { client: { rpc, from } } },
       ],
     });
     service = TestBed.inject(ProfileService);
@@ -70,10 +102,17 @@ describe('ProfileService', () => {
       expect(rpc).toHaveBeenCalledOnceWith('get_my_profile');
     });
 
-    it('is none when the user has no profile row yet', async () => {
+    it('is none when the user has accepted the terms but has no profile row yet', async () => {
       rpc.and.resolveTo({ data: null, error: null });
 
       expect(await settled()).toEqual({ kind: 'none' });
+    });
+
+    it('is needs-terms when the user has neither accepted the terms nor a profile', async () => {
+      rpc.and.resolveTo({ data: null, error: null });
+      acceptedVersions = [];
+
+      expect(await settled()).toEqual({ kind: 'needs-terms' });
     });
 
     it('is error when the fetch fails', async () => {
@@ -140,9 +179,7 @@ describe('ProfileService', () => {
       await settled();
       expect(kinds).toEqual(['loading', 'none']);
 
-      rpc.and.callFake(async (name: string) =>
-        name === 'submit_onboarding' ? { data: null, error: null } : { data: PROFILE, error: null },
-      );
+      rpc.and.resolveTo({ data: PROFILE, error: null });
       await service.submitOnboarding(NEW_PROFILE);
       await new Promise((resolve) => setTimeout(resolve));
       subscription.unsubscribe();
@@ -182,6 +219,54 @@ describe('ProfileService', () => {
       // One more call (the failed submit) and no refetch.
       expect(rpc.calls.count()).toBe(calls + 1);
       expect(states.filter((kind) => kind === 'loading').length).toBe(1);
+    });
+  });
+
+  describe('acceptTerms', () => {
+    beforeEach(() => {
+      rpc.and.resolveTo({ data: null, error: null });
+      acceptedVersions = [];
+    });
+
+    it('records the current version, then reloads so the shell moves on', async () => {
+      const kinds: ProfileState['kind'][] = [];
+      const subscription = service.state$.subscribe((state) => kinds.push(state.kind));
+      await settled();
+
+      await service.acceptTerms();
+      await new Promise((resolve) => setTimeout(resolve));
+      subscription.unsubscribe();
+
+      expect(insert).toHaveBeenCalledOnceWith({ version: TERMS_VERSION });
+      expect(kinds).toEqual(['loading', 'needs-terms', 'loading', 'none']);
+    });
+
+    it('treats terms accepted already (say, in another tab) as done and reloads', async () => {
+      const kinds: ProfileState['kind'][] = [];
+      const subscription = service.state$.subscribe((state) => kinds.push(state.kind));
+      await settled();
+
+      acceptedVersions = [TERMS_VERSION];
+      insertError = { code: '23505', message: 'duplicate key value' };
+      await expectAsync(service.acceptTerms()).toBeResolved();
+      await new Promise((resolve) => setTimeout(resolve));
+      subscription.unsubscribe();
+
+      expect(kinds).toEqual(['loading', 'needs-terms', 'loading', 'none']);
+    });
+
+    it('throws if recording fails, and does not reload', async () => {
+      const error = { code: '42501', message: 'permission denied' };
+      insertError = error;
+      const states: ProfileState['kind'][] = [];
+      const subscription = service.state$.subscribe((state) => states.push(state.kind));
+      await settled();
+
+      await expectAsync(service.acceptTerms()).toBeRejectedWith(error);
+      await new Promise((resolve) => setTimeout(resolve));
+      subscription.unsubscribe();
+
+      expect(states).toEqual(['loading', 'needs-terms']);
     });
   });
 });

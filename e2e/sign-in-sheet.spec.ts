@@ -11,13 +11,12 @@ function openSignInSheet(page: Page) {
 async function createExistingUser(page: Page, email: string) {
   await page.goto('/?invite=E2E-INVITE');
   await page.getByLabel('Email').fill(email);
-  await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Sign up' }).click();
   await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible();
 }
 
 // The sheet must not reveal whether an address is registered, so an unknown one gets the same
-// answer as a known one, and a working link (which leads into onboarding).
+// answer as a known one, and a working link (which leads to the terms, then onboarding).
 test('an email with no existing account gets a sign-in link too', async ({ page }) => {
   const email = uniqueEmail();
   await page.goto('/');
@@ -31,7 +30,7 @@ test('an email with no existing account gets a sign-in link too', async ({ page 
 
   await page.goto(await getLatestMagicLink(email));
   await page.waitForURL('**/app');
-  await expect(page.getByRole('heading', { name: 'Create profile' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Before we start' })).toBeVisible();
 });
 
 test('shows a generic error when the request fails', async ({ page }) => {

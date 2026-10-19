@@ -1,0 +1,28 @@
+.policy-sheet {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 20px 0;
+  font-family: var(--kt-font-sans);
+}
+
+.grab-handle {
+  align-self: center;
+  width: 44px;
+  height: 5px;
+  border-radius: 99px;
+  background: var(--kt-outline-soft);
+  margin-bottom: 16px;
+}
+
+// Stays at the bottom of the sheet while the document scrolls.
+.actions {
+  position: sticky;
+  bottom: 0;
+  margin-top: 24px;
+  padding: 12px 0 24px;
+  background: var(--kt-bg-soft);
+
+  button {
+    width: 100%;
+  }
+}
