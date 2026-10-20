@@ -52,6 +52,21 @@ test('the Privacy Policy link returns to the sign-in sheet afterwards', async ({
   await expect(policySheet).toBeHidden();
 });
 
+test('pressing Enter in the email field signs in', async ({ page }) => {
+  // The failing request shows that the form was submitted, without sending an email.
+  await page.route('**/auth/v1/otp*', (route) => route.abort());
+  await page.goto('/');
+  await openSignInSheet(page);
+
+  const sheet = page.locator('.sign-in-sheet');
+  await sheet.getByLabel('Email').fill(uniqueEmail());
+  await sheet.getByLabel('Email').press('Enter');
+
+  await expect(
+    sheet.getByText('Something went wrong. Please try again in a minute.'),
+  ).toBeVisible();
+});
+
 test('shows a generic error when the request fails', async ({ page }) => {
   await page.route('**/auth/v1/otp*', (route) => route.abort());
   await page.goto('/');
