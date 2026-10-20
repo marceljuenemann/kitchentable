@@ -10,6 +10,11 @@ values
   ('bbbbbbbb-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
     'jo@example.com', '{}'::jsonb, '', now(), now(), now());
 
+insert into public.terms_acceptances (user_id, version) values
+  ('bbbbbbbb-0000-0000-0000-000000000001', 1),
+  ('bbbbbbbb-0000-0000-0000-000000000002', 1),
+  ('bbbbbbbb-0000-0000-0000-000000000003', 1);
+
 -- Requests to this URL are the ones made by this test (pg_net only sends them after commit, and
 -- the test is rolled back, so none are sent).
 create function pg_temp.requests() returns setof net.http_request_queue language sql as $$

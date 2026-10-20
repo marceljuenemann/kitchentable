@@ -1,0 +1,59 @@
+:host {
+  display: block;
+}
+
+main {
+  margin-top: 32px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--kt-ink);
+}
+
+h1 {
+  margin: 32px 0 0;
+  font-family: var(--kt-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--kt-violet);
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+p {
+  margin: 8px 0 0;
+}
+
+ul {
+  margin: 10px 0 0;
+  padding-left: 20px;
+}
+
+li + li {
+  margin-top: 8px;
+}
+
+a {
+  color: var(--mat-sys-primary);
+}
+
+mat-checkbox {
+  display: block;
+  // MDC's checkbox reserves an 11px touch-target inset around the box; pull it back so the box
+  // lines up with the text above it.
+  margin: 20px 0 0 -11px;
+  --mat-checkbox-label-text-size: 15px;
+}
+
+.error {
+  margin: 24px 0 0;
+  font-size: 14px;
+  color: var(--mat-sys-error);
+}
+
+.continue {
+  width: 100%;
+  margin-top: 32px;
+}

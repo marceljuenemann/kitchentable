@@ -9,6 +9,7 @@ import { AgeVerificationComponent } from '../age-verification/age-verification.c
 import { MainComponent } from '../main/main.component';
 import { OnboardingComponent } from '../onboarding/onboarding.component';
 import { SubmittedComponent } from '../onboarding/submitted/submitted.component';
+import { TermsComponent } from '../terms/terms.component';
 
 /**
  * Everything a signed-in user sees lives behind this one component: it shows the screen that
@@ -27,6 +28,7 @@ import { SubmittedComponent } from '../onboarding/submitted/submitted.component'
     MainComponent,
     OnboardingComponent,
     SubmittedComponent,
+    TermsComponent,
   ],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',

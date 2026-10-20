@@ -9,6 +9,10 @@ values
   ('99999999-9999-9999-9999-999999999999', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
     'finn@example.com', '{}'::jsonb, '', now(), now(), now());
 
+insert into public.terms_acceptances (user_id, version) values
+  ('88888888-8888-8888-8888-888888888888', 1),
+  ('99999999-9999-9999-9999-999999999999', 1);
+
 -- A valid call, with one argument overridden per test below (rolled back with the rest).
 create function public.test_submit(
   p_name text default 'Erin',

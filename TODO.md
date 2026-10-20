@@ -1,12 +1,7 @@
 # TODO
 
-- Analytics
-- eMail admin on applications submission
-- Internal onboarding testing
 
-- Add content policy to photos (no nudity)
 - Reconfigure chunks (see npm run build)
-- Add Terms & Conditions and Privacy Policy
 
 - Photos improvements for slow connections: upload in background, cache locally
 - Publish repo

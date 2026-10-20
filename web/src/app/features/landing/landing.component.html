@@ -28,42 +28,42 @@
       @if (!sent()) {
         <h2>Sign Up</h2>
 
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
-          <mat-label>Email</mat-label>
-          <input
-            matInput
-            type="email"
-            placeholder="you@example.com"
-            [value]="email()"
-            (input)="setEmail($any($event.target).value)"
-          />
-        </mat-form-field>
+        <!-- A plain form (no Angular forms module), so Enter in the field submits it. -->
+        <form (submit)="$event.preventDefault(); signUp()">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+            <mat-label>Email</mat-label>
+            <input
+              matInput
+              type="email"
+              placeholder="you@example.com"
+              [value]="email()"
+              (input)="setEmail($any($event.target).value)"
+            />
+          </mat-form-field>
 
-        <mat-checkbox [checked]="agree()" (change)="setAgree($event.checked)">
-          I agree to the
-          <a href="#" (click)="$event.preventDefault(); $event.stopPropagation()">Terms</a>
-          and
-          <a href="#" (click)="$event.preventDefault(); $event.stopPropagation()">Privacy Policy</a
-          >.
-        </mat-checkbox>
-
-        @if (errorMessage()) {
-          <p class="error">{{ errorMessage() }}</p>
-        }
-
-        <button
-          mat-flat-button
-          color="primary"
-          type="button"
-          [disabled]="!canSignUp() || submitting()"
-          (click)="signUp()"
-        >
-          @if (submitting()) {
-            <mat-spinner diameter="20" />
-          } @else {
-            Sign up
+          @if (errorMessage()) {
+            <p class="error">{{ errorMessage() }}</p>
           }
-        </button>
+
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="!canSignUp() || submitting()"
+          >
+            @if (submitting()) {
+              <mat-spinner diameter="20" />
+            } @else {
+              Sign up
+            }
+          </button>
+        </form>
+
+        <p class="kt-fine-print">
+          We'll email you a link to sign up. See our
+          <a href="/about/privacy" (click)="openPrivacyPolicy($event)">Privacy Policy</a> for how we
+          handle your data.
+        </p>
       } @else {
         <h2>Check your email</h2>
         <p>We've sent a login link to {{ email() }}. Open it on this device to continue.</p>

@@ -57,15 +57,24 @@ export async function photoObject(
  * Creates a user (with an invite code in the sign-up metadata, as the landing page sends it)
  * without going through the UI/email, optionally with a profile in the given status, and signs
  * the page in with a generated magic link. The status stands in for the admin/age-verification
- * steps that happen outside the app.
+ * steps that happen outside the app. The user has accepted the terms unless `acceptedTerms` is
+ * false (a profile needs them).
  */
-export async function signInAs(page: Page, status: ProfileStatus | null): Promise<string> {
+export async function signInAs(
+  page: Page,
+  status: ProfileStatus | null,
+  { acceptedTerms = true } = {},
+): Promise<string> {
   const email = uniqueEmail('shell');
   const user = await api('/auth/v1/admin/users', {
     email,
     email_confirm: true,
     user_metadata: { invite_code: 'E2E-INVITE' },
   });
+
+  if (acceptedTerms) {
+    await api('/rest/v1/terms_acceptances', { user_id: user.id, version: 1 });
+  }
 
   if (status) {
     // Service role bypasses the client lockdown on `profiles` (only `submit_onboarding` creates
