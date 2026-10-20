@@ -30,7 +30,7 @@ test('an email with no existing account gets a sign-in link too', async ({ page 
 
   await page.goto(await getLatestMagicLink(email));
   await page.waitForURL('**/app');
-  await expect(page.getByRole('heading', { name: 'Before we start' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Our commitments' })).toBeVisible();
 });
 
 // Only one bottom sheet can be open at a time, so the policy replaces the sign-in sheet, which

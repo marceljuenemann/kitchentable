@@ -1,23 +1,76 @@
 <app-header />
 
 <main>
-  <h1>Before we start (TODO: Update)</h1>
-  <p class="subtitle">
-    Kitchen Table is built on trust. Please read our Terms of Use and Privacy Policy, and agree to
-    them to continue.
+  <h1>Our commitments</h1>
+  <p>
+    These commitments are part of our
+    <a href="/about/terms" (click)="openPolicy($event, 'terms')">Terms of Use</a> and are binding on
+    us.
+  </p>
+  <ul>
+    <li>
+      <b>Core features stay free.</b> Creating a profile and connecting with other members will
+      never be behind a paywall.
+    </li>
+    <li>
+      <b>Your data isn't for sale.</b> We won't sell your personal data, and we won't use it, or let
+      anyone else use it, to target advertising.
+    </li>
+    <li>
+      <b>Built with the community.</b> We'll develop the Community Guidelines together with members,
+      and any member can give feedback and share their views before we make significant changes.
+    </li>
+    <li>
+      <b>Profits are reinvested.</b> Any profits go back into running and developing Kitchen Table.
+      Pay for anyone working on it stays reasonable and in line with comparable roles.
+    </li>
+  </ul>
+
+  <h1>Your responsibilities</h1>
+  <p>
+    Our <a href="/about/terms" (click)="openPolicy($event, 'terms')">Terms of Use</a> set out the
+    full rules. In particular:
+  </p>
+  <ul>
+    <li>
+      <b>Treat people with respect.</b> No harassment, pressure or abuse, and no unsolicited sexual
+      messages or images.
+    </li>
+    <li>
+      <b>Respect consent.</b> Clear, ongoing consent from everyone involved, on the app, on dates
+      and at events.
+    </li>
+    <li>
+      <b>Protect each other's privacy.</b> Don't share anyone's identity, profile, photos or
+      messages outside Kitchen Table without their permission.
+    </li>
+    <li><b>No nudity or explicit content</b>, and no photos showing anyone under 18.</li>
+    <li>
+      <b>Take responsibility for your own safety.</b> Use your judgement, especially when meeting
+      someone for the first time.
+    </li>
+  </ul>
+
+  <h1>Your data</h1>
+  <p>
+    Information such as your sexuality or relationship style is special category data under UK law,
+    so we need your explicit consent to use it. You can withdraw your consent at any time as
+    outlined in our
+    <a href="/about/privacy" (click)="openPolicy($event, 'privacy')">Privacy Policy</a>.
   </p>
 
-  <mat-checkbox [checked]="termsAgreed()" (change)="termsAgreed.set($event.checked)">
-    I agree to the
-    <a href="/about/terms" (click)="openPolicy($event, 'terms')">Terms of Use</a>.
+  <mat-checkbox [checked]="consentGiven()" (change)="consentGiven.set($event.checked)">
+    <b>
+      I consent to Kitchen Table using information I provide about my sexual orientation or sex life
+      to show my profile to other members and provide the Kitchen Table service.
+    </b>
   </mat-checkbox>
 
-  <mat-checkbox [checked]="consentGiven()" (change)="consentGiven.set($event.checked)">
-    I consent to Kitchen Table using what I share about my gender, sexuality, relationships and sex
-    life to run and improve Kitchen Table, including reviewing my application, showing my profile to
-    members and connecting me with other members, as described in the
-    <a href="/about/privacy" (click)="openPolicy($event, 'privacy')">Privacy Policy</a>. I can
-    withdraw my consent at any time.
+  <mat-checkbox [checked]="termsAgreed()" (change)="termsAgreed.set($event.checked)">
+    <b>
+      I am 18 or over and I agree to the
+      <a href="/about/terms" (click)="openPolicy($event, 'terms')">Terms of Use</a>.
+    </b>
   </mat-checkbox>
 
   @if (failed()) {

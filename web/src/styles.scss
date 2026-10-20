@@ -112,6 +112,16 @@ body {
   }
 }
 
+// Add to `kt-bottom-sheet` for a sheet that scrolls part of its own content (say, a long
+// document between a grab handle and a button). The container then doesn't scroll, so there's
+// no scrollbar running into its rounded corners. The sheet component's host must be a flex
+// column with `min-height: 0`, and the scrolling part `overflow-y: auto`.
+.kt-bottom-sheet-inner-scroll .mat-bottom-sheet-container {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 // Form field labels (Name, Email, ...) share the look of the uppercase row labels in the
 // onboarding flow. An element selector, so it also reaches fields inside overlays and sheets.
 mat-form-field mat-label {
@@ -130,6 +140,34 @@ mat-form-field textarea {
   scrollbar-width: thin;
   scrollbar-color: var(--kt-input) transparent;
   padding-right: 4px;
+}
+
+// Small print under a form's button, such as what happens to the email address entered.
+.kt-fine-print {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--kt-outline);
+
+  a {
+    color: inherit;
+    white-space: nowrap;
+  }
+}
+
+// Checkboxes with a label of several lines: the box lines up with the first line instead of
+// the middle. The box sits in the middle of a 40px touch target, so the label's first 22px line
+// needs (40 - 22) / 2 = 9px above it.
+mat-checkbox {
+  --mat-checkbox-label-text-line-height: 22px;
+
+  .mat-internal-form-field {
+    align-items: flex-start;
+  }
+
+  .mat-internal-form-field-label {
+    padding-top: 9px;
+  }
 }
 
 // Rounded, borderless chips: off-white when off, a light theme colour when selected (secondary
