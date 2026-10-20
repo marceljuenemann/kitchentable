@@ -33,6 +33,25 @@ test('an email with no existing account gets a sign-in link too', async ({ page 
   await expect(page.getByRole('heading', { name: 'Before we start' })).toBeVisible();
 });
 
+// Only one bottom sheet can be open at a time, so the policy replaces the sign-in sheet, which
+// comes back with the email still filled in.
+test('the Privacy Policy link returns to the sign-in sheet afterwards', async ({ page }) => {
+  await page.goto('/');
+  await openSignInSheet(page);
+  const signInSheet = page.locator('.sign-in-sheet');
+  await signInSheet.getByLabel('Email').fill('sam@example.com');
+
+  await signInSheet.getByRole('link', { name: 'Privacy Policy' }).click();
+  const policySheet = page.locator('app-policy-sheet');
+  await expect(
+    policySheet.getByRole('heading', { name: 'Kitchen Table Privacy Policy' }),
+  ).toBeVisible();
+  await policySheet.getByRole('button', { name: 'Close' }).click();
+
+  await expect(signInSheet.getByLabel('Email')).toHaveValue('sam@example.com');
+  await expect(policySheet).toBeHidden();
+});
+
 test('shows a generic error when the request fails', async ({ page }) => {
   await page.route('**/auth/v1/otp*', (route) => route.abort());
   await page.goto('/');

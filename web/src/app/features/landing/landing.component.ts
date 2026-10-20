@@ -3,14 +3,14 @@ import { ActivatedRoute } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
 import { AuthService } from '../../core/auth/auth.service';
-import { SignInSheetComponent } from './sign-in-sheet/sign-in-sheet.component';
+import { openPolicySheet } from '../../shared/policy/open-policy-sheet';
+import { openSignInSheet } from './sign-in-sheet/sign-in-sheet.component';
 
 const EMAIL_PATTERN = /\S+@\S+\.\S+/;
 
@@ -22,7 +22,6 @@ const EMAIL_PATTERN = /\S+@\S+\.\S+/;
     HeaderComponent,
     MatButtonModule,
     MatCardModule,
-    MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
@@ -38,8 +37,8 @@ export class LandingComponent {
   readonly inviteCode = this.route.snapshot.queryParamMap.get('invite');
 
   readonly email = signal('');
-  readonly agree = signal(false);
-  readonly canSignUp = computed(() => EMAIL_PATTERN.test(this.email()) && this.agree());
+  // The terms are agreed to after signing in, once the address is confirmed (TermsComponent).
+  readonly canSignUp = computed(() => EMAIL_PATTERN.test(this.email()));
 
   readonly submitting = signal(false);
   readonly sent = signal(false);
@@ -47,10 +46,6 @@ export class LandingComponent {
 
   setEmail(value: string) {
     this.email.set(value);
-  }
-
-  setAgree(checked: boolean) {
-    this.agree.set(checked);
   }
 
   async signUp() {
@@ -68,11 +63,11 @@ export class LandingComponent {
   }
 
   openSignIn() {
-    this.bottomSheet.open(SignInSheetComponent, {
-      panelClass: 'kt-bottom-sheet',
-      // Not the email field: focusing it while the sheet is still sliding in opens the phone
-      // keyboard over the sheet, hiding the field. Tapping it scrolls it into view instead.
-      autoFocus: 'dialog',
-    });
+    openSignInSheet(this.bottomSheet);
+  }
+
+  openPrivacyPolicy(event: Event) {
+    event.preventDefault();
+    void openPolicySheet(this.bottomSheet, 'privacy');
   }
 }

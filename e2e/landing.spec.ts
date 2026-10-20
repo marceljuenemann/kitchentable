@@ -15,6 +15,15 @@ test('shows the sign-up form when an invite code is present', async ({ page }) =
   await expect(page.getByRole('heading', { name: 'Sign Up' })).toBeVisible();
 });
 
+test('the sign-up form links to the Privacy Policy in a sheet', async ({ page }) => {
+  await page.goto('/?invite=anything');
+  await page.locator('.signup-card').getByRole('link', { name: 'Privacy Policy' }).click();
+
+  const sheet = page.getByRole('dialog');
+  await expect(sheet.getByRole('heading', { name: 'Kitchen Table Privacy Policy' })).toBeVisible();
+  await expect(page).toHaveURL(/\/\?invite=anything$/);
+});
+
 // Invite codes aren't validated at sign-up (they are checked by hand during vetting), so any
 // code works.
 test('completes the full sign-up flow with an invite code', async ({ page }) => {

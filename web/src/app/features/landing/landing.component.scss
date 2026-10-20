@@ -92,7 +92,7 @@
     color: var(--kt-violet);
   }
 
-  p {
+  p:not(.kt-fine-print) {
     margin: 0 0 16px;
     font-size: 14.5px;
     line-height: 1.5;
@@ -107,17 +107,8 @@
 
   mat-form-field {
     width: 100%;
+    margin-bottom: 16px;
     --mat-form-field-outlined-container-shape: 14px;
-  }
-
-  mat-checkbox {
-    // MDC's checkbox reserves an 11px touch-target inset around the box; pull it back
-    // so the box lines up with the form field and button either side of it.
-    margin: 8px 0 16px -11px;
-
-    a {
-      color: var(--mat-sys-primary);
-    }
   }
 
   button {
