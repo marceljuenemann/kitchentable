@@ -16,10 +16,10 @@
     "check": "npm run format:check && npm run lint && npm run typecheck:e2e && npm run build --prefix web && npm run test:unit"
   },
   "devDependencies": {
-    "@playwright/test": "^1.63.0",
-    "@types/node": "^26.6.3",
-    "prettier": "^3.9.9",
-    "supabase": "^2.113.0",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "prettier": "^3.9.10",
+    "supabase": "^2.121.0",
     "typescript": "~5.9.2"
   }
 }
