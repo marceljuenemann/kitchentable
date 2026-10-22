@@ -5,7 +5,7 @@ import { signInAs } from './admin';
 export async function goToPhotosStep(page: Page) {
   await signInAs(page, null);
   await page.getByLabel('Name').fill('Sam');
-  await page.getByRole('button', { name: /Preferred pronouns/ }).click();
+  await page.getByRole('button', { name: /Pronouns/ }).click();
   await page.getByRole('option', { name: 'they/them' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
 

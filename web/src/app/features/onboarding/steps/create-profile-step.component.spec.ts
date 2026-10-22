@@ -67,8 +67,8 @@ describe('CreateProfileStepComponent', () => {
 
   describe('rows', () => {
     it('invite the user to fill in what is empty, marking what is required', () => {
-      expect(row('Preferred pronouns')).toContain('required');
-      expect(row('Preferred pronouns')).toContain('Add pronouns');
+      expect(row('Pronouns')).toContain('required');
+      expect(row('Pronouns')).toContain('Add pronouns');
       expect(row('Gender')).toContain('optional');
       expect(row('Age')).toContain('Add birthday');
       expect(row('Location')).toContain('London');
@@ -83,7 +83,7 @@ describe('CreateProfileStepComponent', () => {
       });
       fixture.detectChanges();
 
-      expect(row('Preferred pronouns')).toContain('they/them');
+      expect(row('Pronouns')).toContain('they/them');
       expect(row('Gender')).toContain('Woman, bigender');
       expect(row('Sexuality')).toContain('Queer');
       expect(row('Location')).toContain('Manchester');

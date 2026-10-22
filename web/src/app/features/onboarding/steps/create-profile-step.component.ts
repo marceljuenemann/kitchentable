@@ -28,7 +28,7 @@ interface Row {
 
 const SHEETS: Record<ListField, Omit<OptionSheetData, 'selected'>> = {
   pronouns: {
-    title: 'Preferred pronouns',
+    title: 'Pronouns',
     help: "Choose what you'd like to show on your profile.",
     options: PRONOUN_OPTIONS,
     multi: false,
@@ -73,7 +73,7 @@ export class CreateProfileStepComponent {
     return [
       {
         key: 'pronouns',
-        label: 'Preferred pronouns',
+        label: 'Pronouns',
         required: true,
         emptyText: 'Add pronouns',
         value: draft.pronouns.join(', '),
