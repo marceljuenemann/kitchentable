@@ -26,10 +26,10 @@ export const SEXUALITY_OPTIONS = [
   'Lesbian',
   'Gay',
   'Straight',
+  'Heteroflexible',
   'Asexual',
   'Demisexual',
   'Aromantic',
-  'Omnisexual',
   'Questioning',
 ];
 

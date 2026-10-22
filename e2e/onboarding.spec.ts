@@ -76,7 +76,7 @@ test('a custom value can be added in the option sheet', async ({ page }) => {
   await signInAs(page, null);
   await page.getByRole('button', { name: /^Gender/ }).click();
   await page.getByRole('option', { name: 'Woman', exact: true }).click();
-  await page.getByLabel('Self describe').fill('bigender');
+  await page.getByLabel('Add your own').fill('bigender');
   await page.getByRole('button', { name: 'Add' }).click();
   await page.getByRole('button', { name: 'Done' }).click();
 
