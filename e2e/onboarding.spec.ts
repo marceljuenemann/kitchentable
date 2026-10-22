@@ -101,7 +101,7 @@ test('step 2 needs an about text of 250 characters and something you are looking
   await expect(page.getByText('250 characters')).toBeVisible();
   await expect(next).toBeDisabled();
 
-  await page.getByRole('option', { name: 'Solo poly' }).click();
+  await page.getByRole('option', { name: 'Polyamory' }).click();
   await expect(next).toBeEnabled();
 
   // Own entries appear as extra, selected chips.

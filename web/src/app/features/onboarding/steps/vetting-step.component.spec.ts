@@ -41,7 +41,7 @@ describe('VettingStepComponent', () => {
       name: 'Sam',
       pronouns: ['they/them'],
       aboutText: 'About Sam',
-      lookingFor: ['solo-poly'],
+      lookingFor: ['polyamory'],
       photos: ['photo-1'],
     });
     fixture = TestBed.createComponent(VettingStepComponent);

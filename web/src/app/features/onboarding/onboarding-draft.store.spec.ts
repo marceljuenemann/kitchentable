@@ -177,7 +177,7 @@ describe('toNewProfile', () => {
     birthYear: '1990',
     tagline: ' Hello ',
     aboutText: '  About me  ',
-    lookingFor: ['solo-poly', 'Running buddies'],
+    lookingFor: ['polyamory', 'Running buddies'],
     photos: ['a', 'b'],
     vettingAnswers: { consent: 'x', guidelines: 'y' },
   };
@@ -193,7 +193,7 @@ describe('toNewProfile', () => {
       sexuality: ['Queer'],
       birth_year: 1990,
       birth_month: 6,
-      looking_for: ['solo-poly', 'Running buddies'],
+      looking_for: ['polyamory', 'Running buddies'],
       photos: ['a', 'b'],
       vetting_answers: { consent: 'x', guidelines: 'y' },
     });
