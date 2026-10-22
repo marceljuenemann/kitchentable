@@ -16,7 +16,7 @@ export const GENDER_OPTIONS = [
   'Genderqueer',
   'Genderfluid',
   'Agender',
-  'Gender Questioning',
+  'Gender questioning',
 ];
 
 export const SEXUALITY_OPTIONS = [
@@ -26,10 +26,10 @@ export const SEXUALITY_OPTIONS = [
   'Lesbian',
   'Gay',
   'Straight',
+  'Heteroflexible',
   'Asexual',
   'Demisexual',
   'Aromantic',
-  'Omnisexual',
   'Questioning',
 ];
 
@@ -53,14 +53,14 @@ export const VETTING_QUESTIONS = [
  * a data migration); anything else in a draft/profile is the user's own text.
  */
 export const LOOKING_FOR_OPTIONS = [
-  { id: 'solo-poly', label: 'Solo poly' },
-  { id: 'relationship-anarchist', label: 'Relationship anarchist' },
-  { id: 'nesting-partner', label: 'Nesting partner' },
-  { id: 'open-couple', label: 'Open couple' },
-  { id: 'kitchen-table-poly', label: 'Kitchen table poly' },
-  { id: 'slow-dating', label: 'Slow dating' },
-  { id: 'new-friends', label: 'New friends' },
-  { id: 'dont-label-it', label: "Don't label it" },
+  { id: 'polyamory', label: 'Polyamory' },
+  { id: 'open-relationship', label: 'Open relationship' },
+  { id: 'relationship-anarchy', label: 'Relationship anarchy' },
+  { id: 'friends', label: 'Friends' },
+  { id: 'exploring', label: 'Exploring' },
+  { id: 'casual', label: 'Casual' },
+  { id: 'play-partners', label: 'Play partners' },
+  { id: 'monogamy', label: 'Monogamy' },
 ];
 
 /** The text to show for a stored "looking for" value. */

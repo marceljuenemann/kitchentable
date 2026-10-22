@@ -1,10 +1,9 @@
 # TODO
 
-
 - Reconfigure chunks (see npm run build)
+- Publish repo
 
 - Photos improvements for slow connections: upload in background, cache locally
-- Publish repo
 - Add event log / audit log table?
 - Photos bucket cleanup
 - Report photos / profile

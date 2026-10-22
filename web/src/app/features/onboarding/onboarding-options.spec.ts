@@ -2,7 +2,7 @@ import { LOOKING_FOR_OPTIONS, lookingForLabel, lookingForValueFor } from './onbo
 
 describe('lookingForLabel', () => {
   it('shows the label of a standard option', () => {
-    expect(lookingForLabel('solo-poly')).toBe('Solo poly');
+    expect(lookingForLabel('open-relationship')).toBe('Open relationship');
   });
 
   it('shows the user’s own text as it is', () => {
@@ -12,12 +12,12 @@ describe('lookingForLabel', () => {
 
 describe('lookingForValueFor', () => {
   it('stores the id when the text is the label of a standard option, ignoring case and spacing', () => {
-    expect(lookingForValueFor('Solo poly')).toBe('solo-poly');
-    expect(lookingForValueFor('  solo POLY ')).toBe('solo-poly');
+    expect(lookingForValueFor('Open relationship')).toBe('open-relationship');
+    expect(lookingForValueFor('  open RELATIONSHIP ')).toBe('open-relationship');
   });
 
   it('stores the id when the text already is one', () => {
-    expect(lookingForValueFor('nesting-partner')).toBe('nesting-partner');
+    expect(lookingForValueFor('play-partners')).toBe('play-partners');
   });
 
   it('stores anything else trimmed', () => {

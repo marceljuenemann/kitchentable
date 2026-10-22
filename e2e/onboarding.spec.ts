@@ -12,9 +12,9 @@ test('step 1 only continues once name, pronouns and location are filled in', asy
   await page.getByLabel('Name').fill('Sam');
   await expect(next).toBeDisabled();
 
-  await page.getByRole('button', { name: /Preferred pronouns/ }).click();
+  await page.getByRole('button', { name: /Pronouns/ }).click();
   await page.getByRole('option', { name: 'they/them' }).click();
-  await expect(page.getByRole('button', { name: /Preferred pronouns/ })).toContainText('they/them');
+  await expect(page.getByRole('button', { name: /Pronouns/ })).toContainText('they/them');
   await expect(next).toBeEnabled();
 
   // London is preselected; another city needs a name before the sheet can be saved.
@@ -76,7 +76,7 @@ test('a custom value can be added in the option sheet', async ({ page }) => {
   await signInAs(page, null);
   await page.getByRole('button', { name: /^Gender/ }).click();
   await page.getByRole('option', { name: 'Woman', exact: true }).click();
-  await page.getByLabel('Self describe').fill('bigender');
+  await page.getByLabel('Add your own').fill('bigender');
   await page.getByRole('button', { name: 'Add' }).click();
   await page.getByRole('button', { name: 'Done' }).click();
 
@@ -88,7 +88,7 @@ test('step 2 needs an about text of 250 characters and something you are looking
 }) => {
   await signInAs(page, null);
   await page.getByLabel('Name').fill('Sam');
-  await page.getByRole('button', { name: /Preferred pronouns/ }).click();
+  await page.getByRole('button', { name: /Pronouns/ }).click();
   await page.getByRole('option', { name: 'they/them' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
 
@@ -101,7 +101,7 @@ test('step 2 needs an about text of 250 characters and something you are looking
   await expect(page.getByText('250 characters')).toBeVisible();
   await expect(next).toBeDisabled();
 
-  await page.getByRole('option', { name: 'Solo poly' }).click();
+  await page.getByRole('option', { name: 'Polyamory' }).click();
   await expect(next).toBeEnabled();
 
   // Own entries appear as extra, selected chips.
@@ -161,7 +161,7 @@ test('the draft survives a reload and an expired session, and is cleared on sign
 }) => {
   const email = await signInAs(page, null);
   await page.getByLabel('Name').fill('Sam');
-  await page.getByRole('button', { name: /Preferred pronouns/ }).click();
+  await page.getByRole('button', { name: /Pronouns/ }).click();
   await page.getByRole('option', { name: 'they/them' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.getByRole('heading', { name: 'About you' })).toBeVisible();

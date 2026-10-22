@@ -52,7 +52,7 @@ test('submitting the application creates the profile and moves on to "being vett
     tagline: '',
     location: 'London',
     bio: 'x'.repeat(250),
-    looking_for: ['solo-poly'],
+    looking_for: ['polyamory'],
     gender: [],
     birth_year: null,
     vetting_answers: {

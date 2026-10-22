@@ -35,7 +35,7 @@ describe('AboutYouStepComponent', () => {
       store.update({ aboutText: 'x'.repeat(ABOUT_MIN_LENGTH) });
       expect(component.canContinue()).toBeFalse();
 
-      store.update({ lookingFor: ['solo-poly'] });
+      store.update({ lookingFor: ['polyamory'] });
       expect(component.canContinue()).toBeTrue();
     });
 
@@ -49,7 +49,7 @@ describe('AboutYouStepComponent', () => {
       component.next();
       expect(store.draft().step).toBe(2);
 
-      store.update({ aboutText: 'x'.repeat(ABOUT_MIN_LENGTH), lookingFor: ['solo-poly'] });
+      store.update({ aboutText: 'x'.repeat(ABOUT_MIN_LENGTH), lookingFor: ['polyamory'] });
       fixture.detectChanges();
       expect(continueButton().disabled).toBeFalse();
       component.next();
@@ -63,7 +63,7 @@ describe('AboutYouStepComponent', () => {
       component.addOwn('Running buddies');
       const options = component.options();
 
-      expect(options[0]).toBe('solo-poly');
+      expect(options[0]).toBe('polyamory');
       expect(options[options.length - 1]).toBe('Running buddies');
     });
 
@@ -74,10 +74,10 @@ describe('AboutYouStepComponent', () => {
     });
 
     it('stores a typed standard option under its id, so it is not added twice', () => {
-      component.addOwn('  solo poly ');
+      component.addOwn('  open relationship ');
 
-      expect(store.draft().lookingFor).toEqual(['solo-poly']);
-      expect(component.isDuplicate('Solo poly')).toBeTrue();
+      expect(store.draft().lookingFor).toEqual(['open-relationship']);
+      expect(component.isDuplicate('Open relationship')).toBeTrue();
     });
 
     it('drops an own entry from the list once it is deselected', () => {

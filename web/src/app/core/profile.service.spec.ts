@@ -17,7 +17,7 @@ const PROFILE: Profile = {
   sexuality: [],
   birth_year: null,
   birth_month: null,
-  looking_for: ['solo-poly'],
+  looking_for: ['polyamory'],
   photos: ['photo-1'],
 };
 
@@ -31,7 +31,7 @@ const NEW_PROFILE: NewProfile = {
   sexuality: [],
   birth_year: 1990,
   birth_month: 6,
-  looking_for: ['solo-poly'],
+  looking_for: ['polyamory'],
   photos: ['photo-1', 'photo-2'],
   vetting_answers: { consent: 'a', guidelines: 'b' },
 };
@@ -166,7 +166,7 @@ describe('ProfileService', () => {
         p_sexuality: [],
         p_birth_year: 1990,
         p_birth_month: 6,
-        p_looking_for: ['solo-poly'],
+        p_looking_for: ['polyamory'],
         p_photos: ['photo-1', 'photo-2'],
         p_vetting_answers: { consent: 'a', guidelines: 'b' },
       });

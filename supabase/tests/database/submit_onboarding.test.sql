@@ -19,7 +19,7 @@ create function public.test_submit(
   p_bio text default 'About Erin',
   p_birth_year int default null,
   p_birth_month int default null,
-  p_looking_for text[] default '{solo-poly}',
+  p_looking_for text[] default '{polyamory}',
   p_photos uuid[] default '{aaaaaaaa-0000-0000-0000-000000000001,aaaaaaaa-0000-0000-0000-000000000002}',
   p_vetting_answers jsonb default '{"consent": "yes"}',
   p_tagline text default 'Hi'
@@ -65,7 +65,7 @@ select is(
     "id": "88888888-8888-8888-8888-888888888888", "status": "vetting", "name": "Erin",
     "pronouns": "they/them", "tagline": "", "bio": "About Erin", "location": "London",
     "gender": ["Woman"], "sexuality": ["Queer"], "birth_year": 1990, "birth_month": 6,
-    "looking_for": ["solo-poly"],
+    "looking_for": ["polyamory"],
     "photos": ["aaaaaaaa-0000-0000-0000-000000000001", "aaaaaaaa-0000-0000-0000-000000000002"]
   }'::jsonb,
   'the profile is created in vetting with the trimmed, submitted values (and is read back without the vetting answers)'
