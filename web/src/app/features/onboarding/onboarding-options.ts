@@ -16,7 +16,7 @@ export const GENDER_OPTIONS = [
   'Genderqueer',
   'Genderfluid',
   'Agender',
-  'Gender Questioning',
+  'Gender questioning',
 ];
 
 export const SEXUALITY_OPTIONS = [
