@@ -164,7 +164,7 @@ Age is computed as `currentYear − year`, minus 1 if the current month is befor
 
 **Tagline** — label "TAGLINE", text input `maxlength="60"`, placeholder "One line summary that people see first". Right-aligned counter below at 11px weight 600 `--outline`: "{60 − length} left". **Optional.**
 
-**About you** — label "ABOUT YOU", `<textarea rows="7">` (`border-radius: 14px`, padding `14px 16px`, 16px / `line-height: 1.55`, `resize: vertical`), placeholder "Tell people more about yourself and what you're looking for". Right-aligned counter at 12px weight 600: below the minimum it reads "{n} characters to go" in `--magenta`; at or above it reads "{n} characters" in `--outline`. **Required, minimum 250 characters (trimmed).**
+**About you** — label "ABOUT YOU", `<textarea rows="7">` (`border-radius: 14px`, padding `14px 16px`, 16px / `line-height: 1.55`, `resize: vertical`), placeholder "Tell people more about yourself and what you're looking for". Hints at 12px weight 600: below the minimum, "At least {min} characters" on the left and "{n} / {min}" on the right, both in `--magenta`; at or above it, only "{n} characters" on the right, in `--outline`. **Required, minimum 250 characters (trimmed).**
 
 **Looking for** — label "LOOKING FOR", then wrapping chips (`min-height: 44px`, `border-radius: 99px`, padding `0 15px`, 14.5px weight 700, gap 8px). Off: `--sunken` / `--muted` / `1.5px solid transparent`. On: `--violet-container` / `--violet` / `1.5px solid --violet` plus a 15px tick, again **rendered only when on**.
 
@@ -200,7 +200,7 @@ Subtitle: "Select up to six photos. Drag to reorder."
 
 Subtitle: "These answers are not shown on your profile."
 
-Two questions, each a 16.5px weight 700 `--ink` prompt (`line-height: 1.4`, `margin-top: 22px`) over a `<textarea rows="4">` with placeholder "Write as much or as little as you need", and the same counter treatment as the About field.
+Two questions, each a 16.5px weight 700 `--ink` prompt (`line-height: 1.4`, `margin-top: 22px`) over a `<textarea rows="4">` with placeholder "A few sentences is plenty", and the same counter treatment as the About field.
 
 1. "In your own words, what is consent and why is it important?" — minimum **80** characters.
 2. "What guidelines do you think everyone in the Kitchen Table community should adhere to?" — minimum **80** characters.

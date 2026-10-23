@@ -72,20 +72,23 @@ describe('VettingStepComponent', () => {
   it('counts characters ignoring surrounding spaces', () => {
     type(0, `  ${text(VETTING_MIN_LENGTH - 1)}   `);
 
-    expect(fixture.nativeElement.textContent).toContain('1 characters to go');
+    expect(fixture.nativeElement.textContent).toContain(
+      `${VETTING_MIN_LENGTH - 1} / ${VETTING_MIN_LENGTH}`,
+    );
     expect(submitButton().disabled).toBeTrue();
   });
 
-  it('shows how many characters are still needed, then how many there are', () => {
-    expect(fixture.nativeElement.textContent).toContain(`${VETTING_MIN_LENGTH} characters to go`);
+  it('states the minimum and the progress towards it, then just the count', () => {
+    const hints = () => fixture.nativeElement.querySelectorAll('mat-form-field')[0].textContent;
+    expect(hints()).toContain(`At least ${VETTING_MIN_LENGTH} characters`);
+    expect(hints()).toContain(`0 / ${VETTING_MIN_LENGTH}`);
 
     type(0, text(30));
-    expect(fixture.nativeElement.textContent).toContain(
-      `${VETTING_MIN_LENGTH - 30} characters to go`,
-    );
+    expect(hints()).toContain(`30 / ${VETTING_MIN_LENGTH}`);
 
     type(0, text(VETTING_MIN_LENGTH + 20));
-    expect(fixture.nativeElement.textContent).toContain(`${VETTING_MIN_LENGTH + 20} characters`);
+    expect(hints()).not.toContain('At least');
+    expect(hints()).toContain(`${VETTING_MIN_LENGTH + 20} characters`);
   });
 
   it('keeps the answers in the draft', () => {

@@ -265,11 +265,11 @@ a{color:oklch(0.42 0.19 300)}a:hover{color:oklch(0.29 0.15 300.5)}
 <p style="margin:8px 0 0;font-size:15px;line-height:1.5;color:var(--muted);text-wrap:pretty">These answers are not shown on your profile.</p>
 
 <p style="margin:22px 0 0;font-size:16.5px;font-weight:700;line-height:1.4;color:var(--ink);text-wrap:pretty">In your own words, what is consent and why is it important?</p>
-<textarea id="ob-vet-consent" rows="4" value="{{ vetConsent }}" onChange="{{ setVetConsent }}" placeholder="Write as much or as little as you need" style="margin-top:10px;width:100%;box-sizing:border-box;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:14px 16px;font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--ink);resize:vertical"></textarea>
+<textarea id="ob-vet-consent" rows="4" value="{{ vetConsent }}" onChange="{{ setVetConsent }}" placeholder="A few sentences is plenty" style="margin-top:10px;width:100%;box-sizing:border-box;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:14px 16px;font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--ink);resize:vertical"></textarea>
 <p style="margin:6px 2px 0;text-align:right;font-size:12px;font-weight:600;color:{{ vetConsentColor }}">{{ vetConsentHint }}</p>
 
 <p style="margin:22px 0 0;font-size:16.5px;font-weight:700;line-height:1.4;color:var(--ink);text-wrap:pretty">What guidelines do you think everyone in the Kitchen Table community should adhere to?</p>
-<textarea id="ob-vet-why" rows="4" value="{{ vetWhy }}" onChange="{{ setVetWhy }}" placeholder="Write as much or as little as you need" style="margin-top:10px;width:100%;box-sizing:border-box;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:14px 16px;font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--ink);resize:vertical"></textarea>
+<textarea id="ob-vet-why" rows="4" value="{{ vetWhy }}" onChange="{{ setVetWhy }}" placeholder="A few sentences is plenty" style="margin-top:10px;width:100%;box-sizing:border-box;border-radius:14px;border:1px solid var(--input);background:var(--bg);padding:14px 16px;font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--ink);resize:vertical"></textarea>
 <p style="margin:6px 2px 0;text-align:right;font-size:12px;font-weight:600;color:{{ vetWhyColor }}">{{ vetWhyHint }}</p>
 
 <button onClick="{{ submit }}" disabled="{{ step4Disabled }}" style="margin-top:24px;width:100%;height:52px;border:0;border-radius:99px;background:{{ step4Bg }};color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16.5px;font-weight:700;cursor:{{ step4Cursor }}">Submit application</button>

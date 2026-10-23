@@ -23,6 +23,7 @@ export class VettingStepComponent {
   readonly failed = signal(false);
   readonly totalSteps = ONBOARDING_STEPS;
   readonly questions = VETTING_QUESTIONS;
+  readonly minLength = VETTING_MIN_LENGTH;
 
   /** How many more characters each question needs, by question id. */
   readonly charsToGo = computed(() =>
