@@ -8,14 +8,17 @@
     <textarea
       matInput
       rows="4"
-      placeholder="Write as much or as little as you need"
+      placeholder="A few sentences is plenty"
       [attr.aria-labelledby]="'question-' + question.id"
       [value]="answer(question.id)"
       (input)="setAnswer(question.id, $any($event.target).value)"
     ></textarea>
+    @if (charsToGo()[question.id] > 0) {
+      <mat-hint class="short">At least {{ minLength }} characters</mat-hint>
+    }
     <mat-hint align="end" [class.short]="charsToGo()[question.id] > 0">
       @if (charsToGo()[question.id] > 0) {
-        {{ charsToGo()[question.id] }} characters to go
+        {{ length(question.id) }} / {{ minLength }}
       } @else {
         {{ length(question.id) }} characters
       }

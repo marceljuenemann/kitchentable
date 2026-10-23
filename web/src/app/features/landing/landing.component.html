@@ -1,7 +1,7 @@
 <div class="landing">
   <app-header />
 
-  <h1 class="headline">Let's fix ENM dating.</h1>
+  <h1 class="headline">ENM dating, reimagined.</h1>
 
   <p class="subhead">Kitchen Table is a new dating community for non-monogamous folks in London.</p>
 
@@ -12,13 +12,12 @@
     </li>
     <li>
       <span class="dot dot-magenta"></span>
-      <span><b>Invite-only.</b>&nbsp;Only vetted members, no fake profiles</span>
+      <span><b>Invite-only.</b>&nbsp;Building a community you can trust</span>
     </li>
     <li>
       <span class="dot dot-primary"></span>
       <span
-        ><b>Community-driven.</b>&nbsp;Contribute to guidelines, product decisions, or the
-        open-source code</span
+        ><b>Community-driven.</b>&nbsp;Help shape the guidelines, features, and even the code</span
       >
     </li>
   </ul>
@@ -26,7 +25,7 @@
   <mat-card class="signup-card" appearance="outlined">
     @if (inviteCode) {
       @if (!sent()) {
-        <h2>Sign Up</h2>
+        <h2>Sign up</h2>
 
         <!-- A plain form (no Angular forms module), so Enter in the field submits it. -->
         <form (submit)="$event.preventDefault(); signUp()">
@@ -66,17 +65,17 @@
         </p>
       } @else {
         <h2>Check your email</h2>
-        <p>We've sent a login link to {{ email() }}. Open it on this device to continue.</p>
+        <p>We've sent a sign-in link to {{ email() }}. Open it on this device to continue.</p>
       }
     } @else {
       <h2>Kitchen Table is currently invite-only</h2>
-      <p>Want to get involved? Just reach out to us!</p>
+      <p>Want to join or help out? Drop us a line.</p>
       <a mat-flat-button color="primary" href="mailto:hello@kitchentable.dating">Email us</a>
     }
   </mat-card>
 
   <p class="signin-line">
-    Already have a profile?
+    Already signed up?
     <button mat-button type="button" (click)="openSignIn()">Sign in</button>
   </p>
 
