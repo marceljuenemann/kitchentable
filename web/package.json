@@ -32,17 +32,18 @@
     "material-icons": "^1.13.14",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
-    "zone.js": "~0.15.0"
+    "zone.js": "~0.16.3"
   },
   "devDependencies": {
     "@angular/build": "^22.2.0",
     "@angular/cli": "^22.2.0",
     "@angular/compiler-cli": "^22.2.0",
-    "@types/jasmine": "~5.1.0",
+    "@eslint/js": "^10.0.1",
+    "@types/jasmine": "~6.0.0",
     "angular-eslint": "22.6.0",
-    "eslint": "^9.39.1",
+    "eslint": "^10.13.0",
     "istanbul-lib-instrument": "^6.0.3",
-    "jasmine-core": "~5.9.0",
+    "jasmine-core": "~6.3.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
