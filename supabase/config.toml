@@ -203,9 +203,8 @@ password_requirements = ""
 [auth.rate_limit]
 # Number of emails that can be sent per hour. Requires auth.email.smtp to be enabled.
 # Raised from the Supabase CLI default (2) for local dev/e2e, where a full Playwright run
-# sends a handful of magic-link emails. This file is local-only -- production uses a
-# separate real Supabase project (see web/src/environments/environment.prod.ts) -- so
-# raising it here is safe.
+# sends a handful of magic-link emails. Staging and production set their own limit in the
+# [remotes.*] blocks at the end of this file, so raising it here is safe.
 email_sent = 100
 # Number of SMS messages that can be sent per hour. Requires auth.sms to be enabled.
 sms_sent = 30
@@ -441,9 +440,10 @@ enabled = true
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
 
-# Overrides applied when the CLI is linked to the staging project (`supabase config push`,
-# run by the deploy-staging CI job). Everything above is tuned for local dev -- these replace
-# the local-only bits: URLs, the generous email rate limits, and Mailpit instead of real SMTP.
+# Overrides applied when the CLI is linked to the staging or production project
+# (`supabase config push`, run by the deploy jobs in CI). Everything above is tuned for local
+# dev -- these replace the local-only bits: URLs, the generous email rate limits, and Mailpit
+# instead of real SMTP. Keep the two blocks in step.
 [remotes.staging]
 project_id = "ceqkaciklgqzfwycrrfx"
 
@@ -474,4 +474,34 @@ content_path = "./supabase/templates/magic_link.html"
 
 [remotes.staging.auth.email.template.confirmation]
 subject = "[Staging] Kitchen Table sign-in link"
+content_path = "./supabase/templates/magic_link.html"
+
+[remotes.production]
+project_id = "fdojaontbugknmrjjxjo"
+
+[remotes.production.auth]
+site_url = "https://kitchentable.dating"
+additional_redirect_urls = ["https://kitchentable.dating/auth/callback"]
+
+[remotes.production.auth.rate_limit]
+email_sent = 100
+
+[remotes.production.auth.email]
+max_frequency = "60s"
+
+[remotes.production.auth.email.smtp]
+enabled = true
+host = "live.smtp.mailtrap.io"
+port = 587
+user = "api"
+pass = "env(SUPABASE_AUTH_SMTP_PASS)"
+admin_email = "no-reply@kitchentable.dating"
+sender_name = "Kitchen Table"
+
+[remotes.production.auth.email.template.magic_link]
+subject = "Kitchen Table sign-in link"
+content_path = "./supabase/templates/magic_link.html"
+
+[remotes.production.auth.email.template.confirmation]
+subject = "Kitchen Table sign-in link"
 content_path = "./supabase/templates/magic_link.html"

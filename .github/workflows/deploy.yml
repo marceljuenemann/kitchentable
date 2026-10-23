@@ -1,0 +1,122 @@
+name: Deploy
+
+# Deploys one environment, called from ci.yml once the checks pass: migrations, auth config
+# (including the [remotes.<environment>] overrides in supabase/config.toml) and edge functions
+# to Supabase, then the frontend to Cloudflare Pages. Secrets live in the GitHub environment of
+# the same name and are passed only to the steps that use them, so npm install scripts and the
+# build never see them.
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: GitHub environment holding the secrets (staging or production)
+        type: string
+        required: true
+      url:
+        type: string
+        required: true
+      project-ref:
+        description: Supabase project ref
+        type: string
+        required: true
+      build-configuration:
+        description: Angular build configuration
+        type: string
+        required: true
+      pages-project:
+        description: Cloudflare Pages project
+        type: string
+        required: true
+      noindex:
+        description: Serve the site with X-Robots-Tag noindex
+        type: boolean
+        default: false
+      latest-only:
+        description: Refuse to deploy a commit that is no longer the head of main
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ inputs.url }}
+    concurrency:
+      group: deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    env:
+      SUPABASE_PROJECT_REF: ${{ inputs.project-ref }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Approving an older run that is still waiting would roll the frontend back to it.
+      - name: Check this is still the latest commit on main
+        if: inputs.latest-only
+        run: |
+          latest=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [ "$latest" != "$GITHUB_SHA" ]; then
+            echo "::error::main has moved on to $latest; deploy that run instead."
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+
+      - name: Install root dependencies (Supabase CLI)
+        run: npm ci
+
+      - name: Install web app dependencies
+        run: npm ci --prefix web
+
+      - name: Link Supabase project
+        run: npx supabase link --project-ref "$SUPABASE_PROJECT_REF"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Apply database migrations
+        run: npx supabase db push --yes
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Push auth config and email templates
+        run: npx supabase config push --yes
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_AUTH_SMTP_PASS: ${{ secrets.SUPABASE_AUTH_SMTP_PASS }}
+
+      # Their environment variables are set by hand in the project (see README.md) and kept
+      # across deploys; verify_jwt comes from supabase/config.toml.
+      - name: Deploy edge functions
+        run: npx supabase functions deploy --use-api --project-ref "$SUPABASE_PROJECT_REF"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Build frontend
+        run: npm run build --prefix web -- --configuration "$BUILD_CONFIGURATION"
+        env:
+          BUILD_CONFIGURATION: ${{ inputs.build-configuration }}
+
+      # Keeps staging out of search engines. Written here rather than in web/public so it
+      # never ships with a production build.
+      - name: Add noindex header
+        if: inputs.noindex
+        run: |
+          printf '/*\n  X-Robots-Tag: noindex, nofollow\n' > web/dist/web/browser/_headers
+
+      # With no 404.html in the output, Pages serves index.html for unknown paths (SPA mode).
+      - name: Deploy frontend to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy web/dist/web/browser --project-name=${{ inputs.pages-project }} --branch=main

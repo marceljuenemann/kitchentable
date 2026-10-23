@@ -68,7 +68,7 @@ npm run typecheck:e2e  # type-check e2e/ (Playwright transpiles TS without check
 
 https://staging.kitchentable.dating — Supabase project "Kitchen Table - Staging" (`ceqkaciklgqzfwycrrfx`, London), frontend on Cloudflare Pages (`kitchentable-staging`), auth emails via Mailtrap. The staging build shows a "Staging" badge and is served with `X-Robots-Tag: noindex`.
 
-Every push to `main` deploys automatically once `check` and `e2e` pass (the `deploy-staging` job in `.github/workflows/ci.yml`):
+Every push to `main` deploys automatically once `check` and `e2e` pass (the `deploy-staging` job in `.github/workflows/ci.yml`, which runs `.github/workflows/deploy.yml`):
 
 1. `supabase db push` — applies new migrations.
 2. `supabase config push` — auth settings and email templates from `supabase/config.toml`, with the `[remotes.staging]` block overriding the local-only values (URLs, rate limits, Mailtrap SMTP instead of Mailpit). Auth settings changed in the dashboard get overwritten here, so change them in `config.toml` instead.
@@ -103,6 +103,14 @@ SUPABASE_AUTH_SMTP_PASS=<mailtrap token> npx supabase config push
 ```
 
 Note `config push` applies without waiting for confirmation when stdin isn't a terminal, so don't pipe into it expecting a dry run.
+
+## Production
+
+https://kitchentable.dating — Supabase project "Kitchen Table" (`fdojaontbugknmrjjxjo`, London), frontend on Cloudflare Pages (`kitchentable-production`), auth emails via Mailtrap.
+
+`main` is always meant to be releasable: work that isn't ready stays on a PR branch (CI runs on PRs too) or behind a flag. After each staging deploy, the `deploy-production` job in `.github/workflows/ci.yml` waits for approval ("Review deployments" on the workflow run) and then runs the same steps as staging, with `[remotes.production]` from `supabase/config.toml` and `ng build --configuration production` (`environment.prod.ts`), and without the noindex header. It only deploys the latest commit on `main`: approving an older run that's still waiting fails rather than rolling production back, so reject those. To undo a change, revert it on `main` and deploy again; a migration that has reached staging can't be reverted, only followed by a new one.
+
+The `production` GitHub environment has the same secrets as `staging` (with the production database password and its own Mailtrap token) and requires a reviewer. The edge function secrets and Vault secrets are set by hand as for staging, with the production project ref and `SITE_URL=https://kitchentable.dating`.
 
 ## License
 
