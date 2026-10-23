@@ -12,7 +12,7 @@ test('shows the invite-only message with no invite code', async ({ page }) => {
 
 test('shows the sign-up form when an invite code is present', async ({ page }) => {
   await page.goto('/?invite=anything');
-  await expect(page.getByRole('heading', { name: 'Sign Up' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sign up' })).toBeVisible();
 });
 
 test('pressing Enter in the email field signs up', async ({ page }) => {

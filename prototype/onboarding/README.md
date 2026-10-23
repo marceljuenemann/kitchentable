@@ -83,11 +83,11 @@ Content is capped at `max-width: 430px`, centred.
 | Dot | Copy |
 | --- | --- |
 | `--sky` | **Non-profit.** No need to pay just to see who likes you |
-| `--magenta` | **Invite-only.** Only vetted members, no fake profiles |
-| `--gold` | **Community-driven.** Contribute to guidelines, product decisions, or the open-source code |
+| `--magenta` | **Invite-only.** Building a trusted community, one vetted member at a time |
+| `--gold` | **Community-driven.** Help shape the guidelines, the features, even the code |
 
 **Sign Up card** (`margin: 28px 0 8px`, `border-radius: 24px`, 1px `--outline-soft`, background `--bg`, padding `24px 20px`):
-- Heading "Sign Up" — `--display`, 20px, weight 700, `--violet`.
+- Heading "Sign up" — `--display`, 20px, weight 700, `--violet`.
 - Field label "EMAIL" — 12.5px, weight 800, `letter-spacing: .08em`, uppercase, `--muted`.
 - Email input — `height: 52px`, `border-radius: 14px`, 1px `--input`, background `--bg`, padding `0 16px`, 16px text. Placeholder `you@example.com`.
 - Consent checkbox — 24×24, `border-radius: 8px`, 2px border (`--outline` off, `--violet` on), fill `--raised` off / `--violet` on, white tick when checked. `role="checkbox"`, `aria-checked`. Label text: "I agree to the [Terms] and [Privacy Policy]." at 14.5px — the plain text toggles the box, the two links navigate.
