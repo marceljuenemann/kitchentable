@@ -74,7 +74,7 @@ Content is capped at `max-width: 430px`, centred.
 
 **Masthead**: logo mark 60×60 + wordmark (23px, weight 800, `letter-spacing: .07em`, uppercase, `--violet`), gap 13px, `padding-top: 40px`.
 
-**Headline**: "Let's fix ENM dating." — `--display`, 42px, weight 800, `line-height: 1.03`, `letter-spacing: -.02em`, `--violet`, `text-wrap: balance`, `margin-top: 34px`.
+**Headline**: "ENM dating, reimagined." — `--display`, 42px, weight 800, `line-height: 1.03`, `letter-spacing: -.02em`, `--violet`, `text-wrap: balance`, `margin-top: 34px`.
 
 **Subhead**: "Kitchen Table is a new dating community for non-monogamous folks in London." — 17.5px, `line-height: 1.5`, `--muted`, `margin-top: 16px`.
 
