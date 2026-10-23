@@ -84,7 +84,7 @@ Content is capped at `max-width: 430px`, centred.
 | --- | --- |
 | `--sky` | **Non-profit.** No need to pay just to see who likes you |
 | `--magenta` | **Invite-only.** Building a trusted community, one vetted member at a time |
-| `--gold` | **Community-driven.** Help shape the guidelines, the features, even the code |
+| `--gold` | **Community-driven.** Help shape the guidelines, features, and even the code |
 
 **Sign Up card** (`margin: 28px 0 8px`, `border-radius: 24px`, 1px `--outline-soft`, background `--bg`, padding `24px 20px`):
 - Heading "Sign up" — `--display`, 20px, weight 700, `--violet`.
