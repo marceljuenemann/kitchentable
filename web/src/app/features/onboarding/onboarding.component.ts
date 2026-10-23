@@ -40,7 +40,6 @@ export class OnboardingComponent {
 
   constructor() {
     // Every step starts at the top.
-    // TODO: This should trigger when the step changes.
     effect(() => {
       this.step();
       window.scrollTo(0, 0);

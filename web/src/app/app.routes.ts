@@ -1,18 +1,21 @@
 import { Routes } from '@angular/router';
 import { authGuard, signedOutGuard } from './core/auth/auth.guard';
+import { CallbackComponent } from './features/auth-callback/callback.component';
+import { LandingComponent } from './features/landing/landing.component';
 
+// Chunks: everything signed-out visitors need is in the initial bundle, everything for
+// signed-in users is one lazy chunk (the shell and all its screens), and the policy documents
+// load only when someone opens one. Fewer, bigger chunks mean fewer round trips one after another.
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
     canActivate: [signedOutGuard],
-    loadComponent: () =>
-      import('./features/landing/landing.component').then((m) => m.LandingComponent),
+    component: LandingComponent,
   },
   {
     path: 'auth/callback',
-    loadComponent: () =>
-      import('./features/auth-callback/callback.component').then((m) => m.CallbackComponent),
+    component: CallbackComponent,
   },
   // One route for everything a signed-in user sees: the shell picks the screen from the
   // profile status, so nobody can navigate into the wrong flow.
@@ -25,14 +28,12 @@ export const routes: Routes = [
   {
     path: 'about/terms',
     data: { policy: 'terms' },
-    loadComponent: () =>
-      import('./features/about/policy-page.component').then((m) => m.PolicyPageComponent),
+    loadComponent: () => import('./shared/policy/policy-chunk').then((m) => m.PolicyPageComponent),
   },
   {
     path: 'about/privacy',
     data: { policy: 'privacy' },
-    loadComponent: () =>
-      import('./features/about/policy-page.component').then((m) => m.PolicyPageComponent),
+    loadComponent: () => import('./shared/policy/policy-chunk').then((m) => m.PolicyPageComponent),
   },
   { path: '**', redirectTo: '' },
 ];

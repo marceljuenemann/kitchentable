@@ -10,7 +10,7 @@ export async function openPolicySheet(
   bottomSheet: MatBottomSheet,
   policy: PolicyId,
 ): Promise<MatBottomSheetRef> {
-  const { PolicySheetComponent } = await import('./policy-sheet.component');
+  const { PolicySheetComponent } = await import('./policy-chunk');
   return bottomSheet.open(PolicySheetComponent, {
     panelClass: ['kt-bottom-sheet', 'kt-bottom-sheet-inner-scroll'],
     autoFocus: 'dialog',
