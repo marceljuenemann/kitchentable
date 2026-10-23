@@ -104,8 +104,6 @@ SUPABASE_AUTH_SMTP_PASS=<mailtrap token> npx supabase config push
 
 Note `config push` applies without waiting for confirmation when stdin isn't a terminal, so don't pipe into it expecting a dry run.
 
-See [TODO.md](TODO.md) for remaining gaps.
-
 ## License
 
 Copyright (C) 2026 HTTP 403 Limited

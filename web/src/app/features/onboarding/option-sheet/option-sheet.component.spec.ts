@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { OptionSheetComponent, OptionSheetData } from './option-sheet.component';
 
 describe('OptionSheetComponent', () => {
@@ -23,7 +23,7 @@ describe('OptionSheetComponent', () => {
     dismiss = jasmine.createSpy('dismiss');
     TestBed.configureTestingModule({
       providers: [
-        provideNoopAnimations(),
+        { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
         { provide: MatBottomSheetRef, useValue: { dismiss } },
         {
           provide: MAT_BOTTOM_SHEET_DATA,

@@ -15,7 +15,6 @@
   "license": "AGPL-3.0-only",
   "author": "HTTP 403 Limited",
   "dependencies": {
-    "@angular/animations": "^22.2.0",
     "@angular/cdk": "^22.2.0",
     "@angular/common": "^22.2.0",
     "@angular/compiler": "^22.2.0",

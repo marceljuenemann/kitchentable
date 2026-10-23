@@ -7,6 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { firstValueFrom } from 'rxjs';
 import { OnboardingDraftStore, ONBOARDING_STEPS } from '../onboarding-draft.store';
 import { MAX_PHOTOS } from '../onboarding-options';
+import { CropSheetComponent } from '../photos/crop-sheet.component';
 import { checkPhotoFile, PhotoError } from '../photos/photo-processor';
 import { PhotoStorageService } from '../photos/photo-storage.service';
 
@@ -102,9 +103,7 @@ export class PhotosStepComponent {
   }
 
   /** Opens the crop sheet, which uploads the photo; resolves with the new photo's id. */
-  private async crop(file: File): Promise<string | undefined> {
-    // Loaded on demand: the crop sheet (with panzoom) is only needed here.
-    const { CropSheetComponent } = await import('../photos/crop-sheet.component');
+  private crop(file: File): Promise<string | undefined> {
     const ref = this.bottomSheet.open(CropSheetComponent, {
       data: { file },
       panelClass: 'kt-bottom-sheet',
