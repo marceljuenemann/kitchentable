@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ProfileService } from '../../../core/profile.service';
 import { UserStorage } from '../../../core/user-storage';
 import { OnboardingDraftStore } from '../onboarding-draft.store';
-import { VETTING_MIN_LENGTH } from '../onboarding-options';
+import { ONBOARDING_FEEDBACK_ID, VETTING_MIN_LENGTH } from '../onboarding-options';
 import { VettingStepComponent } from './vetting-step.component';
 
 describe('VettingStepComponent', () => {
@@ -48,12 +48,13 @@ describe('VettingStepComponent', () => {
     fixture.detectChanges();
   });
 
-  it('asks both questions', () => {
+  it('asks both questions, then for optional feedback', () => {
     const text = fixture.nativeElement.textContent as string;
 
     expect(text).toContain('what is consent and why is it important?');
     expect(text).toContain('guidelines do you think everyone');
-    expect(fixture.nativeElement.querySelectorAll('textarea').length).toBe(2);
+    expect(text).toContain('How did you find signing up?');
+    expect(fixture.nativeElement.querySelectorAll('textarea').length).toBe(3);
   });
 
   it('cannot be submitted until both answers are long enough', () => {
@@ -80,14 +81,14 @@ describe('VettingStepComponent', () => {
 
   it('states the minimum and the progress towards it, then just the count', () => {
     const hints = () => fixture.nativeElement.querySelectorAll('mat-form-field')[0].textContent;
-    expect(hints()).toContain(`At least ${VETTING_MIN_LENGTH} characters`);
+    expect(hints()).toContain(`${VETTING_MIN_LENGTH} characters minimum`);
     expect(hints()).toContain(`0 / ${VETTING_MIN_LENGTH}`);
 
     type(0, text(30));
     expect(hints()).toContain(`30 / ${VETTING_MIN_LENGTH}`);
 
     type(0, text(VETTING_MIN_LENGTH + 20));
-    expect(hints()).not.toContain('At least');
+    expect(hints()).not.toContain('minimum');
     expect(hints()).toContain(`${VETTING_MIN_LENGTH + 20} characters`);
   });
 
@@ -95,6 +96,15 @@ describe('VettingStepComponent', () => {
     type(0, 'my answer');
 
     expect(store.draft().vettingAnswers['consent']).toBe('my answer');
+  });
+
+  it('can be submitted without feedback, and keeps feedback with the answers', () => {
+    answerBoth();
+    expect(submitButton().disabled).toBeFalse();
+
+    type(2, 'Smooth!');
+    expect(store.draft().vettingAnswers[ONBOARDING_FEEDBACK_ID]).toBe('Smooth!');
+    expect(submitButton().disabled).toBeFalse();
   });
 
   it('submits the finished profile', async () => {

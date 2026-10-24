@@ -4,7 +4,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ProfileService } from '../../../core/profile.service';
 import { OnboardingDraftStore, ONBOARDING_STEPS, toNewProfile } from '../onboarding-draft.store';
-import { VETTING_MIN_LENGTH, VETTING_QUESTIONS } from '../onboarding-options';
+import {
+  ONBOARDING_FEEDBACK_ID,
+  VETTING_MIN_LENGTH,
+  VETTING_QUESTIONS,
+} from '../onboarding-options';
 
 /** Onboarding step 4: the private vetting questions, then submit. */
 @Component({
@@ -24,6 +28,7 @@ export class VettingStepComponent {
   readonly totalSteps = ONBOARDING_STEPS;
   readonly questions = VETTING_QUESTIONS;
   readonly minLength = VETTING_MIN_LENGTH;
+  readonly feedbackId = ONBOARDING_FEEDBACK_ID;
 
   /** How many more characters each question needs, by question id. */
   readonly charsToGo = computed(() =>

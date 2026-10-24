@@ -12,7 +12,7 @@ Postgres via Supabase. The whole schema lives in `supabase/migrations/`, and is 
 
 - `profiles` — one row per user who has **completed onboarding**; `id` = `auth.users.id`. Signing up creates only an `auth.users` row, so "no profile row" means the user still needs to onboard (draft answers live in the browser's localStorage until submitted).
   `name`, `pronouns`, `bio` and `location` are `not null` (they are required, and rows only come from `submit_onboarding`); `tagline` is `not null` too but may be an empty string. Birth month and year are the only nullable columns, since they are optional.
-  Answers to the vetting questions are stored in the `vetting_answers` jsonb column (keyed by question id) rather than one column per question, since the questions will change and are never filtered on. The same object holds `invite_code`, the code the user signed up with, if there was one (see below).
+  Answers to the vetting questions are stored in the `vetting_answers` jsonb column (keyed by question id) rather than one column per question, since the questions will change and are never filtered on. The same object holds `invite_code`, the code the user signed up with, if there was one (see below), and `onboarding_feedback`, the optional answer to "How did you find signing up?", if they gave one.
   Photos are the ordered `photos uuid[]` column (first = main photo, at most 6, enforced by a check), not a separate table; the files themselves live in the `photos` storage bucket. See [photos.md](photos.md).
 - `analytics_events`: first-party product analytics (see below). No client access, the same as `profiles`.
 - `terms_acceptances`: who accepted which version of the terms, and when (see below). Clients use it directly, under RLS.

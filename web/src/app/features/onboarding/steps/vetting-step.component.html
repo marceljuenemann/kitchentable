@@ -14,7 +14,7 @@
       (input)="setAnswer(question.id, $any($event.target).value)"
     ></textarea>
     @if (charsToGo()[question.id] > 0) {
-      <mat-hint class="short">At least {{ minLength }} characters</mat-hint>
+      <mat-hint class="short">{{ minLength }} characters minimum</mat-hint>
     }
     <mat-hint align="end" [class.short]="charsToGo()[question.id] > 0">
       @if (charsToGo()[question.id] > 0) {
@@ -25,6 +25,20 @@
     </mat-hint>
   </mat-form-field>
 }
+
+<p class="question" id="question-feedback">
+  Optional: How did you find signing up? Anything we could improve?
+</p>
+<mat-form-field appearance="outline" subscriptSizing="dynamic">
+  <textarea
+    matInput
+    rows="3"
+    placeholder="What was confusing, what you liked, anything at all"
+    aria-labelledby="question-feedback"
+    [value]="answer(feedbackId)"
+    (input)="setAnswer(feedbackId, $any($event.target).value)"
+  ></textarea>
+</mat-form-field>
 
 @if (failed()) {
   <p class="error" role="alert">

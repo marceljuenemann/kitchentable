@@ -95,7 +95,7 @@ test('step 2 needs an about text of 250 characters and something you are looking
   const next = page.getByRole('button', { name: 'Continue' });
   await expect(next).toBeDisabled();
 
-  await expect(page.getByText('At least 250 characters')).toBeVisible();
+  await expect(page.getByText('250 characters minimum')).toBeVisible();
   await page.getByLabel('About you').fill('x'.repeat(249));
   await expect(page.getByText('249 / 250')).toBeVisible();
   await page.getByLabel('About you').fill('x'.repeat(250));
