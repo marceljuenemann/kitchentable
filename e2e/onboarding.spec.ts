@@ -95,8 +95,9 @@ test('step 2 needs an about text of 250 characters and something you are looking
   const next = page.getByRole('button', { name: 'Continue' });
   await expect(next).toBeDisabled();
 
+  await expect(page.getByText('250 characters minimum')).toBeVisible();
   await page.getByLabel('About you').fill('x'.repeat(249));
-  await expect(page.getByText('1 characters to go')).toBeVisible();
+  await expect(page.getByText('249 / 250')).toBeVisible();
   await page.getByLabel('About you').fill('x'.repeat(250));
   await expect(page.getByText('250 characters')).toBeVisible();
   await expect(next).toBeDisabled();
@@ -140,7 +141,7 @@ test('step 4 needs both vetting answers to have 80 characters, and keeps them ac
   const consent = page.getByLabel('In your own words, what is consent and why is it important?');
   const guidelines = page.getByLabel(/^What guidelines do you think everyone/);
   await consent.fill('x'.repeat(79));
-  await expect(page.getByText('1 characters to go')).toBeVisible();
+  await expect(page.getByText('79 / 80')).toBeVisible();
   await consent.fill('x'.repeat(80));
   await expect(submit).toBeDisabled();
 

@@ -74,7 +74,7 @@ Content is capped at `max-width: 430px`, centred.
 
 **Masthead**: logo mark 60×60 + wordmark (23px, weight 800, `letter-spacing: .07em`, uppercase, `--violet`), gap 13px, `padding-top: 40px`.
 
-**Headline**: "Let's fix ENM dating." — `--display`, 42px, weight 800, `line-height: 1.03`, `letter-spacing: -.02em`, `--violet`, `text-wrap: balance`, `margin-top: 34px`.
+**Headline**: "ENM dating, reimagined." — `--display`, 42px, weight 800, `line-height: 1.03`, `letter-spacing: -.02em`, `--violet`, `text-wrap: balance`, `margin-top: 34px`.
 
 **Subhead**: "Kitchen Table is a new dating community for non-monogamous folks in London." — 17.5px, `line-height: 1.5`, `--muted`, `margin-top: 16px`.
 
@@ -83,11 +83,11 @@ Content is capped at `max-width: 430px`, centred.
 | Dot | Copy |
 | --- | --- |
 | `--sky` | **Non-profit.** No need to pay just to see who likes you |
-| `--magenta` | **Invite-only.** Only vetted members, no fake profiles |
-| `--gold` | **Community-driven.** Contribute to guidelines, product decisions, or the open-source code |
+| `--magenta` | **Invite-only.** Building a community you can trust |
+| `--gold` | **Community-driven.** Help shape the guidelines, features, and even the code |
 
 **Sign Up card** (`margin: 28px 0 8px`, `border-radius: 24px`, 1px `--outline-soft`, background `--bg`, padding `24px 20px`):
-- Heading "Sign Up" — `--display`, 20px, weight 700, `--violet`.
+- Heading "Sign up" — `--display`, 20px, weight 700, `--violet`.
 - Field label "EMAIL" — 12.5px, weight 800, `letter-spacing: .08em`, uppercase, `--muted`.
 - Email input — `height: 52px`, `border-radius: 14px`, 1px `--input`, background `--bg`, padding `0 16px`, 16px text. Placeholder `you@example.com`.
 - Consent checkbox — 24×24, `border-radius: 8px`, 2px border (`--outline` off, `--violet` on), fill `--raised` off / `--violet` on, white tick when checked. `role="checkbox"`, `aria-checked`. Label text: "I agree to the [Terms] and [Privacy Policy]." at 14.5px — the plain text toggles the box, the two links navigate.
@@ -164,7 +164,7 @@ Age is computed as `currentYear − year`, minus 1 if the current month is befor
 
 **Tagline** — label "TAGLINE", text input `maxlength="60"`, placeholder "One line summary that people see first". Right-aligned counter below at 11px weight 600 `--outline`: "{60 − length} left". **Optional.**
 
-**About you** — label "ABOUT YOU", `<textarea rows="7">` (`border-radius: 14px`, padding `14px 16px`, 16px / `line-height: 1.55`, `resize: vertical`), placeholder "Tell people more about yourself and what you're looking for". Right-aligned counter at 12px weight 600: below the minimum it reads "{n} characters to go" in `--magenta`; at or above it reads "{n} characters" in `--outline`. **Required, minimum 250 characters (trimmed).**
+**About you** — label "ABOUT YOU", `<textarea rows="7">` (`border-radius: 14px`, padding `14px 16px`, 16px / `line-height: 1.55`, `resize: vertical`), placeholder "Tell people more about yourself and what you're looking for". Hints at 12px weight 600: below the minimum, "At least {min} characters" on the left and "{n} / {min}" on the right, both in `--magenta`; at or above it, only "{n} characters" on the right, in `--outline`. **Required, minimum 250 characters (trimmed).**
 
 **Looking for** — label "LOOKING FOR", then wrapping chips (`min-height: 44px`, `border-radius: 99px`, padding `0 15px`, 14.5px weight 700, gap 8px). Off: `--sunken` / `--muted` / `1.5px solid transparent`. On: `--violet-container` / `--violet` / `1.5px solid --violet` plus a 15px tick, again **rendered only when on**.
 
@@ -200,7 +200,7 @@ Subtitle: "Select up to six photos. Drag to reorder."
 
 Subtitle: "These answers are not shown on your profile."
 
-Two questions, each a 16.5px weight 700 `--ink` prompt (`line-height: 1.4`, `margin-top: 22px`) over a `<textarea rows="4">` with placeholder "Write as much or as little as you need", and the same counter treatment as the About field.
+Two questions, each a 16.5px weight 700 `--ink` prompt (`line-height: 1.4`, `margin-top: 22px`) over a `<textarea rows="4">` with placeholder "A few sentences is plenty", and the same counter treatment as the About field.
 
 1. "In your own words, what is consent and why is it important?" — minimum **80** characters.
 2. "What guidelines do you think everyone in the Kitchen Table community should adhere to?" — minimum **80** characters.

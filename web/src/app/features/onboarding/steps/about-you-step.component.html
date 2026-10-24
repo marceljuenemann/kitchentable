@@ -22,9 +22,12 @@
     [value]="draft().aboutText"
     (input)="setAbout($any($event.target).value)"
   ></textarea>
+  @if (aboutLeft() > 0) {
+    <mat-hint class="short">{{ aboutMin }} characters minimum</mat-hint>
+  }
   <mat-hint align="end" [class.short]="aboutLeft() > 0">
     @if (aboutLeft() > 0) {
-      {{ aboutLeft() }} characters to go
+      {{ aboutLength() }} / {{ aboutMin }}
     } @else {
       {{ aboutLength() }} characters
     }

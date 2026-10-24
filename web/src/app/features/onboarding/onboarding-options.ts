@@ -46,6 +46,9 @@ export const VETTING_QUESTIONS = [
   },
 ];
 
+/** Optional feedback on onboarding (step 4), stored with the vetting answers under this key. */
+export const ONBOARDING_FEEDBACK_ID = 'onboarding_feedback';
+
 /**
  * Standard "looking for" options. The id is what gets stored (so a label can be reworded without
  * a data migration); anything else in a draft/profile is the user's own text.

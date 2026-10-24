@@ -12,7 +12,7 @@ Postgres via Supabase. The whole schema lives in `supabase/migrations/`, and is 
 
 - `profiles` — one row per user who has **completed onboarding**; `id` = `auth.users.id`. Signing up creates only an `auth.users` row, so "no profile row" means the user still needs to onboard (draft answers live in the browser's localStorage until submitted).
   `name`, `pronouns`, `bio` and `location` are `not null` (they are required, and rows only come from `submit_onboarding`); `tagline` is `not null` too but may be an empty string. Birth month and year are the only nullable columns, since they are optional.
-  Answers to the vetting questions are stored in the `vetting_answers` jsonb column (keyed by question id) rather than one column per question, since the questions will change and are never filtered on. The same object holds `invite_code`, the code the user signed up with, if there was one (see below).
+  Answers to the vetting questions are stored in the `vetting_answers` jsonb column (keyed by question id) rather than one column per question, since the questions will change and are never filtered on. The same object holds `invite_code`, the code the user signed up with, if there was one (see below), and `onboarding_feedback`, the optional answer to "How did you find signing up?", if they gave one.
   Photos are the ordered `photos uuid[]` column (first = main photo, at most 6, enforced by a check), not a separate table; the files themselves live in the `photos` storage bucket. See [photos.md](photos.md).
 - `analytics_events`: first-party product analytics (see below). No client access, the same as `profiles`.
 - `terms_acceptances`: who accepted which version of the terms, and when (see below). Clients use it directly, under RLS.
@@ -52,6 +52,15 @@ When a profile row is inserted in `vetting` (that is, an application was submitt
 Signing up is open: requesting a sign-in link for an address without an account creates one, and nothing in the database validates invite codes. This is deliberate. Sign-up and sign-in must answer the same for every email address, otherwise the forms reveal who is a member.
 
 The landing page sends the invite code from the `?invite=` link as sign-up metadata (`invite_code` in `auth.users.raw_user_meta_data`), and `submit_onboarding` copies it into `profiles.vetting_answers` as `invite_code`. It is checked by hand during vetting. Treat it as a hint only: users can edit their own metadata before submitting, and someone who first signs in without an invite link has no code at all. There is no table of valid codes yet.
+
+Applicants can invite friends from the "Thanks for applying" screen. Their personal code is the first 8 hex digits of the SHA-256 of their user id, worked out in the browser (`core/invite-code.ts`), so nothing is stored for it. To see who invited an applicant:
+
+```sql
+select id, name from profiles
+where left(encode(sha256(id::text::bytea), 'hex'), 8) = '<invite_code>';
+```
+
+Codes handed out by hand (like the ones in the first invite links) don't match anyone.
 
 ## No passwords
 

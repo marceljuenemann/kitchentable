@@ -63,6 +63,19 @@ export async function photoObject(
 export async function signInAs(
   page: Page,
   status: ProfileStatus | null,
+  options: { acceptedTerms?: boolean } = {},
+): Promise<string> {
+  const email = await createUser(status, options);
+  await signIn(page, email);
+  return email;
+}
+
+/**
+ * Creates a user like `signInAs` without signing in. GoTrue allows one sign-in link per user
+ * a second (`max_frequency`), so use this before asking for a sign-in email.
+ */
+export async function createUser(
+  status: ProfileStatus | null,
   { acceptedTerms = true } = {},
 ): Promise<string> {
   const email = uniqueEmail('shell');
@@ -89,7 +102,6 @@ export async function signInAs(
     });
   }
 
-  await signIn(page, email);
   return email;
 }
 
