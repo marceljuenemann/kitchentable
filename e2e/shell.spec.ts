@@ -25,6 +25,23 @@ test('sends a signed-in user from the landing page to the app', async ({ page })
   await expect(page.getByRole('heading', { name: 'Thanks for applying' })).toBeVisible();
 });
 
+test('an applicant gets a personal invite link that opens the sign-up form', async ({
+  page,
+  browser,
+}) => {
+  await signInAs(page, 'vetting');
+
+  await expect(page.getByRole('heading', { name: 'Help us launch' })).toBeVisible();
+  const link = page.getByText(/\?invite=/);
+  await expect(link).toHaveText(/^http:\/\/localhost:4200\/\?invite=[0-9a-f]{8}$/);
+
+  // A friend, not signed in, opens it.
+  const friend = await browser.newPage();
+  await friend.goto((await link.textContent())!);
+  await expect(friend.getByRole('heading', { name: 'Sign up' })).toBeVisible();
+  await friend.close();
+});
+
 test('signing out returns to the landing page', async ({ page }) => {
   await signInAs(page, 'vetting');
 

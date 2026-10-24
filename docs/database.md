@@ -53,6 +53,15 @@ Signing up is open: requesting a sign-in link for an address without an account 
 
 The landing page sends the invite code from the `?invite=` link as sign-up metadata (`invite_code` in `auth.users.raw_user_meta_data`), and `submit_onboarding` copies it into `profiles.vetting_answers` as `invite_code`. It is checked by hand during vetting. Treat it as a hint only: users can edit their own metadata before submitting, and someone who first signs in without an invite link has no code at all. There is no table of valid codes yet.
 
+Applicants can invite friends from the "Thanks for applying" screen. Their personal code is the first 8 hex digits of the SHA-256 of their user id, worked out in the browser (`core/invite-code.ts`), so nothing is stored for it. To see who invited an applicant:
+
+```sql
+select id, name from profiles
+where left(encode(sha256(id::text::bytea), 'hex'), 8) = '<invite_code>';
+```
+
+Codes handed out by hand (like the ones in the first invite links) don't match anyone.
+
 ## No passwords
 
 Sign-in is by emailed link only, but Supabase Auth cannot switch passwords off, and its password sign-up endpoint is callable by anyone. Two things keep that harmless:
