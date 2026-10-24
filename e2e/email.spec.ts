@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { sendSignInEmail, signInAs } from './support/admin';
+import { createUser, sendSignInEmail } from './support/admin';
 import { firstLink, getLatestEmail } from './support/mailpit';
 
 // The template lives in supabase/templates/magic_link.html and is set up in supabase/config.toml.
 // Changing either needs `supabase stop && supabase start` before this passes.
 test('the sign-in email is branded, and its first link signs the user in', async ({ page }) => {
-  const email = await signInAs(page, null);
+  const email = await createUser(null);
   await sendSignInEmail(email);
 
   const message = await getLatestEmail(email);
@@ -21,4 +21,8 @@ test('the sign-in email is branded, and its first link signs the user in', async
   const response = await fetch(logo!);
   expect(response.ok).toBe(true);
   expect(response.headers.get('content-type')).toContain('image/png');
+
+  await page.goto(firstLink(message.html));
+  await page.waitForURL('**/app');
+  await expect(page.getByRole('heading', { name: 'Create profile' })).toBeVisible();
 });
