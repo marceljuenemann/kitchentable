@@ -83,8 +83,12 @@
   }
 }
 
-// Frosted round buttons over the photo, like the back button.
-%round-button {
+// Stays in view while the page scrolls.
+.back {
+  position: fixed;
+  top: 12px;
+  left: max(12px, calc((100% - var(--kt-page-width)) / 2 + 12px));
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -98,6 +102,7 @@
   box-shadow: var(--kt-shadow-soft);
   color: var(--kt-violet);
   cursor: pointer;
+  animation: fade-in 0.12s ease-out both;
 
   mat-icon {
     width: 28px;
@@ -106,33 +111,47 @@
   }
 }
 
-// Previous/next photo, for a mouse or keyboard; touch screens swipe instead.
+// Previous/next photo, for a mouse or keyboard; touch screens swipe instead. Plain and
+// see-through, so they don't compete with the back button.
 .step {
-  @extend %round-button;
   position: absolute;
-  top: calc(50% - 22px);
+  top: calc(50% - 24px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: white;
+  opacity: 0.7;
+  filter: drop-shadow(0 1px 3px oklch(0.2 0.05 300 / 0.5));
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+  }
+
+  mat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+  }
 
   &.previous {
-    left: 12px;
+    left: 4px;
   }
 
   &.next {
-    right: 12px;
+    right: 4px;
   }
 
   @media (hover: none) {
     display: none;
   }
-}
-
-// Stays in view while the page scrolls.
-.back {
-  @extend %round-button;
-  position: fixed;
-  top: 12px;
-  left: max(12px, calc((100% - var(--kt-page-width)) / 2 + 12px));
-  z-index: 1;
-  animation: fade-in 0.12s ease-out both;
 }
 
 .content {
@@ -180,94 +199,57 @@ h1 {
   list-style: none;
 }
 
+// The same colours as the chips in onboarding: gender as in its sheet (secondary), looking for
+// as in About you (primary). Sexuality is gold here, to tell it apart next to gender.
 .chip {
   padding: 8px 13px;
   border-radius: 99px;
   font-size: 13.5px;
   font-weight: 700;
-  background: var(--kt-sunken);
-  color: var(--kt-muted);
 
-  &.magenta {
-    background: var(--kt-magenta-container);
-    color: var(--kt-magenta);
+  &.gender {
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
   }
 
-  &.sky {
-    background: var(--kt-sky-container);
-    color: var(--kt-sky);
-  }
-
-  &.violet {
-    background: var(--kt-violet-container);
-    color: var(--kt-violet-soft);
-  }
-
-  &.gold {
+  &.sexuality {
     background: var(--kt-gold-container);
     color: var(--kt-gold);
   }
-}
 
-section {
-  margin-top: 28px;
-}
-
-h2 {
-  margin: 0;
-  font-family: var(--kt-font-display);
-  font-size: 19px;
-  font-weight: 700;
-  color: var(--kt-ink);
-}
-
-.bar {
-  display: block;
-  width: 36px;
-  height: 3px;
-  margin-top: 8px;
-  border-radius: 99px;
-
-  &.gold {
-    background: var(--kt-gold);
-  }
-
-  &.violet {
-    background: var(--kt-violet);
+  .looking-for & {
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
   }
 }
 
 .about p {
-  margin: 14px 0 0;
+  margin: 20px 0 0;
   font-size: 17px;
   line-height: 1.65;
   white-space: pre-line;
+
+  & + p {
+    margin-top: 14px;
+  }
 }
 
-.looking-for ul {
-  display: grid;
-  gap: 10px;
-  margin: 14px 0 0;
-  padding: 0;
-  list-style: none;
+.looking-for {
+  margin-top: 28px;
 
-  li {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    font-size: 16px;
-    line-height: 1.55;
-
-    &::before {
-      content: '';
-      flex: none;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--kt-violet);
-      transform: translateY(-1px);
-    }
+  .chips {
+    margin-top: 10px;
   }
+}
+
+// A small label rather than a heading: the chips speak for themselves.
+h2 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kt-muted);
 }
 
 // The text comes in just after the photo starts moving, one part after another.
