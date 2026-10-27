@@ -60,7 +60,7 @@ Processing rule for file size: the client targets about 1 MB or less for `full` 
 
 ## Access and privacy
 
-- The bucket is **private**. Row-level security allows a user to read, write and delete only objects under their own `<user id>/` folder. Photos are displayed through **signed URLs** (`createSignedUrl`, about an hour).
+- The bucket is **private**. Row-level security allows a user to read, write and delete only objects under their own `<user id>/` folder. Admins (profile status `admin`, see `docs/database.md`) can also read every photo, for vetting, but not change or delete them. Photos are displayed through **signed URLs** (`createSignedUrl`, about an hour).
 - **Not built yet:** letting other users see the photos of `active` profiles (needed for browse and search). That will be an additional storage select policy driven by the profile status rules in `docs/database.md`, so suspended, disabled and deleted profiles stop being visible automatically.
 - Deleting a profile should clear `photos` and remove the files (see the deletion note in `docs/database.md`).
 

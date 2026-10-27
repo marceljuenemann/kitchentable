@@ -44,6 +44,7 @@ describe('ShellComponent', () => {
     'disabled',
     'suspended',
     'deleted',
+    'admin',
   ] as const) {
     it(`shows the ${status} screen to a ${status} profile`, () => {
       state$.next(profile(status) as ProfileState);

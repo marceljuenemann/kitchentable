@@ -30,6 +30,10 @@
       <!-- Hidden from search but still able to message, so the app stays usable. -->
       <app-main />
     }
+    @case ('admin') {
+      <!-- Admin accounts use the app too, but are never shown to members. -->
+      <app-main />
+    }
     @case ('suspended') {
       <app-header />
       <main>

@@ -4,7 +4,7 @@ Postgres via Supabase. The whole schema lives in `supabase/migrations/`, and is 
 
 - **Clients never touch the `profiles` table directly.** All privileges are revoked from `anon` and `authenticated`, RLS is on with no policies (a backstop), and every read/write goes through a `security definer` function that checks `auth.uid()`. This keeps the flows and state changes in one auditable place instead of spread across RLS policies. Functions are added as the features that need them are built.
 - RLS exceptions, where the rules are simple enough for policies:
-  - the `photos` storage bucket: owner-only (`<user id>/<photo id>/...`), because uploads go straight from the browser. Sizes, limits and privacy rules are in [photos.md](photos.md).
+  - the `photos` storage bucket: owner-only (`<user id>/<photo id>/...`), because uploads go straight from the browser, plus read access for admins (vetting). Sizes, limits and privacy rules are in [photos.md](photos.md).
   - `terms_acceptances`: users read their own rows and insert their own, through the REST API (see [Terms acceptance](#terms-acceptance)).
 - The `service_role` has full table access (admin tooling, webhooks, e2e fixtures).
 
@@ -81,17 +81,18 @@ Sign-in is by emailed link only, but Supabase Auth cannot switch passwords off, 
 | `disabled`  | hidden by the user: not in search, can still message               | main app               |
 | `suspended` | suspended by an admin                                              | suspended message      |
 | `deleted`   | deleted by the user: can no longer message; personal data scrubbed | deleted message        |
+| `admin`     | an admin account, never shown to members (see [Admins](#admins))   | main app               |
 
-There is no `rejected` status yet; a rejected applicant simply stays in `vetting`. Add it together with the admin tool.
+There is no `rejected` status; a rejected applicant simply stays in `vetting`. Add one when someone actually needs rejecting.
 
 ### Intended transitions
 
-Only reading (`get_my_profile`) and onboarding submission (`submit_onboarding`) are implemented so far; until the other procedures exist, statuses are changed by an admin via Studio / the service role.
+Only onboarding submission (`submit_onboarding`) and approval (`admin_approve_application`) are implemented so far; until the other procedures exist, statuses are changed by an admin via Studio / the service role. `admin` has no transitions: it is only ever set by hand.
 
 | From                 | To          | Who                      |
 | -------------------- | ----------- | ------------------------ |
 | _(no row)_           | `vetting`   | user (onboarding submit) |
-| `vetting`            | `approved`  | admin                    |
+| `vetting`            | `approved`  | admin (`admin_approve_application`) |
 | `approved`           | `active`    | age-verification webhook |
 | `active`             | `disabled`  | user                     |
 | `disabled`           | `active`    | user                     |
@@ -108,3 +109,18 @@ Anything that depends on status (search visibility, who may message) should deri
 - `get_my_profile()` → the caller's profile (including the `photos` id array, but without `vetting_answers`, which only the person vetting needs), or `null` if there is no row. Drives which screen the app shows.
 - `track_event(p_name, p_props)` → records an analytics event for the caller. Rejects unknown names and `p_props` that isn't a JSON object of at most 500 characters. See [Analytics](#analytics).
 - `submit_onboarding(p_name, p_pronouns, p_tagline, p_bio, p_location, p_gender, p_sexuality, p_birth_year, p_birth_month, p_looking_for, p_photos, p_vetting_answers)` → creates the caller's profile in status `vetting` (the only way a row gets created; it needs accepted terms), with the invite code from their sign-up metadata added to the vetting answers, or raises `unique_violation` (`23505`) if they already have one.
+
+## Admins
+
+An admin is a separate account whose profile has status `admin`. Admins use the app like members (the shell shows them the main app; the admin tool is under `/admin`), but are never shown to members: anything member-facing only shows `active` profiles. There is no admins table and no flag elsewhere. To make an account an admin, sign in with it, accept the terms, and insert its row in Studio (the placeholders fill the `not null` columns; inserting directly skips onboarding, so no "new application" email is sent):
+
+```sql
+insert into profiles (id, status, name, pronouns, bio, location)
+select id, 'admin', 'Kitchen Table', '-', '-', '-' from auth.users where email = '<address>';
+```
+
+The admin functions raise `insufficient_privilege` (`42501`, "Admins only.") for anyone else:
+
+- `admin_list_applications()` → the profiles in `vetting`, oldest first, as whole rows (`vetting_answers`, and the `invite_code` in it, included), so opening one needs no further request. Profiles are small; the photos are fetched separately.
+- `admin_approve_application(p_id)` → moves a profile from `vetting` to `approved`; raises for anything else, so an application can't be decided twice.
+- `is_admin()` → whether the caller is an admin (false without a signed-in user). Used by the functions above and the `photos_select_admin` storage policy, which lets admins read every photo.

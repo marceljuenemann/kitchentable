@@ -1,11 +1,12 @@
 import { Routes } from '@angular/router';
-import { authGuard, signedOutGuard } from './core/auth/auth.guard';
+import { adminGuard, authGuard, signedOutGuard } from './core/auth/auth.guard';
 import { CallbackComponent } from './features/auth-callback/callback.component';
 import { LandingComponent } from './features/landing/landing.component';
 
 // Chunks: everything signed-out visitors need is in the initial bundle, everything for
-// signed-in users is one lazy chunk (the shell and all its screens), and the policy documents
-// load only when someone opens one. Fewer, bigger chunks mean fewer round trips one after another.
+// signed-in users is one lazy chunk (the shell and all its screens), the admin tool is another
+// (so members never download it), and the policy documents load only when someone opens one.
+// Fewer, bigger chunks mean fewer round trips one after another.
 export const routes: Routes = [
   {
     path: '',
@@ -23,6 +24,12 @@ export const routes: Routes = [
     path: 'app',
     canActivate: [authGuard],
     loadComponent: () => import('./features/shell/shell.component').then((m) => m.ShellComponent),
+  },
+  // For admin accounts (profile status `admin`) only.
+  {
+    path: 'admin',
+    canMatch: [adminGuard],
+    loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
   },
   // Legal documents, public whether signed in or not.
   {

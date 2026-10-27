@@ -1,6 +1,6 @@
 /** See docs/database.md for what each status means and who may change it. */
 export type ProfileStatus =
-  'vetting' | 'approved' | 'active' | 'disabled' | 'suspended' | 'deleted';
+  'vetting' | 'approved' | 'active' | 'disabled' | 'suspended' | 'deleted' | 'admin';
 
 /**
  * What onboarding submits to create a profile (`submit_onboarding`; each field is the argument
