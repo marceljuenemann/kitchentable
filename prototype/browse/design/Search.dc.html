@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;1,6..12,400&display=swap" rel="stylesheet">
+<style>
+:root{
+--violet:oklch(0.29 0.15 300.5);--violet-soft:oklch(0.42 0.19 300);--violet-container:oklch(0.925 0.032 300);
+--sky:oklch(0.48 0.12 233);--sky-container:oklch(0.925 0.043 233);
+--magenta:oklch(0.5 0.216 341);--magenta-container:oklch(0.935 0.038 341);
+--gold:oklch(0.48 0.12 68);--gold-container:oklch(0.935 0.05 84);
+--bg:oklch(0.995 0.004 95);--ink:oklch(0.21 0.095 300);--muted:oklch(0.42 0.045 300);
+--raised:oklch(1 0 0);--sunken:oklch(0.958 0.008 95);
+--cream:oklch(0.955 0.032 88);--cream-strong:oklch(0.925 0.048 86);
+--outline:oklch(0.55 0.03 300);--outline-soft:oklch(0.885 0.012 95);--input:oklch(0.855 0.016 95);
+--shadow-soft:0 1px 2px oklch(0.3 0.12 300 / .07), 0 10px 26px -14px oklch(0.3 0.12 300 / .22);
+--shadow-lift:0 2px 6px oklch(0.3 0.12 300 / .1), 0 22px 46px -20px oklch(0.3 0.12 300 / .3);
+--display:"Baloo Bhaijaan 2","Trebuchet MS",sans-serif;
+--sans:"Nunito Sans",system-ui,sans-serif;
+}
+body{margin:0;background:oklch(0.9 0.01 300);color:oklch(0.21 0.095 300);font-family:"Nunito Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;display:flex;justify-content:center}
+a{color:oklch(0.42 0.19 300)}a:hover{color:oklch(0.29 0.15 300.5)}
+*{box-sizing:border-box}
+[data-scroll]::-webkit-scrollbar{width:0;height:0}
+</style>
+</helmet>
+
+<div ref="{{ rootRef }}" style="position:relative;width:min(600px,100vw);height:844px;max-height:100vh;margin:0 auto;background:var(--bg);box-shadow:0 0 0 1px oklch(0.29 0.15 300.5 / .08), var(--shadow-lift);font-family:var(--sans);color:var(--ink);display:flex;flex-direction:column;overflow:hidden">
+
+<header style="flex:none;background:var(--raised);border-bottom:1px solid var(--outline-soft);padding:12px 16px">
+<div style="display:flex;gap:8px;align-items:center">
+<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="oklch(0.42 0.045 300)" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex:none;margin-right:1px"><path d="M4 7h16M7 12h10M10 17h4"></path></svg>
+<sc-for list="{{ fields }}" as="f" hint-placeholder-count="3">
+<button onClick="{{ f.open }}" aria-pressed="{{ f.on }}" aria-label="{{ f.aria }}" style="flex:none;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 14px;border:{{ f.border }};border-radius:99px;background:{{ f.bg }};color:{{ f.color }};font-family:var(--sans);font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap">
+<span>{{ f.label }}</span>
+<sc-if value="{{ f.showCount }}" hint-placeholder-val="{{ false }}">
+<span style="flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-size:10.5px;font-weight:800">{{ f.count }}</span>
+</sc-if>
+<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="{{ f.chevron }}"></path></svg>
+</button>
+</sc-for>
+</div>
+</header>
+
+<div data-scroll="grid" style="flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none;padding:14px 16px 96px">
+
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px">
+<p style="margin:0;font-size:13.5px;font-weight:700;color:var(--muted)">{{ resultLine }}</p>
+<button onClick="{{ cycleSort }}" style="display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;padding:6px 0;font-family:var(--sans);font-size:13.5px;font-weight:700;color:var(--violet);cursor:pointer">
+<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"></path></svg>
+{{ sortLabel }}
+</button>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+<sc-for list="{{ people }}" as="p" hint-placeholder-count="8">
+<div style="position:relative;border-radius:10px;overflow:hidden;background:{{ p.wrapBg }}">
+<div aria-hidden="true" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:oklch(0.995 0.004 95);opacity:{{ p.revealOpacity }}">
+<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 12c2.6-4.2 5.6-6.3 9-6.3s6.4 2.1 9 6.3c-2.6 4.2-5.6 6.3-9 6.3S5.6 16.2 3 12z"></path><path d="M4 4l16 16"></path></svg>
+<span style="font-size:12.5px;font-weight:800;letter-spacing:.02em">{{ p.revealLabel }}</span>
+</div>
+<article onPointerDown="{{ p.down }}" onPointerMove="{{ p.move }}" onPointerUp="{{ p.up }}" onPointerCancel="{{ p.up }}" onClick="{{ p.openProfile }}" style="position:relative;border-radius:10px;overflow:hidden;background:var(--raised);touch-action:pan-y;cursor:pointer;transform:translateX({{ p.dx }});opacity:{{ p.tileOpacity }};transition:{{ p.transition }};visibility:{{ p.tileVisibility }}">
+<div style="position:relative;aspect-ratio:1/1;background:var(--sunken)">
+<div role="img" aria-label="{{ p.alt }}" style="width:100%;height:100%;background-color:var(--sunken);background-image:url({{ p.photo }});background-size:cover;background-position:{{ p.crop }}"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;padding:34px 12px 11px;background:linear-gradient(to top, oklch(0.16 0.06 300 / .9) 0%, oklch(0.16 0.06 300 / .64) 46%, oklch(0.16 0.06 300 / 0) 100%)">
+<p style="margin:0;font-family:var(--display);font-size:17px;font-weight:700;line-height:1.15;color:#fff">{{ p.name }}</p>
+<p style="margin:4px 0 0;font-size:12.5px;line-height:1.35;color:oklch(0.995 0.004 95 / .95);text-wrap:pretty">{{ p.tagline }}</p>
+</div>
+</div>
+</article>
+</div>
+</sc-for>
+</div>
+
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="border-radius:20px;border:1px solid var(--cream-strong);background:var(--cream);padding:20px;text-align:center">
+<p style="margin:0;font-family:var(--display);font-size:18px;font-weight:700">Nobody matches all of that</p>
+<p style="margin:6px 0 0;font-size:14.5px;line-height:1.55;color:var(--muted)">Try loosening one filter. The list is small on purpose — we don't pad it with people who aren't nearby.</p>
+<button onClick="{{ clearAll }}" style="margin-top:14px;height:44px;padding:0 20px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer">Clear all filters</button>
+</div>
+</sc-if>
+
+</div>
+
+<nav style="position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);padding:8px 4px 16px;background:oklch(1 0 0 / .96);backdrop-filter:blur(10px);border-top:1px solid var(--outline-soft)">
+<sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+<button onClick="{{ n.pick }}" aria-label="{{ n.label }}" aria-current="{{ n.current }}" style="min-height:60px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer">
+<span style="display:inline-flex;align-items:center;justify-content:center;width:60px;height:40px;border-radius:99px;background:{{ n.pill }};color:{{ n.color }}">
+<sc-if value="{{ n.isMark }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 360 360" width="28" height="28" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="round" aria-hidden="true"><g transform="translate(180 180)"><circle r="58"></circle><path d="M-109.5 -23.3A112 112 0 0 1 -23.3 -109.5"></path><path d="M23.3 -109.5A112 112 0 0 1 109.5 -23.3"></path><path d="M109.5 23.3A112 112 0 0 1 23.3 109.5"></path><path d="M-23.3 109.5A112 112 0 0 1 -109.5 23.3"></path></g></svg>
+</sc-if>
+<sc-if value="{{ n.isPath }}" hint-placeholder-val="{{ true }}">
+<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="{{ n.weight }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ n.icon }}"></path></svg>
+</sc-if>
+</span>
+</button>
+</sc-for>
+</nav>
+
+<section aria-label="Profile" onScroll="{{ onProfileScroll }}" style="position:absolute;inset:0;z-index:70;background:var(--bg);overflow-y:auto;scrollbar-width:none;opacity:{{ profileScrimOpacity }};pointer-events:{{ profileEvents }};transition:opacity .18s">
+<div data-scroll="profile" style="position:relative;min-height:100%;padding-bottom:104px">
+<div style="width:100%;aspect-ratio:1/1"></div>
+
+<div style="padding:20px 20px 0">
+<h1 style="margin:0;font-family:var(--display);font-size:28px;font-weight:700;line-height:1.1;color:var(--violet);opacity:{{ profileContentOpacity }};transition:opacity .2s .16s">{{ openName }}, {{ openAge }}</h1>
+
+<p style="margin:8px 0 0;display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:14.5px;font-weight:700;color:var(--muted);opacity:{{ profileContentOpacity }};transition:opacity .2s .18s">
+<span>{{ openPronouns }}</span>
+<span aria-hidden="true" style="opacity:.5">·</span>
+<span style="display:inline-flex;align-items:center;gap:5px">
+<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"></path><circle cx="12" cy="10" r="2.4"></circle></svg>
+London
+</span>
+</p>
+
+<ul style="list-style:none;margin:16px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px;opacity:{{ profileContentOpacity }};transition:opacity .2s .22s">
+<li style="padding:8px 13px;border-radius:99px;background:{{ openGenderBg }};color:{{ openGenderColor }};font-size:13.5px;font-weight:700">{{ openGender }}</li>
+<li style="padding:8px 13px;border-radius:99px;background:var(--gold-container);color:var(--gold);font-size:13.5px;font-weight:700">{{ openSexuality }}</li>
+</ul>
+
+<div style="margin-top:22px;opacity:{{ profileContentOpacity }};transition:opacity .2s .24s">
+<h2 style="margin:0;font-family:var(--display);font-size:19px;font-weight:700">About me</h2>
+<span style="display:block;margin-top:8px;height:3px;width:36px;border-radius:99px;background:var(--gold)"></span>
+<p style="margin:14px 0 0;font-size:17px;line-height:1.65;text-wrap:pretty">{{ openAbout1 }}</p>
+<p style="margin:14px 0 0;font-size:17px;line-height:1.65;text-wrap:pretty">{{ openAbout2 }}</p>
+</div>
+
+<div style="margin-top:26px;opacity:{{ profileContentOpacity }};transition:opacity .2s .26s">
+<h2 style="margin:0;font-family:var(--display);font-size:19px;font-weight:700">Looking for</h2>
+<span style="display:block;margin-top:8px;height:3px;width:36px;border-radius:99px;background:var(--violet)"></span>
+<ul style="list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ openDynamics }}" as="d" hint-placeholder-count="2">
+<li style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:11px;font-size:16px;line-height:1.55">
+<span style="width:8px;height:8px;border-radius:99px;background:var(--violet);margin-top:8px"></span>
+<span style="min-width:0;text-wrap:pretty">{{ d }}</span>
+</li>
+</sc-for>
+</ul>
+</div>
+</div>
+</div>
+
+</section>
+
+<div style="position:absolute;z-index:86;left:12px;top:12px;visibility:{{ heroVisibility }};opacity:{{ profileContentOpacity }};transition:opacity .2s .12s">
+<button onClick="{{ closeProfile }}" aria-label="Back to search" style="position:relative;width:44px;height:44px;border:0;border-radius:99px;background:oklch(1 0 0 / .92);backdrop-filter:blur(8px);color:var(--violet);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft)">
+<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</button>
+
+</div>
+
+<div style="position:absolute;z-index:85;left:0;right:0;bottom:0;padding:14px 20px 20px;background:oklch(1 0 0 / .96);backdrop-filter:blur(10px);border-top:1px solid var(--outline-soft);visibility:{{ heroVisibility }};opacity:{{ profileContentOpacity }};transition:opacity .2s .2s;pointer-events:{{ profileEvents }}">
+<button onClick="{{ openIntro }}" style="width:100%;height:52px;display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16.5px;font-weight:700;cursor:pointer">
+<svg viewBox="-44 -44 88 88" width="20" height="20" aria-hidden="true"><path fill="#E3AF47" d="M0 26C-22 8-38-4-38-20c0-13 10-22 21-22 8 0 14 5 17 11 3-6 9-11 17-11 11 0 21 9 21 22C38-4 22 8 0 26Z"></path></svg>
+Reach out
+</button>
+</div>
+
+<div style="position:absolute;z-index:80;visibility:{{ heroVisibility }};transform:{{ heroShift }};left:{{ heroLeft }};top:{{ heroTop }};width:{{ heroWidth }};height:{{ heroHeight }};border-radius:{{ heroRadius }};overflow:hidden;background:var(--sunken);transition:{{ heroTransition }};pointer-events:{{ profileEvents }}">
+<div onPointerDown="{{ photoDown }}" onPointerMove="{{ photoMove }}" onPointerUp="{{ photoUp }}" onPointerCancel="{{ photoUp }}" style="display:flex;width:300%;height:100%;touch-action:pan-y;transform:translateX({{ photoTrackX }});transition:{{ photoTrackTransition }}">
+<sc-for list="{{ openPhotos }}" as="ph" hint-placeholder-count="3">
+<div role="img" aria-label="{{ ph.alt }}" style="width:33.3333%;height:100%;background-image:url({{ ph.url }});background-size:cover;background-position:{{ ph.position }}"></div>
+</sc-for>
+</div>
+
+<div aria-hidden="true" style="position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:6px;opacity:{{ profileContentOpacity }};transition:opacity .2s .12s">
+<sc-for list="{{ photoDots }}" as="d" hint-placeholder-count="3">
+<span style="width:{{ d.w }};height:6px;border-radius:99px;background:{{ d.bg }};box-shadow:0 1px 3px oklch(0.16 0.06 300 / .4);transition:width .2s,background-color .2s"></span>
+</sc-for>
+</div>
+</div>
+
+<div role="status" style="position:absolute;left:16px;right:16px;bottom:{{ toastBottom }};z-index:35;display:flex;align-items:center;justify-content:space-between;gap:14px;border-radius:14px;background:var(--ink);color:oklch(0.995 0.004 95);padding:13px 16px;box-shadow:var(--shadow-lift);font-size:14px;transition:opacity .2s,transform .2s;opacity:{{ toastOpacity }};transform:translateY({{ toastY }});pointer-events:{{ toastEvents }}">
+<span style="min-width:0">{{ toastText }}</span>
+<button onClick="{{ undoHide }}" style="flex:none;border:0;background:transparent;padding:4px 0;font-family:var(--sans);font-size:14px;font-weight:800;color:oklch(0.86 0.07 90);cursor:pointer">Undo</button>
+</div>
+
+<div onClick="{{ closeIntro }}" style="position:absolute;inset:0;z-index:90;background:oklch(0.29 0.15 300.5 / .4);transition:opacity .3s;opacity:{{ introScrim }};pointer-events:{{ introEvents }}"></div>
+<div role="dialog" aria-modal="true" aria-label="Reach out to {{ openName }}" style="position:absolute;left:0;right:0;bottom:0;z-index:91;max-height:82%;display:flex;flex-direction:column;border-radius:32px 32px 0 0;background:var(--raised);box-shadow:var(--shadow-lift);transition:transform .3s ease-out;transform:{{ introTransform }};pointer-events:{{ introEvents }}">
+<div style="flex:none;padding:16px 20px 0">
+<div style="margin:0 auto;height:5px;width:44px;border-radius:99px;background:var(--outline-soft)"></div>
+<h2 style="margin:14px 0 0;font-family:var(--display);font-size:22px;font-weight:700;color:var(--violet)">Reach out to {{ openName }}</h2>
+</div>
+
+<div style="flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none;padding:16px 20px">
+<p style="margin:0 0 10px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">What to match on</p>
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ introOptions }}" as="o" hint-placeholder-count="3">
+<button onClick="{{ o.toggle }}" aria-pressed="{{ o.on }}" style="min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 15px;border-radius:14px;border:{{ o.border }};background:{{ o.bg }};font-family:var(--sans);font-size:15px;font-weight:700;color:var(--ink);cursor:pointer">
+{{ o.label }}
+<span role="switch" aria-checked="{{ o.on }}" style="position:relative;width:44px;height:26px;flex:none;border-radius:99px;background:{{ o.switchBg }};transition:background-color .2s">
+<span style="position:absolute;top:3px;left:{{ o.switchX }};width:20px;height:20px;border-radius:99px;background:var(--raised);box-shadow:var(--shadow-soft);transition:left .2s"></span>
+</span>
+</button>
+</sc-for>
+</div>
+
+<p style="margin:20px 0 8px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Your message</p>
+<textarea rows="5" value="{{ introText }}" onChange="{{ setIntroText }}" placeholder="Say what made you want to write, and something specific about them." style="width:100%;resize:none;border-radius:16px;border:1px solid var(--input);background:var(--bg);padding:12px 14px;font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--ink)"></textarea>
+</div>
+
+<div style="flex:none;padding:12px 20px 20px;border-top:1px solid var(--outline-soft)">
+<button onClick="{{ sendIntro }}" disabled="{{ introDisabled }}" style="width:100%;height:52px;border:0;border-radius:99px;background:{{ introSendBg }};color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16.5px;font-weight:700;cursor:{{ introSendCursor }}">{{ introSendLabel }}</button>
+</div>
+</div>
+
+<div onClick="{{ closeSheet }}" style="position:absolute;inset:0;z-index:40;background:oklch(0.29 0.15 300.5 / .4);transition:opacity .3s;opacity:{{ scrimOpacity }};pointer-events:{{ scrimEvents }}"></div>
+<div role="dialog" aria-modal="true" aria-label="{{ sheetTitle }}" style="position:absolute;left:0;right:0;bottom:0;z-index:50;border-radius:32px 32px 0 0;background:var(--raised);box-shadow:var(--shadow-lift);padding:16px 20px 24px;transition:transform .3s ease-out;transform:{{ sheetTransform }};pointer-events:{{ sheetEvents }}">
+<div style="margin:0 auto;height:5px;width:44px;border-radius:99px;background:var(--outline-soft)"></div>
+<div style="margin-top:14px;display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;color:var(--violet)">{{ sheetTitle }}</h2>
+<button onClick="{{ clearField }}" style="border:0;background:transparent;padding:4px 0;font-family:var(--sans);font-size:13.5px;font-weight:700;color:var(--muted);cursor:pointer">Any</button>
+</div>
+
+<sc-if value="{{ isAge }}" hint-placeholder-val="{{ false }}">
+<div>
+<p style="margin:18px 0 10px;font-size:15px;font-weight:700">{{ ageLabel }}</p>
+<p style="margin:0 0 4px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Youngest</p>
+<input type="range" min="18" max="70" step="1" value="{{ ageMin }}" onChange="{{ setAgeMin }}" style="width:100%;accent-color:oklch(0.29 0.15 300.5)">
+<p style="margin:14px 0 4px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Oldest</p>
+<input type="range" min="18" max="70" step="1" value="{{ ageMax }}" onChange="{{ setAgeMax }}" style="width:100%;accent-color:oklch(0.29 0.15 300.5)">
+</div>
+</sc-if>
+
+<sc-if value="{{ isChoice }}" hint-placeholder-val="{{ true }}">
+<div style="margin-top:16px;display:flex;gap:14px">
+<button onClick="{{ selectAll }}" style="border:0;background:transparent;padding:4px 0;font-family:var(--sans);font-size:13.5px;font-weight:700;color:var(--violet);cursor:pointer">Select all</button>
+<button onClick="{{ selectNone }}" style="border:0;background:transparent;padding:4px 0;font-family:var(--sans);font-size:13.5px;font-weight:700;color:var(--violet);cursor:pointer">Select none</button>
+</div>
+<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ options }}" as="o" hint-placeholder-count="6">
+<button onClick="{{ o.toggle }}" aria-pressed="{{ o.on }}" style="min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 15px;border-radius:14px;border:{{ o.border }};background:{{ o.bg }};font-family:var(--sans);font-size:15px;font-weight:700;color:var(--ink);cursor:pointer">
+{{ o.label }}
+<span role="switch" aria-checked="{{ o.on }}" style="position:relative;width:44px;height:26px;flex:none;border-radius:99px;background:{{ o.switchBg }};transition:background-color .2s">
+<span style="position:absolute;top:3px;left:{{ o.switchX }};width:20px;height:20px;border-radius:99px;background:var(--raised);box-shadow:var(--shadow-soft);transition:left .2s"></span>
+</span>
+</button>
+</sc-for>
+</div>
+<p style="margin:14px 0 0;font-size:13px;line-height:1.55;color:var(--muted)">{{ sheetHelp }}</p>
+</sc-if>
+
+<div style="margin-top:20px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px">
+<button onClick="{{ clearAll }}" style="height:52px;padding:0 20px;border:1px solid var(--outline-soft);border-radius:99px;background:var(--raised);color:var(--ink);font-family:var(--sans);font-size:16px;font-weight:700;cursor:pointer">Clear all</button>
+<button onClick="{{ closeSheet }}" style="height:52px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16px;font-weight:700;cursor:pointer">{{ applyLabel }}</button>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    ageMin: 18,
+    ageMax: 70,
+    gender: [],
+    sexuality: [],
+    dynamics: [],
+    open: null,
+    sort: 0,
+    nav: "Search",
+    hidden: [],
+    dragId: null,
+    dragX: 0,
+    released: null,
+    toast: false,
+    lastHidden: null,
+    profile: null,
+    phase: "closed",
+    photoIndex: 0,
+    photoDrag: 0,
+    photoDragging: false,
+    profileScroll: 0,
+    intro: false,
+    introText: "",
+    introPicks: [],
+  };
+
+  rootRef = React.createRef();
+  _openToken = 0;
+
+  options = {
+    Gender: ["Woman", "Man", "Non-binary", "Trans", "Genderqueer", "Genderfluid", "Agender", "Transmasc", "Transfem", "Questioning"],
+    Sexuality: ["Queer", "Bisexual", "Pansexual", "Lesbian", "Gay", "Straight"],
+    Dynamics: ["Solo poly", "Relationship anarchist", "Nesting partner", "Open couple", "Kitchen table poly", "Slow dating", "New friends", "Don't label it", "Something else"],
+  };
+
+  help = {
+    Gender: "Pick any that apply. People choose their own words for this in their profile — these are the search groupings, not labels we assign.",
+    Sexuality: "Pick any that apply. Nobody is hidden from search for leaving this blank.",
+    Dynamics: "How someone does relationships right now. It changes, so profiles can say more than one.",
+  };
+
+  roster = [
+    { name: "Maya", dynamics: ["Kitchen table poly", "Nesting partner", "New friends"], pronouns: "she/her", location: "Brixton · 3 km away", about: ["I host a monthly supper club — twelve people, one long table, no phones out. It started as a way to feed friends after a bad year and turned into the best part of my month.", "I have a partner of six years who you'd probably meet at the table eventually. Slow is good. I would rather cook with someone twice than message for a fortnight."], photos: ["https://i.pravatar.cc/600?img=44", "https://i.pravatar.cc/600?img=45", "https://i.pravatar.cc/600?img=47"], age: 34, gender: "Woman", sexuality: "Queer", dynamic: "Kitchen table poly", tagline: "Hosts a monthly supper club, likes a long table", crop: "50% 30%" },
+    { name: "Ife", dynamics: ["Solo poly", "Don't label it"], pronouns: "they/them", location: "Walthamstow · 12 km away", about: ["Two partners, one allotment, and more tomatoes than any household needs by August. I am usually the person who brings the surplus to the pub.", "I am not looking to add a third to anything. I am looking for people whose company I want on a Tuesday."], photos: ["https://i.pravatar.cc/600?img=68", "https://i.pravatar.cc/600?img=53", "https://i.pravatar.cc/600?img=65"], age: 41, gender: "Non-binary", sexuality: "Pansexual", dynamic: "Solo poly", tagline: "Two partners, one allotment, endless tomatoes", crop: "40% 40%" },
+    { name: "Rowan", dynamics: ["Relationship anarchist", "New friends"], pronouns: "she/her", location: "New Cross · 5 km away", about: ["Bookshop shifts most weekdays, Sunday swims at the lido whatever the temperature. I will talk about either at length.", "New to organised dating, not new to non-monogamy. Ask before mentioning me to people we both know."], photos: ["https://i.pravatar.cc/600?img=26", "https://i.pravatar.cc/600?img=21", "https://i.pravatar.cc/600?img=49"], age: 29, gender: "Trans woman", sexuality: "Lesbian", dynamic: "Relationship anarchist", tagline: "Bookshop shifts and Sunday swims in the lido", crop: "60% 25%" },
+    { name: "Devi", dynamics: ["Nesting partner", "Slow dating"], pronouns: "she/her", location: "Tooting · 7 km away", about: ["Slow with messages, quick to make dinner for six. If a conversation is going well I would rather move it to a kitchen than keep typing.", "My nesting partner and I have been together eleven years. We do not date as a couple."], photos: ["https://i.pravatar.cc/600?img=31", "https://i.pravatar.cc/600?img=28", "https://i.pravatar.cc/600?img=25"], age: 37, gender: "Woman", sexuality: "Bisexual", dynamic: "Nesting partner", tagline: "Slow messages, quick to make dinner for six", crop: "45% 50%" },
+    { name: "Kel", dynamics: ["Relationship anarchist", "Don't label it", "Solo poly"], pronouns: "they/them", location: "Hackney · 9 km away", about: ["Relationship anarchist, which mostly means I do not rank people. Also genuinely terrible at pub quizzes and unbothered about it.", "I like walks with no destination and being told about your obsessive interest in detail."], photos: ["https://i.pravatar.cc/600?img=52", "https://i.pravatar.cc/600?img=56", "https://i.pravatar.cc/600?img=59"], age: 46, gender: "Agender", sexuality: "Queer", dynamic: "Relationship anarchist", tagline: "Relationship anarchist, terrible at pub quizzes", crop: "55% 35%" },
+    { name: "Ana", dynamics: ["Open couple", "New friends"], pronouns: "she/her", location: "Peckham · 4 km away", about: ["I organise a queer sports league, mostly netball, occasionally chaos. Come and be bad at it with us.", "In an open couple. My partner is on here too and we are honest about it from the first message."], photos: ["https://i.pravatar.cc/600?img=16", "https://i.pravatar.cc/600?img=9", "https://i.pravatar.cc/600?img=20"], age: 31, gender: "Woman", sexuality: "Lesbian", dynamic: "Open couple", tagline: "Queer sports league organiser, mostly netball", crop: "50% 45%" },
+    { name: "Toby", dynamics: ["Nesting partner", "Slow dating"], pronouns: "he/him", location: "Leyton · 14 km away", about: ["Nesting partner of twelve years, both of us new to all of this and taking it carefully.", "I am better in person than in writing. I make a good roast and I listen well."], photos: ["https://i.pravatar.cc/600?img=14", "https://i.pravatar.cc/600?img=13", "https://i.pravatar.cc/600?img=11"], age: 52, gender: "Man", sexuality: "Straight", dynamic: "Nesting partner", tagline: "Nesting partner of 12 years, new to all this", crop: "35% 30%" },
+    { name: "Nour", dynamics: ["Don't label it", "New friends"], pronouns: "he/him", location: "Bethnal Green · 6 km away", about: ["Book swaps, a film club that argues too much, and a very loud cat who will be in every photo eventually.", "I do not label how I do relationships. I am clear about what I want as things go along."], photos: ["https://i.pravatar.cc/600?img=60", "https://i.pravatar.cc/600?img=57", "https://i.pravatar.cc/600?img=55"], age: 27, gender: "Trans man", sexuality: "Gay", dynamic: "Don't label it", tagline: "Book swaps, film club, and a very loud cat", crop: "65% 40%" },
+  ];
+
+  sorts = ["Recently active", "New here first", "Nearest"];
+
+  fieldLabel = { Dynamics: "Looking for" };
+
+  genderTone = {
+    Woman: ["var(--magenta-container)", "var(--magenta)"],
+    Man: ["var(--sky-container)", "var(--sky)"],
+    "Non-binary": ["var(--violet-container)", "var(--violet-soft)"],
+    Trans: ["var(--gold-container)", "var(--gold)"],
+    Agender: ["var(--violet-container)", "var(--violet-soft)"],
+  };
+
+  key = (field) => field.toLowerCase();
+
+  THRESHOLD = 76;
+  EASE = "cubic-bezier(.22,.68,.16,1)";
+
+  openProfile = (name) => (e) => {
+    if (this.state.dragX !== 0 || this._moved) return;
+    const root = this.rootRef.current;
+    if (!root) return;
+    const token = ++this._openToken;
+    clearTimeout(this._close);
+    clearTimeout(this._promote);
+    const r = e.currentTarget.getBoundingClientRect();
+    const b = root.getBoundingClientRect();
+    this.setState({
+      profile: name,
+      phase: "start",
+      photoIndex: 0,
+      profileScroll: 0,
+      rect: { left: r.left - b.left, top: r.top - b.top, width: r.width, height: r.height },
+    });
+    const promote = () => {
+      if (this._openToken !== token) return;
+      if (this.state.profile !== name || this.state.phase !== "start") return;
+      this.setState({ phase: "open" });
+    };
+    requestAnimationFrame(() => requestAnimationFrame(promote));
+    clearTimeout(this._promote);
+    this._promote = setTimeout(promote, 80);
+  };
+
+  closeProfile = () => {
+    this._openToken = (this._openToken || 0) + 1;
+    clearTimeout(this._promote);
+    this.setState({ phase: "start" });
+    clearTimeout(this._close);
+    this._close = setTimeout(() => this.setState({ profile: null, phase: "closed", photoIndex: 0 }), 340);
+  };
+
+  photoDown = (e) => {
+    this._px0 = e.clientX;
+    if (e.currentTarget.setPointerCapture) e.currentTarget.setPointerCapture(e.pointerId);
+    this.setState({ photoDragging: true, photoDrag: 0 });
+  };
+
+  photoMove = (e) => {
+    if (!this.state.photoDragging) return;
+    this.setState({ photoDrag: e.clientX - this._px0 });
+  };
+
+  photoUp = () => {
+    if (!this.state.photoDragging) return;
+    const d = this.state.photoDrag;
+    this.setState((s) => {
+      let i = s.photoIndex;
+      if (d < -48) i = Math.min(2, i + 1);
+      else if (d > 48) i = Math.max(0, i - 1);
+      return { photoIndex: i, photoDrag: 0, photoDragging: false };
+    });
+  };
+
+  down = (name) => (e) => {
+    this._x0 = e.clientX;
+    this._moved = false;
+    if (e.currentTarget.setPointerCapture) e.currentTarget.setPointerCapture(e.pointerId);
+    this.setState({ dragId: name, dragX: 0, released: null });
+  };
+
+  move = (name) => (e) => {
+    if (this.state.dragId !== name) return;
+    const dx = Math.max(-160, Math.min(0, e.clientX - this._x0));
+    if (dx < -4) this._moved = true;
+    if (dx !== this.state.dragX) this.setState({ dragX: dx });
+  };
+
+  up = (name) => () => {
+    if (this.state.dragId !== name) return;
+    if (this.state.dragX <= -this.THRESHOLD) {
+      this.setState({ dragId: null, dragX: 0, released: name });
+      clearTimeout(this._hide);
+      this._hide = setTimeout(() => this.hide(name), 180);
+    } else {
+      this.setState({ dragId: null, dragX: 0, released: name });
+    }
+  };
+
+  hide = (name) => {
+    this.setState((s) => ({
+      hidden: [...s.hidden, name],
+      lastHidden: name,
+      released: null,
+      toast: true,
+    }));
+    clearTimeout(this._toast);
+    this._toast = setTimeout(() => this.setState({ toast: false }), 4000);
+  };
+
+  componentWillUnmount() {
+    clearTimeout(this._toast); clearTimeout(this._hide);
+    clearTimeout(this._close); clearTimeout(this._promote);
+  }
+
+  toggle = (field, value) => this.setState((s) => {
+    const k = this.key(field);
+    const list = s[k].includes(value) ? s[k].filter((v) => v !== value) : [...s[k], value];
+    return { [k]: list };
+  });
+
+  renderVals() {
+    const s = this.state;
+    const ageOn = s.ageMin !== 18 || s.ageMax !== 70;
+
+    const list = this.roster.filter((p) => {
+      if (s.hidden.includes(p.name)) return false;
+      if (p.age < s.ageMin || p.age > s.ageMax) return false;
+      if (s.gender.length && !s.gender.includes(p.gender)) return false;
+      if (s.sexuality.length && !s.sexuality.includes(p.sexuality)) return false;
+      if (s.dynamics.length && !s.dynamics.includes(p.dynamic)) return false;
+      return true;
+    });
+
+    const fields = ["Dynamics", "Gender", "Age"].map((field) => {
+      const picked = field === "Age" ? [] : s[this.key(field)];
+      const on = field === "Age" ? ageOn : picked.length > 0;
+      const open = s.open === field;
+      return {
+        label: this.fieldLabel[field] || field,
+        on,
+        count: picked.length,
+        showCount: picked.length > 1,
+        aria: field === "Age"
+          ? (ageOn ? "Age, " + s.ageMin + " to " + s.ageMax : "Age, any")
+          : field + (picked.length ? ", " + picked.join(", ") : ", any"),
+        chevron: open ? "M6 15l6-6 6 6" : "M6 9l6 6 6-6",
+        bg: on ? "var(--violet-container)" : "var(--raised)",
+        color: on ? "var(--violet)" : "var(--ink)",
+        border: on ? "1.5px solid var(--violet)" : "1.5px solid var(--outline-soft)",
+        open: () => this.setState({ open: field }),
+      };
+    });
+
+    const field = s.open;
+    const options = field && field !== "Age"
+      ? this.options[field].map((label) => {
+          const on = s[this.key(field)].includes(label);
+          return {
+            label, on,
+            bg: on ? "var(--violet-container)" : "var(--sunken)",
+            color: on ? "var(--violet)" : "var(--muted)",
+            border: on ? "2px solid var(--violet)" : "2px solid transparent",
+            toggle: () => this.toggle(field, label),
+          };
+        })
+      : [];
+    const optionsWithSwitch = options.map((o) => ({
+      ...o,
+      bg: o.on ? "var(--violet-container)" : "var(--raised)",
+      border: o.on ? "1.5px solid var(--violet)" : "1.5px solid var(--outline-soft)",
+      switchBg: o.on ? "var(--violet)" : "var(--input)",
+      switchX: o.on ? "21px" : "3px",
+    }));
+
+    const icons = {
+      "Your profile": "M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM5 20c.8-3.4 3.6-5 7-5s6.2 1.6 7 5",
+      Search: "M11 17.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM16 16l4.5 4.5",
+      Likes: "M12 20C6.4 15.4 3 12.4 3 8.6 3 5.5 5.4 3 8.4 3c1.9 0 3 1 3.6 2.3C12.6 4 13.7 3 15.6 3 18.6 3 21 5.5 21 8.6c0 3.8-3.4 6.8-9 11.4z",
+      Messages: "M20 12a7 7 0 0 1-7 7H8l-4 3v-4.5A7 7 0 0 1 8 5h5a7 7 0 0 1 7 7z",
+      Community: "",
+    };
+    const navItems = ["Your profile", "Search", "Likes", "Messages", "Community"].map((label) => {
+      const on = s.nav === label;
+      return {
+        label,
+        icon: icons[label],
+        isMark: label === "Community",
+        isPath: label !== "Community",
+        pill: on ? "var(--violet-container)" : "transparent",
+        color: on ? "var(--violet)" : "var(--muted)",
+        weight: on ? 2.4 : 1.9,
+        current: on ? "page" : undefined,
+        pick: () => this.setState({ nav: label }),
+      };
+    });
+
+    const open = s.profile ? this.roster.find((p) => p.name === s.profile) : null;
+    const rect = s.rect || { left: 0, top: 0, width: 0, height: 0 };
+    const opened = s.phase === "open";
+    const rootW = this.rootRef.current ? this.rootRef.current.clientWidth : 390;
+    const slide = -(s.photoIndex * (100 / 3));
+    const dragPct = s.photoDragging && rootW ? (s.photoDrag / rootW) * (100 / 3) : 0;
+
+    return {
+      fields, options: optionsWithSwitch, navItems,
+      selectAll: field ? (() => this.setState({ [this.key(field)]: [...this.options[field]] })) : undefined,
+      selectNone: field ? (() => this.setState({ [this.key(field)]: [] })) : undefined,
+      rootRef: this.rootRef,
+      openName: open ? open.name : "",
+      openAge: open ? open.age : "",
+      openTagline: open ? open.tagline : "",
+      openPronouns: open ? open.pronouns : "",
+      openGender: open ? open.gender : "",
+      openSexuality: open ? open.sexuality : "",
+      openGenderBg: open ? (this.genderTone[open.gender] || ["var(--sunken)", "var(--muted)"])[0] : "var(--sunken)",
+      openGenderColor: open ? (this.genderTone[open.gender] || ["var(--sunken)", "var(--muted)"])[1] : "var(--muted)",
+      openDynamic: open ? open.dynamic : "",
+      openDynamics: open ? open.dynamics : [],
+      openLocation: open ? open.location : "",
+      openAbout1: open ? open.about[0] : "",
+      openAbout2: open ? open.about[1] : "",
+      openPhotos: open
+        ? open.photos.map((url, i) => ({
+            url, position: "center", alt: open.name + ", photo " + (i + 1) + " of 3",
+          }))
+        : [],
+      photoDots: [0, 1, 2].map((i) => ({
+        w: i === s.photoIndex ? "18px" : "6px",
+        bg: i === s.photoIndex ? "oklch(0.995 0.004 95)" : "oklch(0.995 0.004 95 / .55)",
+      })),
+      photoTrackX: (slide + dragPct) + "%",
+      photoTrackTransition: s.photoDragging ? "none" : "transform .28s " + this.EASE,
+      heroLeft: opened ? "0px" : rect.left + "px",
+      heroTop: opened ? "0px" : rect.top + "px",
+      heroShift: opened ? "translateY(" + -s.profileScroll + "px)" : "translateY(0px)",
+      heroWidth: opened ? "100%" : rect.width + "px",
+      heroHeight: opened ? rootW + "px" : rect.height + "px",
+      heroRadius: opened ? "0px" : "10px",
+      heroTransition: s.phase === "closed" ? "none" : "left .34s " + this.EASE + ", top .34s " + this.EASE + ", width .34s " + this.EASE + ", height .34s " + this.EASE + ", border-radius .34s " + this.EASE,
+      heroVisibility: s.phase === "closed" ? "hidden" : "visible",
+      profileScrimOpacity: opened ? 1 : 0,
+      profileContentOpacity: opened ? 1 : 0,
+      profileEvents: s.phase === "closed" ? "none" : "auto",
+      closeProfile: this.closeProfile,
+      onProfileScroll: (e) => {
+        const y = e.currentTarget.scrollTop;
+        if (y !== this.state.profileScroll) this.setState({ profileScroll: y });
+      },
+      photoDown: this.photoDown,
+      photoMove: this.photoMove,
+      photoUp: this.photoUp,
+      openIntro: () => this.setState((st) => ({
+        intro: true,
+        introText: "",
+        introPicks: st.introPicks && st.introPicks._for === s.profile ? st.introPicks : Object.assign([], { _for: s.profile }),
+      })),
+      closeIntro: () => this.setState({ intro: false }),
+      introTransform: s.intro ? "translateY(0)" : "translateY(110%)",
+      introScrim: s.intro ? 1 : 0,
+      introEvents: s.intro ? "auto" : "none",
+      introOptions: open ? open.dynamics.map((label) => {
+        const picks = s.introPicks || [];
+        const on = picks.includes(label);
+        return {
+          label, on,
+          bg: on ? "var(--violet-container)" : "var(--raised)",
+          border: on ? "1.5px solid var(--violet)" : "1.5px solid var(--outline-soft)",
+          switchBg: on ? "var(--violet)" : "var(--input)",
+          switchX: on ? "21px" : "3px",
+          toggle: () => this.setState((st) => {
+            const list = st.introPicks || [];
+            const next = list.includes(label) ? list.filter((v) => v !== label) : [...list, label];
+            return { introPicks: Object.assign(next, { _for: st.profile }) };
+          }),
+        };
+      }) : [],
+      introText: s.introText || "",
+      setIntroText: (e) => this.setState({ introText: e.target.value }),
+      introDisabled: (s.introText || "").length < 20,
+      introSendBg: (s.introText || "").length < 20 ? "var(--outline-soft)" : "var(--violet)",
+      introSendCursor: (s.introText || "").length < 20 ? "not-allowed" : "pointer",
+      introSendLabel: (s.introText || "").length < 20 ? "Write a little more" : "Send introduction",
+      sendIntro: () => this.setState({ intro: false, introText: "" }),
+      people: list.map((p) => {
+        const dragging = s.dragId === p.name;
+        const dx = dragging ? s.dragX : 0;
+        const going = s.released === p.name && s.dragX === 0 && false;
+        const progress = Math.min(1, Math.abs(dx) / this.THRESHOLD);
+        return {
+          name: p.name, age: p.age, tagline: p.tagline, alt: p.name + ", " + p.age, crop: p.crop, photo: p.photos[0],
+          dx: dx + "px",
+          tileOpacity: 1 - progress * 0.25,
+          transition: dragging ? "none" : "transform .22s ease-out, opacity .22s ease-out",
+          revealOpacity: progress,
+          revealLabel: "Hide profile",
+          tileVisibility: s.profile === p.name && s.phase !== "closed" ? "hidden" : "visible",
+          wrapBg: dragging ? "var(--magenta)" : "transparent",
+          openProfile: this.openProfile(p.name),
+          down: this.down(p.name),
+          move: this.move(p.name),
+          up: this.up(p.name),
+        };
+      }),
+      isEmpty: list.length === 0,
+      resultLine: list.length === 1 ? "1 person found" : list.length + " people found",
+      sortLabel: this.sorts[s.sort],
+      cycleSort: () => this.setState((st) => ({ sort: (st.sort + 1) % 3 })),
+      sheetTitle: (this.fieldLabel[field] || field) || "Filters",
+      sheetHelp: field && field !== "Age" ? this.help[field] : "",
+      isAge: field === "Age",
+      isChoice: !!field && field !== "Age",
+      ageMin: s.ageMin,
+      ageMax: s.ageMax,
+      ageLabel: ageOn ? s.ageMin + " to " + s.ageMax + " years old" : "Any age",
+      setAgeMin: (e) => this.setState((st) => ({ ageMin: Math.min(+e.target.value, st.ageMax) })),
+      setAgeMax: (e) => this.setState((st) => ({ ageMax: Math.max(+e.target.value, st.ageMin) })),
+      closeSheet: () => this.setState({ open: null }),
+      sheetTransform: field ? "translateY(0)" : "translateY(110%)",
+      sheetEvents: field ? "auto" : "none",
+      scrimOpacity: field ? 1 : 0,
+      scrimEvents: field ? "auto" : "none",
+      applyLabel: "Show " + list.length,
+      clearField: () => {
+        if (field === "Age") this.setState({ ageMin: 18, ageMax: 70 });
+        else if (field) this.setState({ [this.key(field)]: [] });
+      },
+      clearAll: () => this.setState({ ageMin: 18, ageMax: 70, gender: [], sexuality: [], dynamics: [], open: null }),
+      toastText: s.lastHidden ? s.lastHidden + " won't show up again" : "Profile hidden",
+      toastOpacity: s.toast ? 1 : 0,
+      toastY: s.toast ? "0px" : "12px",
+      toastBottom: "96px",
+      toastEvents: s.toast ? "auto" : "none",
+      undoHide: () => this.setState((st) => ({
+        hidden: st.hidden.filter((n) => n !== st.lastHidden),
+        lastHidden: null,
+        toast: false,
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>
