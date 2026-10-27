@@ -1,0 +1,21 @@
+<ul class="grid">
+  @for (tile of tiles(); track tile.id) {
+    <li>
+      <a class="tile" [routerLink]="[tile.id]" (click)="opening(tile)">
+        <div class="photo" [style.view-transition-name]="transitionName(tile)">
+          @if (tile.photoUrl) {
+            <img [src]="tile.photoUrl" alt="" />
+          } @else {
+            <span class="initial" aria-hidden="true">{{ tile.name.charAt(0) }}</span>
+          }
+        </div>
+        <div class="caption">
+          <p class="name">{{ tile.name }}</p>
+          @if (tile.tagline) {
+            <p class="tagline">{{ tile.tagline }}</p>
+          }
+        </div>
+      </a>
+    </li>
+  }
+</ul>

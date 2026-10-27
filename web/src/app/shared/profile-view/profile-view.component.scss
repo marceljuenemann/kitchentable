@@ -1,0 +1,310 @@
+// Covers the screen over the grid, scrolling on its own, so the grid underneath keeps its
+// scroll position.
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--kt-bg);
+  color: var(--kt-ink);
+  font-family: var(--kt-font-sans);
+}
+
+.page {
+  position: relative;
+  max-width: var(--kt-page-width);
+  margin: 0 auto;
+  padding-bottom: 48px;
+}
+
+// The photo is a full-width square: the end point of the morph from the tile.
+.hero {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--kt-violet-container);
+}
+
+.track {
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  img,
+  .slide-placeholder {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    scroll-snap-align: start;
+  }
+}
+
+.initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-family: var(--kt-font-display);
+  font-size: 120px;
+  font-weight: 700;
+  color: var(--kt-violet-soft);
+}
+
+.dots {
+  position: absolute;
+  inset: auto 0 12px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: oklch(1 0 0 / 0.55);
+  box-shadow: 0 1px 2px oklch(0.2 0.05 300 / 0.3);
+  transition:
+    width 0.2s,
+    background-color 0.2s;
+
+  &.current {
+    width: 18px;
+    background: white;
+  }
+}
+
+// Frosted round buttons over the photo, like the back button.
+%round-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: oklch(1 0 0 / 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--kt-shadow-soft);
+  color: var(--kt-violet);
+  cursor: pointer;
+
+  mat-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 28px;
+  }
+}
+
+// Previous/next photo, for a mouse or keyboard; touch screens swipe instead.
+.step {
+  @extend %round-button;
+  position: absolute;
+  top: calc(50% - 22px);
+
+  &.previous {
+    left: 12px;
+  }
+
+  &.next {
+    right: 12px;
+  }
+
+  @media (hover: none) {
+    display: none;
+  }
+}
+
+// Stays in view while the page scrolls.
+.back {
+  @extend %round-button;
+  position: fixed;
+  top: 12px;
+  left: max(12px, calc((100% - var(--kt-page-width)) / 2 + 12px));
+  z-index: 1;
+  animation: fade-in 0.12s ease-out both;
+}
+
+.content {
+  padding: 20px 20px 0;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--kt-font-display);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--kt-violet);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--kt-muted);
+}
+
+.location {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  padding: 8px 13px;
+  border-radius: 99px;
+  font-size: 13.5px;
+  font-weight: 700;
+  background: var(--kt-sunken);
+  color: var(--kt-muted);
+
+  &.magenta {
+    background: var(--kt-magenta-container);
+    color: var(--kt-magenta);
+  }
+
+  &.sky {
+    background: var(--kt-sky-container);
+    color: var(--kt-sky);
+  }
+
+  &.violet {
+    background: var(--kt-violet-container);
+    color: var(--kt-violet-soft);
+  }
+
+  &.gold {
+    background: var(--kt-gold-container);
+    color: var(--kt-gold);
+  }
+}
+
+section {
+  margin-top: 28px;
+}
+
+h2 {
+  margin: 0;
+  font-family: var(--kt-font-display);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--kt-ink);
+}
+
+.bar {
+  display: block;
+  width: 36px;
+  height: 3px;
+  margin-top: 8px;
+  border-radius: 99px;
+
+  &.gold {
+    background: var(--kt-gold);
+  }
+
+  &.violet {
+    background: var(--kt-violet);
+  }
+}
+
+.about p {
+  margin: 14px 0 0;
+  font-size: 17px;
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+.looking-for ul {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 16px;
+    line-height: 1.55;
+
+    &::before {
+      content: '';
+      flex: none;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--kt-violet);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+// The text comes in just after the photo starts moving, one part after another.
+.fade-in {
+  animation: fade-in 0.2s ease-out both;
+
+  &.header {
+    animation-delay: 0.16s;
+  }
+
+  &.meta {
+    animation-duration: 0.18s;
+    animation-delay: 0.18s;
+  }
+
+  &.chips {
+    animation-delay: 0.22s;
+  }
+
+  &.about {
+    animation-delay: 0.24s;
+  }
+
+  &.looking-for {
+    animation-delay: 0.26s;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in,
+  .back {
+    animation: none;
+  }
+}

@@ -226,3 +226,23 @@ mat-checkbox {
     --mat-chip-with-icon-selected-icon-color: var(--mat-sys-on-tertiary-container);
   }
 }
+
+// Opening and closing a profile (shared/profile-view/profile-transition.ts): the photo morphs
+// between tile and profile, and the rest of the page cross-fades.
+::view-transition-group(*) {
+  animation-duration: 0.34s;
+  animation-timing-function: cubic-bezier(0.22, 0.68, 0.16, 1);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.18s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

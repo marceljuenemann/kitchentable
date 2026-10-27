@@ -1,0 +1,14 @@
+// Like the profile view: covers the grid.
+.gone {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  padding: 64px 24px;
+  background: var(--kt-bg);
+  text-align: center;
+
+  p {
+    margin: 0 0 20px;
+    font-size: 16px;
+  }
+}
