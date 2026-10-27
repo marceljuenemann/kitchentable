@@ -22,7 +22,7 @@ for (const [status, heading] of screens) {
 test('an admin can open the admin tool', async ({ page }) => {
   await signInAs(page, 'admin');
   await page.goto('/admin/vetting');
-  await expect(page.getByRole('heading', { name: 'Hello World' })).toBeVisible();
+  await expect(page.getByText(/applications? waiting/)).toBeVisible();
 });
 
 test('sends a signed-in user from the landing page to the app', async ({ page }) => {

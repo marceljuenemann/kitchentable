@@ -16,7 +16,7 @@ test('redirects a member from /admin to the app', async ({ page }) => {
   await signInAs(page, 'active');
   await page.goto('/admin/vetting');
   await page.waitForURL('**/app');
-  await expect(page.getByRole('heading', { name: 'Hello World' })).toBeHidden();
+  await expect(page.getByText(/applications? waiting/)).toBeHidden();
 });
 
 test('redirects an unknown route to the landing page', async ({ page }) => {

@@ -53,6 +53,41 @@ export async function photoObject(
   return { ok: response.ok, bytes: Buffer.from(await response.arrayBuffer()) };
 }
 
+/** Uploads a JPEG into the private `photos` bucket with the service role. */
+export async function uploadPhoto(path: string, jpeg: Buffer) {
+  const response = await fetch(`${API_URL}/storage/v1/object/photos/${path}`, {
+    method: 'POST',
+    headers: {
+      apikey: SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+      'Content-Type': 'image/jpeg',
+    },
+    body: new Uint8Array(jpeg),
+  });
+  if (!response.ok) throw new Error(`Uploading ${path} failed: ${await response.text()}`);
+}
+
+/**
+ * Creates an applicant without going through onboarding: a user who accepted the terms, with a
+ * profile in `vetting` made of the given fields (`name` at least). Returns the user id.
+ */
+export async function createApplicant(fields: Record<string, unknown>): Promise<string> {
+  const user = await api('/auth/v1/admin/users', {
+    email: uniqueEmail('applicant'),
+    email_confirm: true,
+  });
+  await api('/rest/v1/terms_acceptances', { user_id: user.id, version: 1 });
+  await api('/rest/v1/profiles', {
+    id: user.id,
+    status: 'vetting',
+    pronouns: 'she/her',
+    bio: 'About the applicant',
+    location: 'London',
+    ...fields,
+  });
+  return user.id;
+}
+
 /**
  * Creates a user (with an invite code in the sign-up metadata, as the landing page sends it)
  * without going through the UI/email, optionally with a profile in the given status, and signs
