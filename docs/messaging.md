@@ -11,9 +11,10 @@
 ## Tables
 
 - `connections`: `id`, `initiator_id`, `recipient_id`, `status` (`pending` | `accepted`), `created_at`, `updated_at`. An intro is a `pending` connection whose first message is the intro (PRODUCT.md: an intro message instead of a like). Unique on the pair of users, so there is at most one connection between two people.
-- `user_relations`: `user_id`, `about_user_id`, `last_read_at`, `dismissed_at`, `updated_at`; primary key `(user_id, about_user_id)`. One user's private view of another person, visible only to `user_id`. It holds:
+- `user_relations`: `user_id`, `about_user_id`, `last_read_at`, `dismissed_at`, `declined_at`, `updated_at`; primary key `(user_id, about_user_id)`. One user's private view of another person, visible only to `user_id`. It holds:
   - the read state for the conversation with that person (one per pair, because connections are unique per pair);
-  - whether they dismissed that person, which hides them from search and hides their intro.
+  - `dismissed_at`: the user dismissed that person in search. It only hides them from the user's own search; they can still send an intro, which shows as usual.
+  - `declined_at`: the user declined that person's intro. It's stored here rather than as a connection status because the sender can read the connection row: to them, a declined intro just looks unanswered. A declined person is hidden from search too, and the intro no longer counts as unread.
 
   A row exists only once there's something to record: `send_intro` creates one for each side, and dismissing someone creates one if needed. `last_read_at` is `not null` and starts as the time the row is created.
 
@@ -26,7 +27,7 @@ The client-generated message id makes sending idempotent: a send retried after a
 
 RLS filters rows, not columns, so a read flag on `messages` can't be hidden from the sender with a policy. Column privileges (`grant select (…)`) could, but they break `select *`, which replication uses, and it isn't clear that Realtime respects them. A per-message flag would also mean the recipient updating rows someone else wrote.
 
-Instead, each user has a watermark per person, `user_relations.last_read_at`, readable only by its owner. Opening a conversation sets it: one write, however many messages there were. A message is unread for a user if the other person sent it after their `last_read_at`, unless they dismissed that person.
+Instead, each user has a watermark per person, `user_relations.last_read_at`, readable only by its owner. Opening a conversation sets it: one write, however many messages there were. A message is unread for a user if the other person sent it after their `last_read_at`, unless they declined that person's intro.
 
 ## Procedures
 
@@ -36,18 +37,19 @@ Called directly, online only, so the user gets an answer straight away:
 
 - `send_intro(recipient_id, message_id, body)`: creates the `pending` connection, the first message and both `user_relations` rows. Enforces the daily intro limit (PRODUCT.md suggests 3), that the sender is `active` and the recipient `active`, and that there's no connection between them yet.
 - `accept_intro(connection_id)`: recipient only; sets the connection to `accepted`.
+- `decline_intro(connection_id)`: recipient only, while the connection is `pending`; sets `declined_at` on the recipient's relation row and leaves the connection untouched, so the sender isn't told.
 
 Pushed by RxDB, so they work offline:
 
 - `send_message(id, connection_id, body)`: the sender is `active` or `disabled` (see "Profile status" in database.md), the connection is `accepted`, and the body has a sensible length.
-- `update_relation(about_user_id, read_at, dismissed)`: sets the caller's own row, creating it if needed. `read_at` is the time the user read the conversation on their device; it only moves `last_read_at` forward and is capped at `now()`. Using the device's time rather than the time of the push matters offline: otherwise messages that arrived on the server between reading and syncing would count as read without the user having seen them. Declining an intro is dismissing its sender.
+- `update_relation(about_user_id, read_at, dismissed)`: sets the caller's own row, creating it if needed. `read_at` is the time the user read the conversation on their device; it only moves `last_read_at` forward and is capped at `now()`. Using the device's time rather than the time of the push matters offline: otherwise messages that arrived on the server between reading and syncing would count as read without the user having seen them. `dismissed` sets or clears `dismissed_at`.
 
 ## Sync with RxDB
 
 The app has three local collections, mirroring the tables: `connections`, `user_relations` (the user's own rows) and `messages`. The UI reads only from these, so the conversation list, unread badges and search filtering are instant and work offline.
 
 - **Pull:** RxDB reads the three tables directly through the REST API, under RLS. It pulls by an `(updated_at, id)` checkpoint, with `updated_at` set by a trigger so clients can't fake it. Deletions are soft (`deleted = true`), so they replicate too.
-- **Push:** only `messages` and `user_relations` push. RxDB's generic replication (`replicateRxCollection`) takes a custom push handler per collection: a new message calls `send_message`, a changed relation calls `update_relation`. `connections` is pull-only; after `send_intro` or `accept_intro` succeeds, the app triggers a pull.
+- **Push:** only `messages` and `user_relations` push. RxDB's generic replication (`replicateRxCollection`) takes a custom push handler per collection: a new message calls `send_message`, a changed relation calls `update_relation`. `connections` is pull-only; after `send_intro`, `accept_intro` or `decline_intro` succeeds, the app triggers a pull.
 - **Refused pushes:** conflicts can't really happen (messages are append-only and only the owner writes a relation), but a procedure can refuse a message, for example if the connection was closed in the meantime. The push handler then marks the local message as failed so the app can show it. A pull alone wouldn't fix it: a refused message has no row on the server to pull back.
 - **Live updates:** a Realtime subscription only tells RxDB to pull now (`RESYNC`); the pull is the only source of data. A missed event just means the next pull catches up.
 - **Profiles stay out of RxDB** at first: the other person's name and photo come from a `get_connection_profiles()` procedure and are cached in memory.
@@ -76,9 +78,7 @@ One email covers all conversations, which is why the state is per user and not p
 
 ## Open questions
 
-- **Declined intros:** in this plan, declining is dismissing the sender, which nobody else can see. The intro just looks unanswered to its sender, and they can't send another (one connection per pair). Is that right, or should the sender see "declined"?
-- **Dismissing someone you're connected with:** should it also hide the conversation (a soft block), or only affect search? Proper blocking and reporting need their own design.
-- **Being dismissed:** should search also hide people who dismissed you, so you can't send them an intro they'll never see? It reveals nothing directly, but it's a product call.
+- **Declined intros, later:** the sender isn't told for now, and can't send another (one connection per pair). Should a declined intro eventually be shown to the sender, expire, or be undoable by the recipient? Blocking and reporting need their own design.
 - **Deleted users:** their profile stays as a tombstone. Do their sent messages stay visible to the other person, or are they scrubbed?
 - **Retention:** keep messages until either participant deletes their account, or for a fixed time?
 - **Back-off ceiling:** once the wait reaches 30 days, keep sending monthly, or stop until the user comes back?
