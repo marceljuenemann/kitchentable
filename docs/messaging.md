@@ -39,7 +39,7 @@ The app has three local collections, mirroring the tables: `connections`, `conne
   - a connection's `status` changed → `accept_intro` or `decline_intro`.
   - `last_read_at` changed → `mark_read`.
 
-  Conflicts can't really happen: messages are append-only, only the recipient changes a connection's status, and only the owner writes their member row. If a procedure refuses a change (say, the daily intro limit), the next pull brings back the server's version and the app shows why.
+  Conflicts can't really happen: messages are append-only, only the recipient changes a connection's status, and only the owner writes their member row. If a procedure refuses a change (say, the daily intro limit), the push handler marks the local document as failed so the app can show why. A pull alone wouldn't fix it: a refused message has no row on the server to pull back.
 
 - **Live updates:** a Realtime subscription only tells RxDB to pull now (`RESYNC`); the pull is the only source of data. A missed event just means the next pull catches up.
 - **Profiles stay out of RxDB** at first: the other person's name and photo come from a `get_connection_profiles()` procedure and are cached in memory.
