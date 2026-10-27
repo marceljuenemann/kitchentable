@@ -1,0 +1,38 @@
+<section aria-labelledby="vetting-title">
+  <h2 id="vetting-title">Vetting</h2>
+  <p class="private">Only admins see this.</p>
+
+  <dl>
+    <div>
+      <dt>Applied</dt>
+      <dd>{{ application().created_at | date: 'd MMM y, HH:mm' }}</dd>
+    </div>
+    <div>
+      <dt>Tagline</dt>
+      <dd [class.none]="!application().tagline">{{ application().tagline || 'None' }}</dd>
+    </div>
+    <div>
+      <dt>Invite code</dt>
+      <dd [class.none]="!inviteCode()">{{ inviteCode() || 'None' }}</dd>
+    </div>
+    @for (answer of answers(); track answer.label) {
+      <div>
+        <dt class="question">{{ answer.label }}</dt>
+        <dd class="answer">{{ answer.text }}</dd>
+      </div>
+    }
+    @if (feedback()) {
+      <div>
+        <dt class="question">How did you find signing up? Anything we could improve?</dt>
+        <dd class="answer">{{ feedback() }}</dd>
+      </div>
+    }
+  </dl>
+
+  <button mat-flat-button type="button" [disabled]="busy()" (click)="approve.emit()">
+    Approve {{ application().name }}
+  </button>
+  @if (failed()) {
+    <p class="error" role="alert">Something went wrong approving. Please try again.</p>
+  }
+</section>

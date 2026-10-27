@@ -1,0 +1,73 @@
+:host {
+  display: block;
+  margin-top: 32px;
+}
+
+section {
+  padding: 20px;
+  border: 1px solid var(--kt-cream-strong);
+  border-radius: 20px;
+  background: var(--kt-cream);
+}
+
+h2 {
+  margin: 0;
+  font-family: var(--kt-font-display);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--kt-ink);
+}
+
+.private {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--kt-muted);
+}
+
+dl {
+  display: grid;
+  gap: 16px;
+  margin: 18px 0 20px;
+}
+
+dt {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kt-muted);
+
+  // Whole sentences read better in normal case.
+  &.question {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.4;
+    text-transform: none;
+  }
+}
+
+dd {
+  margin: 4px 0 0;
+  font-size: 15.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+
+  &.answer {
+    white-space: pre-line;
+  }
+
+  &.none {
+    color: var(--kt-outline);
+  }
+}
+
+button {
+  width: 100%;
+}
+
+.error {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: var(--mat-sys-error);
+}

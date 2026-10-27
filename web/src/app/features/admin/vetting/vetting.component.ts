@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterOutlet } from '@angular/router';
+import { FooterComponent } from '../../../shared/footer/footer.component';
 import { HeaderComponent } from '../../../shared/header/header.component';
 import {
   ProfileGridComponent,
@@ -17,6 +18,7 @@ import { VettingStore } from './vetting.store';
     MatButtonModule,
     MatProgressSpinnerModule,
     RouterOutlet,
+    FooterComponent,
     HeaderComponent,
     ProfileGridComponent,
   ],
