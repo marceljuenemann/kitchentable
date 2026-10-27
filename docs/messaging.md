@@ -25,14 +25,21 @@ Instead, each participant has a watermark, `connection_members.last_read_at`, re
 
 ## Sync with RxDB
 
+The app has three local collections, mirroring the tables: `connections`, `connection_members` (the user's own rows only) and `messages`. The UI reads and writes only these, so the conversation list, unread badges, accepting an intro and sending all work instantly and offline; replication catches up in the background.
+
 - **Pull:** RxDB reads `connections`, the caller's own `connection_members` rows, and `messages` directly through the REST API, under RLS: a row is visible to members of its connection. It pulls by an `(updated_at, id)` checkpoint, with `updated_at` set by a trigger so clients can't fake it. Deletions are soft (`deleted = true`), so they replicate too.
 - **Push:** writes go through procedures, not table inserts, so the rules live in one reviewable place (the same approach as `profiles`):
   - `send_message(id, connection_id, body)`: the sender is `active` or `disabled` (see "Profile status" in database.md), the connection is `accepted`, and the body has a sensible length.
   - `send_intro(id, recipient_id, body)`: creates the `pending` connection, both member rows and the first message; enforces the daily intro limit (PRODUCT.md suggests 3) and that the recipient is `active`.
   - `accept_intro(connection_id)`, `decline_intro(connection_id)`: recipient only.
-  - `mark_read(connection_id)`: sets the caller's `last_read_at` to now.
+  - `mark_read(connection_id, read_at)`: sets the caller's `last_read_at` to `read_at`, the time the user read it on their device. It only moves forward and is capped at `now()`. Using the device's time rather than the time of the push matters offline: otherwise messages that arrived on the server between reading and syncing would count as read without the user having seen them.
 
-  RxDB's generic replication (`replicateRxCollection`) takes a custom push handler, which calls these.
+  RxDB's generic replication (`replicateRxCollection`) takes a custom push handler per collection, which turns each local change into one of these calls:
+  - a new message → `send_message`, or `send_intro` if it's the first message of a connection the user started. The client generates the connection's id too and writes it locally, but the server creates the row in `send_intro`, so the `connections` handler ignores new rows. This avoids the message being pushed before its connection exists.
+  - a connection's `status` changed → `accept_intro` or `decline_intro`.
+  - `last_read_at` changed → `mark_read`.
+
+  Conflicts can't really happen: messages are append-only, only the recipient changes a connection's status, and only the owner writes their member row. If a procedure refuses a change (say, the daily intro limit), the next pull brings back the server's version and the app shows why.
 
 - **Live updates:** a Realtime subscription only tells RxDB to pull now (`RESYNC`); the pull is the only source of data. A missed event just means the next pull catches up.
 - **Profiles stay out of RxDB** at first: the other person's name and photo come from a `get_connection_profiles()` procedure and are cached in memory.
