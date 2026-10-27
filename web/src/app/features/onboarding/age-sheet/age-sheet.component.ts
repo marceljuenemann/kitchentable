@@ -3,6 +3,7 @@ import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bott
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { ageFrom } from '../../../core/age';
 
 export interface AgeSheetData {
   birthMonth: string;
@@ -28,13 +29,6 @@ export const MONTHS = [
 export function birthYearOptions(now = new Date()): number[] {
   const newest = now.getFullYear() - 19;
   return Array.from({ length: 74 }, (_, i) => newest - i);
-}
-
-/** Age today, or null if month/year aren't both set. Day of birth is deliberately not collected. */
-export function ageFrom(month: string, year: string, now = new Date()): number | null {
-  if (!month || !year) return null;
-  const birthMonth = Number(month);
-  return now.getFullYear() - Number(year) - (now.getMonth() + 1 < birthMonth ? 1 : 0);
 }
 
 /** Bottom sheet to pick a birth month and year. Dismisses with both values ("" if cleared). */

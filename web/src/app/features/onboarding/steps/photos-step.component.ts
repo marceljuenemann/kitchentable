@@ -9,7 +9,7 @@ import { OnboardingDraftStore, ONBOARDING_STEPS } from '../onboarding-draft.stor
 import { MAX_PHOTOS } from '../onboarding-options';
 import { CropSheetComponent } from '../photos/crop-sheet.component';
 import { checkPhotoFile, PhotoError } from '../photos/photo-processor';
-import { PhotoStorageService } from '../photos/photo-storage.service';
+import { PhotoStorageService } from '../../../core/photo-storage.service';
 
 /** Onboarding step 3: add and crop up to six photos. */
 @Component({

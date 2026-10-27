@@ -13,8 +13,8 @@ export const authGuard: CanActivateFn = async () => {
 
 /**
  * Admins only (profile status `admin`): signed-out visitors go to the landing page, everyone else
- * to the app. `canMatch` rather than `canActivate`, so members don't even download the admin
- * chunk. The database checks again on every admin call; this only decides what people see.
+ * to the app. `canMatch` rather than `canActivate`, so nothing is loaded for anyone it turns away.
+ * The database checks again on every admin call; this only decides what people see.
  */
 export const adminGuard: CanMatchFn = async () => {
   const supabase = inject(SupabaseService);

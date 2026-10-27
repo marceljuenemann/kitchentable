@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthService } from '../../../core/auth/auth.service';
-import { SupabaseService } from '../../../core/supabase.service';
+import { AuthService } from './auth/auth.service';
 import { PhotoStorageService } from './photo-storage.service';
+import { SupabaseService } from './supabase.service';
 
 describe('PhotoStorageService', () => {
   let bucket: {
@@ -138,6 +138,37 @@ describe('PhotoStorageService', () => {
       bucket.createSignedUrls.and.resolveTo({ data: null, error });
 
       await expectAsync(service.thumbUrls(['photo-1'])).toBeRejectedWith(error);
+    });
+  });
+
+  describe('signedUrls', () => {
+    it("signs other users' photos in one request, in the order given", async () => {
+      bucket.createSignedUrls.and.resolveTo({
+        data: [
+          { error: null, signedUrl: 'https://signed/a' },
+          { error: 'Object not found', signedUrl: null },
+        ],
+        error: null,
+      });
+
+      const urls = await service.signedUrls(
+        [
+          { ownerId: 'user-2', photoId: 'photo-a' },
+          { ownerId: 'user-3', photoId: 'photo-b' },
+        ],
+        'full',
+      );
+
+      expect(bucket.createSignedUrls).toHaveBeenCalledOnceWith(
+        ['user-2/photo-a/full.jpg', 'user-3/photo-b/full.jpg'],
+        3600,
+      );
+      expect(urls).toEqual(['https://signed/a', null]);
+    });
+
+    it('does not call the server for no photos', async () => {
+      expect(await service.signedUrls([], 'thumb')).toEqual([]);
+      expect(bucket.createSignedUrls).not.toHaveBeenCalled();
     });
   });
 });
