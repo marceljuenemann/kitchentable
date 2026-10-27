@@ -9,8 +9,8 @@ import { lookingForLabel } from '../../features/onboarding/onboarding-options';
 import { photoTransitionName } from './profile-transition';
 
 /**
- * A profile as members see it (prototype/browse): a full-width photo carousel, then name and
- * age, pronouns and location, gender and sexuality chips, the About me text and Looking for. Covers the
+ * A profile as members see it (prototype/browse): a full-width photo carousel, then the name,
+ * pronouns, age and location, gender and sexuality chips, the About me text and Looking for. Covers the
  * screen over the grid it was opened from, as the child route of that grid. Anything placed
  * inside it (say, the admin's vetting box) goes below the profile.
  */
@@ -40,10 +40,6 @@ export class ProfileViewComponent {
   readonly age = computed(() => {
     const { birth_month, birth_year } = this.profile();
     return ageFrom(`${birth_month ?? ''}`, `${birth_year ?? ''}`);
-  });
-  readonly heading = computed(() => {
-    const age = this.age();
-    return age === null ? this.profile().name : `${this.profile().name}, ${age}`;
   });
   readonly aboutParagraphs = computed(() =>
     this.profile()

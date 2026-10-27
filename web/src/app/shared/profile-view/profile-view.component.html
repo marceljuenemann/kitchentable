@@ -52,10 +52,14 @@
   </button>
 
   <div class="content">
-    <h1 class="fade-in header">{{ heading() }}</h1>
+    <h1 class="fade-in header">{{ profile().name }}</h1>
     <p class="fade-in meta">
       <span>{{ profile().pronouns }}</span>
       <span class="separator" aria-hidden="true">·</span>
+      @if (age() !== null) {
+        <span>{{ age() }} years old</span>
+        <span class="separator" aria-hidden="true">·</span>
+      }
       <span class="location">
         <mat-icon aria-hidden="true">place</mat-icon>
         {{ profile().location }}

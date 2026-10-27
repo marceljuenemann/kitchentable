@@ -30,11 +30,11 @@ describe('ProfileViewComponent', () => {
     return fixture.componentInstance;
   };
 
-  it('shows the age next to the name, when there is a birth date', () => {
+  it('works out the age, when there is a birth date', () => {
     const year = new Date().getFullYear() - 30;
 
-    expect(create({ birth_year: year, birth_month: 1 }).heading()).toBe('Ivy, 30');
-    expect(create().heading()).toBe('Ivy');
+    expect(create({ birth_year: year, birth_month: 1 }).age()).toBe(30);
+    expect(create().age()).toBeNull();
   });
 
   it('splits About me into paragraphs at blank lines', () => {
