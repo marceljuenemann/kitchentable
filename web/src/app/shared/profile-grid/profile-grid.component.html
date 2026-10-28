@@ -1,10 +1,48 @@
-<ul class="grid">
+<ul class="grid" [class.hideable]="hideable()">
   @for (tile of tiles(); track tile.id) {
-    <li>
-      <a class="tile" [routerLink]="[tile.id]" (click)="opening(tile)">
+    @let swiped = progress(tile);
+    <li [class.swiping]="swiped > 0">
+      @if (hideable()) {
+        <!-- Beside the tile, in the room it leaves as it's swiped away. -->
+        <div
+          class="reveal"
+          aria-hidden="true"
+          [style.width]="revealWidth(tile)"
+          [style.opacity]="swiped"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="26"
+            height="26"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+          >
+            <path
+              d="M3 12c2.6-4.2 5.6-6.3 9-6.3s6.4 2.1 9 6.3c-2.6 4.2-5.6 6.3-9 6.3S5.6 16.2 3 12z"
+            />
+            <path d="M4 4l16 16" />
+          </svg>
+          <span>Hide profile</span>
+        </div>
+      }
+      <a
+        class="tile"
+        draggable="false"
+        [class.dragging]="drag()?.id === tile.id"
+        [style.transform]="offset(tile)"
+        [style.opacity]="1 - swiped * 0.25"
+        [routerLink]="link(tile)"
+        (click)="opening(tile)"
+        (pointerdown)="onPointerDown($event, tile)"
+        (pointermove)="onPointerMove($event, tile)"
+        (pointerup)="onPointerUp(tile)"
+        (pointercancel)="onPointerCancel()"
+      >
         <div class="photo" [style.view-transition-name]="transitionName(tile)">
           @if (tile.photoUrl) {
-            <img [src]="tile.photoUrl" alt="" />
+            <img [src]="tile.photoUrl" alt="" draggable="false" />
           } @else {
             <span class="initial" aria-hidden="true">{{ tile.name.charAt(0) }}</span>
           }

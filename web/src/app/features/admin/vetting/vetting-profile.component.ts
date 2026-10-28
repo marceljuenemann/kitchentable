@@ -13,12 +13,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { PhotoStorageService } from '../../../core/photo-storage.service';
+import { CLOSE_ANIMATION_MS } from '../../../shared/profile-view/profile-transition';
 import { ProfileViewComponent } from '../../../shared/profile-view/profile-view.component';
 import { VettingBoxComponent } from './vetting-box.component';
 import { Application, VettingStore } from './vetting.store';
-
-/** How long closing a profile animates (styles.scss), before its tile may go away. */
-const CLOSE_ANIMATION_MS = 340;
 
 /** One application over the grid: the profile as members will see it, and the vetting box. */
 @Component({

@@ -4,7 +4,7 @@ An open-source, non-profit dating app, starting with a focus on the ENM (ethical
 
 See [PRODUCT.md](PRODUCT.md) for the full mission, principles, business model, and MVP plan.
 
-Status: early-stage. Invite-gated sign-up, magic-link sign-in, onboarding, vetting and age verification are built, and signed-in users see a screen based on their profile status; browse, connections, and messaging are not yet.
+Status: early-stage. Invite-gated sign-up, magic-link sign-in, onboarding, vetting and age verification are built, and signed-in users see a screen based on their profile status. Search is built with made-up members for now; connections and messaging are not yet.
 
 A redesign of the onboarding/application flow is specced (not yet built) as a design handoff in [prototype/onboarding](prototype/onboarding/README.md) — open `design/Onboarding.dc.html` in a browser to click through it.
 

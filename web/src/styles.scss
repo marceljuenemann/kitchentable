@@ -264,6 +264,108 @@ mat-checkbox {
   }
 }
 
+// A row that is one big switch, such as a search filter's options: a `button role="switch"`
+// with `aria-checked`, its label, and an empty `span.kt-switch` (aria-hidden) for the knob.
+.kt-switch-row {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 15px;
+  border: 1.5px solid var(--kt-outline-soft);
+  border-radius: 14px;
+  background: var(--kt-raised);
+  color: var(--kt-ink);
+  font-family: var(--kt-font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &[aria-checked='true'] {
+    border-color: var(--kt-violet);
+    background: var(--kt-violet-container);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--kt-violet);
+    outline-offset: 2px;
+  }
+}
+
+.kt-switch {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 26px;
+  border-radius: 99px;
+  background: var(--kt-input);
+  transition: background-color 0.2s;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 99px;
+    background: var(--kt-raised);
+    box-shadow: var(--kt-shadow-soft);
+    transition: transform 0.2s;
+  }
+
+  [aria-checked='true'] > & {
+    background: var(--kt-violet);
+
+    &::after {
+      transform: translateX(18px);
+    }
+  }
+}
+
+// A gold note about something unfinished or out of the ordinary ("Still under construction").
+// Put a `mat-icon` and a `span` in it.
+.kt-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in oklch, var(--kt-gold) 35%, transparent);
+  border-radius: 14px;
+  background: var(--kt-gold-container);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--kt-ink);
+
+  mat-icon {
+    flex: none;
+    color: var(--kt-gold);
+  }
+}
+
+// Applied via `panelClass` on MatSnackBar.open(): dark and rounded, above the main app's bottom
+// nav (and the Reach out bar on a profile).
+.kt-snackbar {
+  --mat-snack-bar-container-color: var(--kt-ink);
+  --mat-snack-bar-container-shape: 14px;
+  --mat-snack-bar-supporting-text-color: oklch(0.995 0.004 95);
+  --mat-snack-bar-supporting-text-font: var(--kt-font-sans);
+  --mat-snack-bar-supporting-text-size: 14px;
+  --mat-snack-bar-button-color: oklch(0.86 0.07 90);
+  margin: 0 16px 96px !important;
+  max-width: calc(var(--kt-page-width) - 32px) !important;
+  box-shadow: var(--kt-shadow-lift);
+  border-radius: 14px;
+
+  .mat-mdc-button {
+    font-weight: 800;
+  }
+}
+
 // Opening and closing a profile (shared/profile-view/profile-transition.ts): the photo morphs
 // between tile and profile, and the rest of the page cross-fades.
 ::view-transition-group(*) {

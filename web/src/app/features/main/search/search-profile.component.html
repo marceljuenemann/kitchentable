@@ -1,0 +1,47 @@
+@if (member(); as member) {
+  <app-profile-view [profile]="member" [photoUrls]="photoUrls()" backLabel="Back to search">
+    <!-- Holds the bar's room at the end of the page; the bar itself stays at the bottom. -->
+    <div class="actions">
+      <div class="bar">
+        <!-- Also the accessible alternative to swiping a tile away. -->
+        <button class="hide" mat-stroked-button type="button" (click)="hide(member)">
+          <span class="label">
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M3 12c2.6-4.2 5.6-6.3 9-6.3s6.4 2.1 9 6.3c-2.6 4.2-5.6 6.3-9 6.3S5.6 16.2 3 12z"
+              />
+              <path d="M4 4l16 16" />
+            </svg>
+            Hide profile
+          </span>
+        </button>
+        <button class="reach-out" mat-flat-button type="button" (click)="reachOut()">
+          <span class="label">
+            <!-- The heart from the logo, in its gold; the view box is centred on it. -->
+            <svg viewBox="-40 -48 80 80" width="20" height="20" aria-hidden="true">
+              <path
+                fill="#E3AF47"
+                d="M0 26C-22 8-38-4-38-20c0-13 10-22 21-22 8 0 14 5 17 11 3-6 9-11 17-11 11 0 21 9 21 22C38-4 22 8 0 26Z"
+              />
+            </svg>
+            Reach out
+          </span>
+        </button>
+      </div>
+    </div>
+  </app-profile-view>
+} @else {
+  <div class="gone">
+    <p>This profile isn't available.</p>
+    <a mat-flat-button routerLink="/app">Back to search</a>
+  </div>
+}

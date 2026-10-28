@@ -6,9 +6,8 @@
   @for (tab of tabs; track tab.path) {
     <a
       [routerLink]="tab.path"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="tab.path === '/app' ? searchActive : otherActive"
-      ariaCurrentWhenActive="page"
+      [class.active]="tab === currentTab()"
+      [attr.aria-current]="tab === currentTab() ? 'page' : null"
       [attr.aria-label]="tab.label"
     >
       <span class="pill">

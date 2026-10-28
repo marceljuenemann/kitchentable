@@ -1,5 +1,7 @@
-import { afterNextRender, Component, signal } from '@angular/core';
-import { IsActiveMatchOptions, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { afterNextRender, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { filter, map } from 'rxjs';
 
 interface Tab {
   label: string;
@@ -15,7 +17,7 @@ interface Tab {
 @Component({
   selector: 'app-main',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [RouterLink, RouterOutlet],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss',
 })
@@ -46,18 +48,27 @@ export class MainComponent {
     { label: 'Community', path: '/app/community', icon: null },
   ];
 
+  private readonly router = inject(Router);
+  /** The URL's path, without query parameters, matrix parameters or fragment. */
+  private readonly path = toSignal(
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      map(() => this.currentPath()),
+    ),
+    { initialValue: this.currentPath() },
+  );
   /**
-   * When a tab counts as the current one. Search is `/app` itself, so it needs the exact path:
-   * every tab's path starts with it. Query parameters and fragments never matter (`exact: true`
-   * would require them to match too, so Search wouldn't light up on `/app?…`).
+   * The tab whose path the URL is in. Search is `/app` itself, the start of every tab's path, so
+   * it's the current one when no other is: that includes a profile opened over its grid
+   * (`/app/profiles/:id`), so the pill stays put rather than leaving and sliding back.
    */
-  readonly searchActive: IsActiveMatchOptions = {
-    paths: 'exact',
-    queryParams: 'ignored',
-    fragment: 'ignored',
-    matrixParams: 'ignored',
-  };
-  readonly otherActive: IsActiveMatchOptions = { ...this.searchActive, paths: 'subset' };
+  readonly currentTab = computed(() => {
+    const path = this.path();
+    const other = this.tabs.find(
+      (tab) => tab.path !== '/app' && (path === tab.path || path.startsWith(`${tab.path}/`)),
+    );
+    return other ?? this.tabs.find((tab) => tab.path === '/app');
+  });
 
   /**
    * Whether the pill slides when the tab changes. Off for the first render, so that opening a
@@ -67,5 +78,9 @@ export class MainComponent {
 
   constructor() {
     afterNextRender(() => setTimeout(() => this.animated.set(true)));
+  }
+
+  private currentPath(): string {
+    return this.router.url.split(/[?#;]/)[0];
   }
 }
