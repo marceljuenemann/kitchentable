@@ -1,0 +1,64 @@
+:host {
+  display: block;
+  // Clears the nav.
+  padding-bottom: 96px;
+}
+
+// Fixed rather than inside the shell's padded column, across the page width.
+nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 10;
+  transform: translateX(-50%);
+  width: min(var(--kt-page-width), 100%);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding: 8px 4px max(16px, env(safe-area-inset-bottom));
+  background: color-mix(in oklch, var(--kt-raised) 96%, transparent);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--kt-outline-soft);
+}
+
+a {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--kt-muted);
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    outline: none;
+
+    .pill {
+      outline: 2px solid var(--kt-violet);
+    }
+  }
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 40px;
+  border-radius: 99px;
+  transition: background-color 0.2s;
+}
+
+.icon {
+  stroke-width: 1.9;
+}
+
+.active {
+  color: var(--kt-violet);
+
+  .pill {
+    background: var(--kt-violet-container);
+  }
+
+  .icon {
+    stroke-width: 2.4;
+  }
+}

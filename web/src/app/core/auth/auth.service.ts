@@ -49,6 +49,7 @@ export class AuthService {
     if (error) throw error;
   }
 
+  /** Only ends the session: sign users out with `injectSignOut()`, which clears their storage too. */
   async signOut() {
     await this.supabase.client.auth.signOut();
   }

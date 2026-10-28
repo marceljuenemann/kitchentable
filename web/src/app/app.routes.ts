@@ -19,11 +19,13 @@ export const routes: Routes = [
     component: CallbackComponent,
   },
   // One route for everything a signed-in user sees: the shell picks the screen from the
-  // profile status, so nobody can navigate into the wrong flow.
+  // profile status, so nobody can navigate into the wrong flow. Its children are the main
+  // app's tabs, shown only when the shell shows the main app.
   {
     path: 'app',
     canActivate: [authGuard],
     loadComponent: () => import('./features/signed-in-chunk').then((m) => m.ShellComponent),
+    loadChildren: () => import('./features/signed-in-chunk').then((m) => m.MAIN_ROUTES),
   },
   // For admin accounts (profile status `admin`) only.
   {

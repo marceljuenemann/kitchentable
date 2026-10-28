@@ -39,7 +39,7 @@ test('a passed check activates the profile and opens the app', async ({ page }) 
 
   expect((await sendDiditWebhook(id, 'Approved')).status).toBe(200);
 
-  await expect(page.getByRole('heading', { name: 'Kitchen Table' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Search' })).toBeVisible();
   const profile = await profileOf(id);
   expect(profile['status']).toBe('active');
   expect(profile['age_verified_at']).not.toBeNull();
