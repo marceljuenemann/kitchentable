@@ -1,0 +1,19 @@
+@if (application(); as application) {
+  <app-profile-view
+    [profile]="application"
+    [photoUrls]="photoUrls()"
+    backLabel="Back to applications"
+  >
+    <app-vetting-box
+      [application]="application"
+      [busy]="approving()"
+      [failed]="approveFailed()"
+      (approve)="approve()"
+    />
+  </app-profile-view>
+} @else if (application() === null) {
+  <div class="gone">
+    <p>This application is no longer waiting for review.</p>
+    <a mat-flat-button routerLink="..">Back to applications</a>
+  </div>
+}

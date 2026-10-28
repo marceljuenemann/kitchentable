@@ -9,6 +9,7 @@ const screens: [ProfileStatus | null, string][] = [
   ['disabled', 'Kitchen Table'],
   ['suspended', 'Your profile is suspended'],
   ['deleted', 'Your profile has been deleted'],
+  ['admin', 'Kitchen Table'],
 ];
 
 for (const [status, heading] of screens) {
@@ -17,6 +18,12 @@ for (const [status, heading] of screens) {
     await expect(page.getByRole('heading', { name: heading })).toBeVisible();
   });
 }
+
+test('an admin can open the admin tool', async ({ page }) => {
+  await signInAs(page, 'admin');
+  await page.goto('/admin/vetting');
+  await expect(page.getByText(/applications? waiting/)).toBeVisible();
+});
 
 test('sends a signed-in user from the landing page to the app', async ({ page }) => {
   await signInAs(page, 'vetting');

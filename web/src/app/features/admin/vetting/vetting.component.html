@@ -1,0 +1,22 @@
+<div class="page">
+  <app-header />
+
+  @if (store.loadFailed()) {
+    <p class="message">Something went wrong loading the applications.</p>
+    <button mat-flat-button type="button" (click)="store.load()">Try again</button>
+  } @else if (store.applications() === null) {
+    <mat-spinner diameter="32" />
+  } @else if (tiles().length === 0) {
+    <div class="empty">
+      <p class="empty-title">No applications waiting</p>
+      <p>New applications are emailed to you as they come in.</p>
+    </div>
+  } @else {
+    <p class="count">{{ count() }}</p>
+    <app-profile-grid [tiles]="tiles()" [openId]="store.openId()" />
+  }
+
+  <app-footer />
+</div>
+
+<router-outlet />

@@ -12,7 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import Panzoom, { PanzoomObject } from '@panzoom/panzoom';
 import { MIN_SOURCE_SIZE, renderPhoto, visibleSquare } from './photo-processor';
-import { PhotoStorageService } from './photo-storage.service';
+import { PhotoStorageService } from '../../../core/photo-storage.service';
 
 export interface CropSheetData {
   file: File;

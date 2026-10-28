@@ -1,0 +1,292 @@
+// Covers the screen over the grid, scrolling on its own, so the grid underneath keeps its
+// scroll position.
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--kt-bg);
+  color: var(--kt-ink);
+  font-family: var(--kt-font-sans);
+}
+
+.page {
+  position: relative;
+  max-width: var(--kt-page-width);
+  margin: 0 auto;
+  padding-bottom: 48px;
+}
+
+// The photo is a full-width square: the end point of the morph from the tile.
+.hero {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--kt-violet-container);
+}
+
+.track {
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  img,
+  .slide-placeholder {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    scroll-snap-align: start;
+  }
+}
+
+.initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-family: var(--kt-font-display);
+  font-size: 120px;
+  font-weight: 700;
+  color: var(--kt-violet-soft);
+}
+
+.dots {
+  position: absolute;
+  inset: auto 0 12px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: oklch(1 0 0 / 0.55);
+  box-shadow: 0 1px 2px oklch(0.2 0.05 300 / 0.3);
+  transition:
+    width 0.2s,
+    background-color 0.2s;
+
+  &.current {
+    width: 18px;
+    background: white;
+  }
+}
+
+// Stays in view while the page scrolls.
+.back {
+  position: fixed;
+  top: 12px;
+  left: max(12px, calc((100% - var(--kt-page-width)) / 2 + 12px));
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: oklch(1 0 0 / 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--kt-shadow-soft);
+  color: var(--kt-violet);
+  cursor: pointer;
+  animation: fade-in 0.12s ease-out both;
+
+  mat-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 28px;
+  }
+}
+
+// Previous/next photo, for a mouse or keyboard; touch screens swipe instead. Plain and
+// see-through, so they don't compete with the back button.
+.step {
+  position: absolute;
+  top: calc(50% - 24px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: white;
+  opacity: 0.7;
+  filter: drop-shadow(0 1px 3px oklch(0.2 0.05 300 / 0.5));
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+  }
+
+  mat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+  }
+
+  &.previous {
+    left: 4px;
+  }
+
+  &.next {
+    right: 4px;
+  }
+
+  @media (hover: none) {
+    display: none;
+  }
+}
+
+.content {
+  padding: 20px 20px 0;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--kt-font-display);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--kt-violet);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--kt-muted);
+}
+
+.location {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+// The same colours as the chips in onboarding: gender as in its sheet (secondary), looking for
+// as in About you (primary). Sexuality is gold here, to tell it apart next to gender.
+.chip {
+  padding: 8px 13px;
+  border-radius: 99px;
+  font-size: 13.5px;
+  font-weight: 700;
+
+  &.gender {
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+  }
+
+  &.sexuality {
+    background: var(--kt-gold-container);
+    color: var(--kt-gold);
+  }
+
+  .looking-for & {
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+  }
+}
+
+.about p {
+  margin: 20px 0 0;
+  font-size: 17px;
+  line-height: 1.65;
+  white-space: pre-line;
+
+  & + p {
+    margin-top: 14px;
+  }
+}
+
+.looking-for {
+  margin-top: 28px;
+
+  .chips {
+    margin-top: 10px;
+  }
+}
+
+// A small label rather than a heading: the chips speak for themselves.
+h2 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kt-muted);
+}
+
+// The text comes in just after the photo starts moving, one part after another.
+.fade-in {
+  animation: fade-in 0.2s ease-out both;
+
+  &.header {
+    animation-delay: 0.16s;
+  }
+
+  &.meta {
+    animation-duration: 0.18s;
+    animation-delay: 0.18s;
+  }
+
+  &.chips {
+    animation-delay: 0.22s;
+  }
+
+  &.about {
+    animation-delay: 0.24s;
+  }
+
+  &.looking-for {
+    animation-delay: 0.26s;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in,
+  .back {
+    animation: none;
+  }
+}

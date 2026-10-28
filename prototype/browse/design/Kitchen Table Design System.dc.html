@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;1,6..12,400&display=swap" rel="stylesheet">
+<style>
+:root{
+--violet:oklch(0.29 0.15 300.5);--violet-soft:oklch(0.42 0.19 300);--violet-container:oklch(0.925 0.032 300);
+--sky:oklch(0.48 0.12 233);--sky-container:oklch(0.925 0.043 233);
+--magenta:oklch(0.5 0.216 341);--magenta-container:oklch(0.935 0.038 341);
+--gold:oklch(0.48 0.12 68);--gold-container:oklch(0.935 0.05 84);
+--bg:oklch(0.995 0.004 95);--ink:oklch(0.21 0.095 300);--muted:oklch(0.42 0.045 300);
+--raised:oklch(1 0 0);--sunken:oklch(0.958 0.008 95);
+--cream:oklch(0.955 0.032 88);--cream-strong:oklch(0.925 0.048 86);
+--outline:oklch(0.55 0.03 300);--outline-soft:oklch(0.885 0.012 95);--input:oklch(0.855 0.016 95);
+--shadow-soft:0 1px 2px oklch(0.3 0.12 300 / .07), 0 10px 26px -14px oklch(0.3 0.12 300 / .22);
+--shadow-lift:0 2px 6px oklch(0.3 0.12 300 / .1), 0 22px 46px -20px oklch(0.3 0.12 300 / .3);
+--display:"Baloo Bhaijaan 2","Trebuchet MS",sans-serif;
+--sans:"Nunito Sans",system-ui,sans-serif;
+}
+body{margin:0;background:oklch(0.995 0.004 95);color:oklch(0.21 0.095 300);font-family:"Nunito Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:oklch(0.42 0.19 300)}a:hover{color:oklch(0.29 0.15 300.5)}
+*{box-sizing:border-box}
+@keyframes ktRise{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+</style>
+</helmet>
+
+<div style="min-height:100%;background:{{ canvas }};padding-bottom:80px;font-family:var(--sans);color:var(--ink)">
+
+<header style="position:sticky;top:0;z-index:30;background:oklch(0.995 0.004 95 / .93);backdrop-filter:blur(10px);border-bottom:1px solid var(--outline-soft);padding:12px 20px">
+<div style="max-width:960px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px">
+<span style="display:flex;align-items:center;gap:10px">
+<svg viewBox="0 0 360 360" width="36" height="36" role="img" aria-label="Kitchen Table"><g transform="translate(180 180)" fill="none" stroke-width="24" stroke-linecap="round"><circle r="70" stroke="#3B176F"></circle><path d="M-101.73 -21.62A104 104 0 0 1 -21.62 -101.73" stroke="#70C4EC"></path><path d="M21.62 -101.73A104 104 0 0 1 101.73 -21.62" stroke="#C83897"></path><path d="M101.73 21.62A104 104 0 0 1 21.62 101.73" stroke="#EDE7DC"></path><path d="M-21.62 101.73A104 104 0 0 1 -101.73 21.62" stroke="#6C3AB2"></path></g><path transform="translate(180 180) scale(.9) translate(0 8)" fill="#E3AF47" d="M0 26C-22 8-38-4-38-20c0-13 10-22 21-22 8 0 14 5 17 11 3-6 9-11 17-11 11 0 21 9 21 22C38-4 22 8 0 26Z"></path></svg>
+<span style="font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.02em;text-transform:uppercase;color:var(--violet)">Kitchen Table</span>
+</span>
+<span style="font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase">Design system · v0.2</span>
+</div>
+</header>
+
+<main style="max-width:960px;margin:0 auto;padding:28px 20px 0;display:flex;flex-direction:column;gap:18px">
+
+<section style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:center;padding:4px 0 10px">
+<svg viewBox="0 0 360 360" width="64" height="64" role="img" aria-label="Kitchen Table mark"><g transform="translate(180 180)" fill="none" stroke-width="24" stroke-linecap="round"><circle r="70" stroke="#3B176F"></circle><path d="M-101.73 -21.62A104 104 0 0 1 -21.62 -101.73" stroke="#70C4EC"></path><path d="M21.62 -101.73A104 104 0 0 1 101.73 -21.62" stroke="#C83897"></path><path d="M101.73 21.62A104 104 0 0 1 21.62 101.73" stroke="#EDE7DC"></path><path d="M-21.62 101.73A104 104 0 0 1 -101.73 21.62" stroke="#6C3AB2"></path></g><path transform="translate(180 180) scale(.9) translate(0 8)" fill="#E3AF47" d="M0 26C-22 8-38-4-38-20c0-13 10-22 21-22 8 0 14 5 17 11 3-6 9-11 17-11 11 0 21 9 21 22C38-4 22 8 0 26Z"></path></svg>
+<div style="min-width:0">
+<p style="margin:0;font-size:11.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--magenta)">Material 3 · warm white canvas</p>
+<h1 style="margin:2px 0 0;font-family:var(--display);font-size:36px;line-height:1.06;letter-spacing:-.02em;font-weight:800;color:var(--violet);text-wrap:pretty">Kitchen Table design system</h1>
+<p style="margin:6px 0 0;font-size:16px;line-height:1.5;color:var(--muted);max-width:56ch;text-wrap:pretty">Material 3 roles carrying the brand palette: deep violet primary, three accents for calm, alive and care, cream kept for tonal moments. Built for a non-profit London community that browses and introduces rather than swipes.</p>
+</div>
+</section>
+
+<section style="border-radius:28px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:{{ pad }}">
+<header style="margin-bottom:14px">
+<p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Foundations</p>
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;letter-spacing:-.015em">Colour &amp; surface roles</h2>
+<span style="display:block;margin-top:10px;height:3px;width:40px;border-radius:99px;background:var(--violet)"></span>
+</header>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:var(--muted);max-width:70ch;text-wrap:pretty">The canvas is warm white and cards are pure white with a hairline and a soft shadow, so separation comes from elevation rather than a cream-on-cream wash. Cream is a deliberate tonal moment — care, boundaries, community notes — never the whole screen.</p>
+<ul style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+<sc-for list="{{ swatches }}" as="s" hint-placeholder-count="12">
+<li style="overflow:hidden;border-radius:18px;border:1px solid var(--outline-soft)">
+<span style="display:flex;height:66px;align-items:flex-end;padding:8px;background:{{ s.bg }};color:{{ s.fg }}">
+<span style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase">{{ s.name }}</span>
+</span>
+<span style="display:block;background:var(--raised);padding:7px 9px 8px">
+<span style="display:block;font-size:11.5px;font-weight:700;color:var(--muted)">{{ s.role }}</span>
+<span style="display:block;margin-top:2px;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--outline)">{{ s.token }}</span>
+</span>
+</li>
+</sc-for>
+</ul>
+<div style="margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">
+<div style="border-radius:18px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:16px">
+<p style="margin:0;font-weight:700;font-size:15px">Raised</p>
+<p style="margin:4px 0 0;font-size:13.5px;color:var(--muted)">White card, default.</p>
+</div>
+<div style="border-radius:18px;border:1px solid var(--cream-strong);background:var(--cream);box-shadow:var(--shadow-soft);padding:16px">
+<p style="margin:0;font-weight:700;font-size:15px">Cream tonal</p>
+<p style="margin:4px 0 0;font-size:13.5px;color:var(--muted)">Special moments only.</p>
+</div>
+<div style="border-radius:18px;border:1px solid var(--outline-soft);background:var(--sunken);padding:16px">
+<p style="margin:0;font-weight:700;font-size:15px">Quiet</p>
+<p style="margin:4px 0 0;font-size:13.5px;color:var(--muted)">Meta, no elevation.</p>
+</div>
+</div>
+</section>
+
+<section style="border-radius:28px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:{{ pad }}">
+<header style="margin-bottom:14px">
+<p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Foundations</p>
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;letter-spacing:-.015em">Type scale</h2>
+<span style="display:block;margin-top:10px;height:3px;width:40px;border-radius:99px;background:var(--sky)"></span>
+</header>
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="margin:0;font-family:var(--display);font-size:34px;font-weight:800;line-height:1.05;letter-spacing:-.02em;color:var(--violet)">Display 34 · Baloo Bhaijaan 2</p>
+<p style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;letter-spacing:-.015em">Section header 22 · ink, not a whisper</p>
+<p style="margin:0;font-size:17px;line-height:1.65;max-width:62ch;text-wrap:pretty">Body 17 / 1.65 — the profile-writing size. Long paragraphs of someone's own words get the most generous line height in the system, set in Nunito Sans.</p>
+<p style="margin:0;font-size:15px;color:var(--muted)">Support 15 — helper text, metadata, quiet guidance at 4.5:1 on white.</p>
+<p style="margin:0;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">Eyebrow 11 · sits above the header, never replaces it</p>
+</div>
+<div style="margin-top:16px;border-radius:18px;background:var(--sunken);border:1px solid var(--outline-soft);padding:14px 16px;font-size:13.5px;line-height:1.6;color:var(--muted)">
+Display face is used for the logotype, screen titles and section headers only. Everything a member writes is set in Nunito Sans, so their words never look like branding.
+</div>
+</section>
+
+<section style="border-radius:28px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:{{ pad }}">
+<header style="margin-bottom:14px">
+<p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Foundations</p>
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;letter-spacing:-.015em">Shape, spacing &amp; touch</h2>
+<span style="display:block;margin-top:10px;height:3px;width:40px;border-radius:99px;background:var(--gold)"></span>
+</header>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:12px">
+<sc-for list="{{ radii }}" as="r" hint-placeholder-count="5">
+<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+<div style="width:100%;height:58px;background:var(--violet-container);border:1px solid oklch(0.885 0.012 95);border-radius:{{ r.value }}"></div>
+<span style="font-size:11.5px;font-weight:700">{{ r.name }}</span>
+<span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--outline);margin-top:-6px">{{ r.value }}</span>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
+<sc-for list="{{ spacing }}" as="sp" hint-placeholder-count="6">
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+<div style="width:{{ sp.value }};height:{{ sp.value }};background:var(--sky-container);border-radius:4px"></div>
+<span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--outline)">{{ sp.label }}</span>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+<div style="border-radius:18px;border:1px solid var(--cream-strong);background:var(--cream);padding:14px 16px">
+<p style="margin:0;font-weight:700;font-size:14.5px">44px minimum</p>
+<p style="margin:4px 0 0;font-size:13px;line-height:1.55;color:var(--muted)">Every tappable thing, including icon buttons and chips in filter rows.</p>
+</div>
+<div style="border-radius:18px;border:1px solid var(--cream-strong);background:var(--cream);padding:14px 16px">
+<p style="margin:0;font-weight:700;font-size:14.5px">52px primary</p>
+<p style="margin:4px 0 0;font-size:13px;line-height:1.55;color:var(--muted)">Send an introduction, save boundaries, join an event.</p>
+</div>
+</div>
+</section>
+
+<section style="border-radius:28px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:{{ pad }}">
+<header style="margin-bottom:14px">
+<p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Actions</p>
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;letter-spacing:-.015em">Buttons</h2>
+<span style="display:block;margin-top:10px;height:3px;width:40px;border-radius:99px;background:var(--magenta)"></span>
+</header>
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<button style="height:44px;padding:0 22px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:15px;font-weight:700;box-shadow:var(--shadow-soft);cursor:pointer;transition:background-color .15s,transform .15s" style-hover="background:var(--violet-soft)" style-active="transform:scale(.98)">Filled</button>
+<button style="height:44px;padding:0 22px;border:0;border-radius:99px;background:var(--violet-container);color:var(--violet);font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer" style-hover="background:oklch(0.9 0.04 300)">Tonal</button>
+<button style="height:44px;padding:0 22px;border:0;border-radius:99px;background:var(--gold-container);color:var(--gold);font-family:var(--sans);font-size:15px;font-weight:700;display:inline-flex;align-items:center;gap:8px;cursor:pointer" style-hover="background:oklch(0.91 0.06 84)">
+<svg viewBox="-44 -44 88 88" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M0 26C-22 8-38-4-38-20c0-13 10-22 21-22 8 0 14 5 17 11 3-6 9-11 17-11 11 0 21 9 21 22C38-4 22 8 0 26Z"></path></svg>
+Gold tonal</button>
+<button style="height:44px;padding:0 22px;border:1px solid var(--outline-soft);border-radius:99px;background:var(--raised);color:var(--ink);font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer" style-hover="background:var(--sunken)">Outline</button>
+<button style="height:44px;padding:0 18px;border:0;border-radius:99px;background:transparent;color:var(--violet);font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer" style-hover="background:var(--violet-container)">Text</button>
+<button disabled="disabled" style="height:44px;padding:0 22px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:15px;font-weight:700;opacity:.45;cursor:not-allowed">Disabled</button>
+</div>
+<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<button style="height:36px;padding:0 16px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:13.5px;font-weight:700;cursor:pointer">Small 36</button>
+<button style="height:44px;padding:0 22px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer">Medium 44</button>
+<button style="height:52px;padding:0 26px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16px;font-weight:700;cursor:pointer">Large · 52px touch</button>
+</div>
+<div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<button style="width:56px;height:56px;border:0;border-radius:20px;background:var(--gold-container);color:var(--gold);box-shadow:var(--shadow-soft);cursor:pointer;display:inline-flex;align-items:center;justify-content:center" aria-label="Write an introduction">
+<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+</button>
+<span style="font-size:13.5px;color:var(--muted);max-width:44ch;line-height:1.55">FAB is gold — the one “start something” colour. Never violet, so it never competes with the primary action inside a card.</span>
+</div>
+</section>
+
+<section style="border-radius:28px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:{{ pad }}">
+<header style="margin-bottom:14px">
+<p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">People</p>
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;letter-spacing:-.015em">Identity &amp; intent chips</h2>
+<span style="display:block;margin-top:10px;height:3px;width:40px;border-radius:99px;background:var(--gold)"></span>
+</header>
+<p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:var(--muted);max-width:70ch;text-wrap:pretty">Chips describe people, so tone is decorative only — never the sole carrier of meaning, and always paired with the label text. Tap to filter; selected chips gain a tick and a ring, not just a colour change.</p>
+<ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px">
+<sc-for list="{{ chips }}" as="c" hint-placeholder-count="7">
+<li>
+<button onClick="{{ c.toggle }}" aria-pressed="{{ c.on }}" style="min-height:36px;display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:99px;border:{{ c.border }};background:{{ c.bg }};color:{{ c.color }};font-family:var(--sans);font-size:13.5px;font-weight:700;line-height:1;cursor:pointer">
+<sc-if value="{{ c.on }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M4 12.5l5.2 5.2L20 7"></path></svg>
+</sc-if>
+{{ c.label }}
+</button>
+</li>
+</sc-for>
+</ul>
+</section>
+
+<section style="border-radius:28px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:{{ pad }}">
+<header style="margin-bottom:14px">
+<p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Forms</p>
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;letter-spacing:-.015em">Inputs</h2>
+<span style="display:block;margin-top:10px;height:3px;width:40px;border-radius:99px;background:var(--violet)"></span>
+</header>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div>
+<label for="kt-search" style="display:block;font-size:12.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Search</label>
+<div style="position:relative;margin-top:8px">
+<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="oklch(0.42 0.045 300)" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);pointer-events:none"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
+<input id="kt-search" placeholder="Supper clubs, book swaps, queer sport…" style="height:50px;width:100%;border-radius:99px;border:1px solid var(--input);background:var(--bg);padding:0 18px 0 44px;font-family:var(--sans);font-size:16px;color:var(--ink)">
+</div>
+</div>
+<div>
+<label for="kt-area" style="display:block;font-size:12.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Profile writing</label>
+<textarea id="kt-area" rows="3" style="margin-top:8px;width:100%;resize:none;border-radius:18px;border:1px solid var(--input);background:var(--bg);padding:14px 16px;font-family:var(--sans);font-size:17px;line-height:1.6;color:var(--ink)">I host a monthly supper club and I'm hoping to meet people who like a long table.</textarea>
+<p style="margin:8px 0 0;font-size:13px;color:var(--muted)">Helper text sits under the field, never inside it.</p>
+</div>
+<div>
+<span style="display:block;font-size:12.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Segmented · looking for</span>
+<div style="margin-top:8px;display:flex;gap:6px;padding:5px;border-radius:99px;background:var(--sunken);border:1px solid var(--outline-soft);width:fit-content;max-width:100%;flex-wrap:wrap">
+<sc-for list="{{ segments }}" as="sg" hint-placeholder-count="3">
+<button onClick="{{ sg.pick }}" aria-pressed="{{ sg.on }}" style="min-height:40px;padding:0 18px;border:0;border-radius:99px;background:{{ sg.bg }};color:{{ sg.color }};font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;box-shadow:{{ sg.shadow }}">{{ sg.label }}</button>
+</sc-for>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;border-radius:18px;border:1px solid var(--cream-strong);background:var(--cream);padding:14px 16px">
+<span style="min-width:0;font-size:15px">
+<span style="display:block;font-weight:700">Show me on the community map</span>
+<span style="color:var(--muted)">Borough only, never a pin</span>
+</span>
+<button role="switch" aria-checked="{{ mapOn }}" aria-label="Show me on the community map" onClick="{{ toggleMap }}" style="position:relative;width:52px;height:30px;flex:none;border:0;border-radius:99px;cursor:pointer;transition:background-color .2s;background:{{ switchBg }}">
+<span style="position:absolute;top:4px;left:{{ switchX }};width:22px;height:22px;border-radius:99px;background:var(--raised);box-shadow:var(--shadow-soft);transition:left .2s"></span>
+</button>
+</div>
+</div>
+</section>
+
+<section style="border-radius:28px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:{{ pad }}">
+<header style="margin-bottom:14px">
+<p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Containers</p>
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;letter-spacing:-.015em">Content cards</h2>
+<span style="display:block;margin-top:10px;height:3px;width:40px;border-radius:99px;background:var(--sky)"></span>
+</header>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="border-radius:18px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:16px">
+<h4 style="margin:0;font-family:var(--display);font-size:17px;font-weight:700">Raised card</h4>
+<p style="margin:6px 0 0;font-size:16px;line-height:1.65;color:var(--muted);text-wrap:pretty">Default for someone's own words. White on warm white, one hairline, a soft shadow doing the separating.</p>
+</div>
+<div style="border-radius:18px;border:1px solid var(--cream-strong);background:var(--cream);box-shadow:var(--shadow-soft);padding:16px">
+<h4 style="margin:0;font-family:var(--display);font-size:17px;font-weight:700">Cream tonal panel</h4>
+<p style="margin:6px 0 0;font-size:16px;line-height:1.6;color:var(--muted);text-wrap:pretty">Warmth on purpose — boundaries, care, community moments. One or two per screen.</p>
+</div>
+<div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:flex-start;border-radius:18px;border:1px solid oklch(0.48 0.12 233 / .3);background:var(--sky-container);padding:16px">
+<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--sky)" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5.5M12 7.6v.4"></path></svg>
+<p style="margin:0;min-width:0;font-size:15px;line-height:1.6;color:var(--ink);text-wrap:pretty">Informational note — community context, never marketing.</p>
+</div>
+<div style="border-radius:18px;border:1px solid var(--outline-soft);background:var(--sunken);padding:16px">
+<h4 style="margin:0;font-family:var(--display);font-size:17px;font-weight:700">Quiet card</h4>
+<p style="margin:6px 0 0;font-size:15px;line-height:1.6;color:var(--muted)">Metadata and app explanations. No elevation, no colour.</p>
+</div>
+</div>
+</section>
+
+<section style="border-radius:28px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:{{ pad }}">
+<header style="margin-bottom:14px">
+<p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Kitchen Table only</p>
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;letter-spacing:-.015em">Community patterns</h2>
+<span style="display:block;margin-top:10px;height:3px;width:40px;border-radius:99px;background:var(--magenta)"></span>
+</header>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.6;color:var(--muted);max-width:70ch;text-wrap:pretty">Four components that carry the product's values. They exist because there is no swipe, no ranking and no paywall: trust has to be visible instead.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">
+
+<div style="border-radius:20px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:16px">
+<p style="margin:0 0 10px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Vouch badge</p>
+<span style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;background:var(--gold-container);color:var(--gold);font-size:13.5px;font-weight:700">
+<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 12.5l5.2 5.2L20 7"></path></svg>
+Vouched by 3 members</span>
+<p style="margin:10px 0 0;font-size:13.5px;line-height:1.55;color:var(--muted)">Names shown only to people who share a voucher. Count is never a score.</p>
+</div>
+
+<div style="border-radius:20px;border:1px solid var(--cream-strong);background:var(--cream);box-shadow:var(--shadow-soft);padding:16px">
+<p style="margin:0 0 10px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Boundaries block</p>
+<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px">
+<li style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px;font-size:14.5px;line-height:1.5"><span style="width:8px;height:8px;border-radius:99px;background:var(--violet);margin-top:6px"></span><span>Nesting partner, lives with me</span></li>
+<li style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px;font-size:14.5px;line-height:1.5"><span style="width:8px;height:8px;border-radius:99px;background:var(--magenta);margin-top:6px"></span><span>Not looking for a third</span></li>
+<li style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px;font-size:14.5px;line-height:1.5"><span style="width:8px;height:8px;border-radius:99px;background:var(--sky);margin-top:6px"></span><span>Ask before mentioning me to others</span></li>
+</ul>
+<p style="margin:10px 0 0;font-size:13px;line-height:1.55;color:var(--muted)">Member's own words, verbatim. Never summarised or tag-ified by the app.</p>
+</div>
+
+<div style="border-radius:20px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:16px">
+<p style="margin:0 0 10px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Introduction, not a like</p>
+<div style="border-radius:14px;background:var(--sunken);padding:12px 14px;font-size:14.5px;line-height:1.55;color:var(--ink)">“You mentioned the supper club — I run a bread thing in Peckham. Would you like to swap notes?”</div>
+<button style="margin-top:12px;width:100%;height:52px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16px;font-weight:700;cursor:pointer">Send introduction</button>
+<p style="margin:10px 0 0;font-size:13px;line-height:1.55;color:var(--muted)">150 characters minimum. There is no one-tap interest.</p>
+</div>
+
+<div style="border-radius:20px;border:1px solid var(--outline-soft);background:var(--sunken);padding:16px">
+<p style="margin:0 0 10px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Non-profit note</p>
+<p style="margin:0;font-size:14.5px;line-height:1.6;color:var(--ink);text-wrap:pretty">Kitchen Table is funded by members, not ranking. Every screen that mentions money says where it goes.</p>
+<a href="#" style="display:inline-block;margin-top:10px;font-size:14px;font-weight:700;text-decoration:underline">Where subs go</a>
+</div>
+
+</div>
+</section>
+
+<section style="border-radius:28px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:{{ pad }}">
+<header style="margin-bottom:14px">
+<p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Navigation</p>
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;letter-spacing:-.015em">Bars, tabs &amp; sheets</h2>
+<span style="display:block;margin-top:10px;height:3px;width:40px;border-radius:99px;background:var(--violet)"></span>
+</header>
+
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="border-radius:18px;overflow:hidden;border:1px solid var(--outline-soft)">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:var(--raised)">
+<span style="font-family:var(--display);font-size:20px;font-weight:700;color:var(--violet)">Discover</span>
+<span style="display:flex;gap:6px">
+<span style="width:44px;height:44px;border-radius:99px;background:var(--sunken);display:inline-flex;align-items:center;justify-content:center">
+<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
+</span>
+<span style="width:44px;height:44px;border-radius:99px;background:var(--sunken);display:inline-flex;align-items:center;justify-content:center">
+<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"></path></svg>
+</span>
+</span>
+</div>
+<div style="display:flex;gap:4px;padding:0 12px 0;background:var(--raised);border-top:1px solid var(--outline-soft)">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+<button onClick="{{ t.pick }}" style="min-height:48px;padding:0 14px;border:0;background:transparent;font-family:var(--sans);font-size:14.5px;font-weight:700;color:{{ t.color }};border-bottom:3px solid {{ t.bar }};cursor:pointer">{{ t.label }}</button>
+</sc-for>
+</div>
+<div style="padding:16px;background:var(--bg);font-size:14.5px;line-height:1.6;color:var(--muted)">{{ tabBody }}</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;align-items:start">
+<div>
+<p style="margin:0 0 8px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Bottom navigation</p>
+<div style="border-radius:18px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);display:grid;grid-template-columns:repeat(5,1fr);padding:6px 4px">
+<sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+<button onClick="{{ n.pick }}" aria-label="{{ n.label }}" aria-current="{{ n.current }}" style="min-height:60px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:var(--sans)">
+<span style="display:inline-flex;align-items:center;justify-content:center;width:60px;height:40px;border-radius:99px;background:{{ n.pill }};color:{{ n.color }}">
+<sc-if value="{{ n.isMark }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 360 360" width="28" height="28" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="round" aria-hidden="true"><g transform="translate(180 180)"><circle r="58"></circle><path d="M-109.5 -23.3A112 112 0 0 1 -23.3 -109.5"></path><path d="M23.3 -109.5A112 112 0 0 1 109.5 -23.3"></path><path d="M109.5 23.3A112 112 0 0 1 23.3 109.5"></path><path d="M-23.3 109.5A112 112 0 0 1 -109.5 23.3"></path></g></svg>
+</sc-if>
+<sc-if value="{{ n.isFull }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 360 360" width="30" height="30" aria-hidden="true"><g transform="translate(180 180)" fill="none" stroke-width="30" stroke-linecap="round"><circle r="70" stroke="#3B176F"></circle><path d="M-101.73 -21.62A104 104 0 0 1 -21.62 -101.73" stroke="#70C4EC"></path><path d="M21.62 -101.73A104 104 0 0 1 101.73 -21.62" stroke="#C83897"></path><path d="M101.73 21.62A104 104 0 0 1 21.62 101.73" stroke="#E0D7C6"></path><path d="M-21.62 101.73A104 104 0 0 1 -101.73 21.62" stroke="#6C3AB2"></path></g><path transform="translate(180 180) scale(.82) translate(0 8)" fill="#E3AF47" d="M0 26C-22 8-38-4-38-20c0-13 10-22 21-22 8 0 14 5 17 11 3-6 9-11 17-11 11 0 21 9 21 22C38-4 22 8 0 26Z"></path></svg>
+</sc-if>
+<sc-if value="{{ n.isPath }}" hint-placeholder-val="{{ true }}">
+<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="{{ n.weight }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ n.icon }}"></path></svg>
+</sc-if>
+</span>
+</button>
+</sc-for>
+</div>
+<div style="margin-top:12px;border-radius:18px;border:1px solid var(--outline-soft);background:var(--sunken);padding:14px 16px">
+<p style="margin:0 0 4px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Community icon · alternatives</p>
+<p style="margin:0 0 12px;font-size:13.5px;line-height:1.55;color:var(--muted)">Tap one to see it in the bar above. The first ten describe a community section; from Forum threads onwards they describe a forum and feedback section instead — and if that's what it holds, the tab is probably called Forum, not Community.</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px">
+<sc-for list="{{ communityOptions }}" as="o" hint-placeholder-count="4">
+<button onClick="{{ o.pick }}" style="flex:1 1 130px;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px 10px;border:{{ o.border }};border-radius:16px;background:{{ o.bg }};color:{{ o.color }};font-family:var(--sans);cursor:pointer">
+<sc-if value="{{ o.isMark }}" hint-placeholder-val="{{ true }}">
+<svg viewBox="0 0 360 360" width="30" height="30" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="round" aria-hidden="true"><g transform="translate(180 180)"><circle r="58"></circle><path d="M-109.5 -23.3A112 112 0 0 1 -23.3 -109.5"></path><path d="M23.3 -109.5A112 112 0 0 1 109.5 -23.3"></path><path d="M109.5 23.3A112 112 0 0 1 23.3 109.5"></path><path d="M-23.3 109.5A112 112 0 0 1 -109.5 23.3"></path></g></svg>
+</sc-if>
+<sc-if value="{{ o.isFull }}" hint-placeholder-val="{{ true }}">
+<svg viewBox="0 0 360 360" width="32" height="32" aria-hidden="true"><g transform="translate(180 180)" fill="none" stroke-width="30" stroke-linecap="round"><circle r="70" stroke="#3B176F"></circle><path d="M-101.73 -21.62A104 104 0 0 1 -21.62 -101.73" stroke="#70C4EC"></path><path d="M21.62 -101.73A104 104 0 0 1 101.73 -21.62" stroke="#C83897"></path><path d="M101.73 21.62A104 104 0 0 1 21.62 101.73" stroke="#E0D7C6"></path><path d="M-21.62 101.73A104 104 0 0 1 -101.73 21.62" stroke="#6C3AB2"></path></g><path transform="translate(180 180) scale(.82) translate(0 8)" fill="#E3AF47" d="M0 26C-22 8-38-4-38-20c0-13 10-22 21-22 8 0 14 5 17 11 3-6 9-11 17-11 11 0 21 9 21 22C38-4 22 8 0 26Z"></path></svg>
+</sc-if>
+<sc-if value="{{ o.isPath }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ o.path }}"></path></svg>
+</sc-if>
+<span style="font-size:12.5px;font-weight:700;color:var(--ink)">{{ o.name }}</span>
+<span style="font-size:11.5px;line-height:1.35;color:var(--muted);text-align:center">{{ o.note }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+</div>
+<div>
+<p style="margin:0 0 8px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Sheet &amp; snackbar</p>
+<div style="border-radius:18px;border:1px solid var(--outline-soft);background:var(--sunken);padding:16px">
+<p style="margin:0 0 12px;font-size:14.5px;line-height:1.6;color:var(--muted)">Sheets carry one intentional action. Handle, escape key, tap-outside, focus moved to the close button.</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px">
+<button onClick="{{ openSheet }}" style="height:44px;padding:0 20px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer">Open sheet</button>
+<button onClick="{{ showToast }}" style="height:44px;padding:0 20px;border:1px solid var(--outline-soft);border-radius:99px;background:var(--raised);color:var(--ink);font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer">Show snackbar</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section style="border-radius:28px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:{{ pad }}">
+<header style="margin-bottom:14px">
+<p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">In use</p>
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;letter-spacing:-.015em">Discover — browse, don't swipe</h2>
+<span style="display:block;margin-top:10px;height:3px;width:40px;border-radius:99px;background:var(--sky)"></span>
+</header>
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="width:390px;max-width:100%;border-radius:34px;border:1px solid var(--outline-soft);background:var(--bg);box-shadow:var(--shadow-lift);overflow:hidden">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;background:var(--raised);border-bottom:1px solid var(--outline-soft)">
+<span style="font-family:var(--display);font-size:21px;font-weight:700;color:var(--violet)">Discover</span>
+<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:var(--sunken);font-size:12.5px;font-weight:700;color:var(--muted)">South London</span>
+</div>
+<div style="padding:12px 18px 0;background:var(--raised)">
+<div style="display:flex;gap:8px;overflow:hidden;padding-bottom:12px">
+<span style="flex:none;padding:8px 13px;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-size:12.5px;font-weight:700">Everyone</span>
+<span style="flex:none;padding:8px 13px;border-radius:99px;background:var(--sunken);color:var(--muted);font-size:12.5px;font-weight:700">New here</span>
+<span style="flex:none;padding:8px 13px;border-radius:99px;background:var(--sunken);color:var(--muted);font-size:12.5px;font-weight:700">Vouched</span>
+<span style="flex:none;padding:8px 13px;border-radius:99px;background:var(--sunken);color:var(--muted);font-size:12.5px;font-weight:700">Hosting</span>
+</div>
+</div>
+<div style="padding:14px 16px 18px;display:flex;flex-direction:column;gap:12px">
+
+<article style="border-radius:22px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);overflow:hidden">
+<img src="src/assets/profile-maya.jpg" alt="Maya, standing in a kitchen doorway" style="display:block;width:100%;height:190px;object-fit:cover">
+<div style="padding:14px 16px 16px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+<h3 style="margin:0;font-family:var(--display);font-size:19px;font-weight:700">Maya, 34</h3>
+<span style="font-size:12.5px;font-weight:700;color:var(--muted)">Brixton</span>
+</div>
+<ul style="list-style:none;margin:10px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:7px">
+<li style="padding:6px 11px;border-radius:99px;background:var(--sky-container);color:var(--sky);font-size:12px;font-weight:700">Polyamorous</li>
+<li style="padding:6px 11px;border-radius:99px;background:var(--magenta-container);color:var(--magenta);font-size:12px;font-weight:700">Queer</li>
+<li style="padding:6px 11px;border-radius:99px;background:var(--gold-container);color:var(--gold);font-size:12px;font-weight:700">Slow dating</li>
+</ul>
+<p style="margin:12px 0 0;font-size:15.5px;line-height:1.6;color:var(--ink);text-wrap:pretty">“I host a monthly supper club and I'm hoping to meet people who like a long table.”</p>
+<div style="margin-top:12px;display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--gold)">
+<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M4 12.5l5.2 5.2L20 7"></path></svg>
+Vouched by 3 members
+</div>
+<div style="margin-top:14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px">
+<button style="height:52px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:15.5px;font-weight:700;cursor:pointer">Write an introduction</button>
+<button aria-label="Save for later" style="width:52px;height:52px;border:1px solid var(--outline-soft);border-radius:99px;background:var(--raised);color:var(--gold);cursor:pointer;display:inline-flex;align-items:center;justify-content:center">
+<svg viewBox="-44 -44 88 88" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M0 26C-22 8-38-4-38-20c0-13 10-22 21-22 8 0 14 5 17 11 3-6 9-11 17-11 11 0 21 9 21 22C38-4 22 8 0 26Z"></path></svg>
+</button>
+</div>
+</div>
+</article>
+
+<article style="border-radius:22px;border:1px solid var(--cream-strong);background:var(--cream);box-shadow:var(--shadow-soft);padding:16px">
+<p style="margin:0;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">This Thursday</p>
+<h3 style="margin:6px 0 0;font-family:var(--display);font-size:19px;font-weight:700">Long table supper · Peckham</h3>
+<p style="margin:6px 0 0;font-size:15px;line-height:1.55;color:var(--muted)">14 members going. Pay what you can, nobody turned away.</p>
+<button style="margin-top:12px;height:44px;padding:0 20px;border:0;border-radius:99px;background:var(--gold-container);color:var(--gold);font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer">Save a seat</button>
+</article>
+
+<article style="border-radius:22px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;padding:14px 16px;align-items:center">
+<span style="width:56px;height:56px;border-radius:99px;background:repeating-linear-gradient(135deg,oklch(0.93 0.04 233) 0 8px,oklch(0.96 0.02 233) 8px 16px)"></span>
+<span style="min-width:0">
+<span style="display:flex;align-items:baseline;gap:8px"><span style="font-family:var(--display);font-size:17px;font-weight:700">Sam &amp; Rowan</span><span style="font-size:12px;font-weight:700;color:var(--muted)">together, both here</span></span>
+<span style="display:block;margin-top:4px;font-size:14.5px;line-height:1.5;color:var(--muted)">Linked profiles — you'll always see who is connected to whom.</span>
+</span>
+</article>
+
+</div>
+<div style="display:grid;grid-template-columns:repeat(5,1fr);padding:8px 4px 16px;background:var(--raised);border-top:1px solid var(--outline-soft)">
+<sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+<span title="{{ n.label }}" style="min-height:60px;display:flex;align-items:center;justify-content:center">
+<span style="display:inline-flex;align-items:center;justify-content:center;width:60px;height:40px;border-radius:99px;background:{{ n.pill }};color:{{ n.color }}">
+<sc-if value="{{ n.isFull }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 360 360" width="30" height="30" aria-hidden="true"><g transform="translate(180 180)" fill="none" stroke-width="30" stroke-linecap="round"><circle r="70" stroke="#3B176F"></circle><path d="M-101.73 -21.62A104 104 0 0 1 -21.62 -101.73" stroke="#70C4EC"></path><path d="M21.62 -101.73A104 104 0 0 1 101.73 -21.62" stroke="#C83897"></path><path d="M101.73 21.62A104 104 0 0 1 21.62 101.73" stroke="#E0D7C6"></path><path d="M-21.62 101.73A104 104 0 0 1 -101.73 21.62" stroke="#6C3AB2"></path></g><path transform="translate(180 180) scale(.82) translate(0 8)" fill="#E3AF47" d="M0 26C-22 8-38-4-38-20c0-13 10-22 21-22 8 0 14 5 17 11 3-6 9-11 17-11 11 0 21 9 21 22C38-4 22 8 0 26Z"></path></svg>
+</sc-if>
+<sc-if value="{{ n.isMark }}" hint-placeholder-val="{{ false }}">
+<svg viewBox="0 0 360 360" width="28" height="28" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="round" aria-hidden="true"><g transform="translate(180 180)"><circle r="58"></circle><path d="M-109.5 -23.3A112 112 0 0 1 -23.3 -109.5"></path><path d="M23.3 -109.5A112 112 0 0 1 109.5 -23.3"></path><path d="M109.5 23.3A112 112 0 0 1 23.3 109.5"></path><path d="M-23.3 109.5A112 112 0 0 1 -109.5 23.3"></path></g></svg>
+</sc-if>
+<sc-if value="{{ n.isPath }}" hint-placeholder-val="{{ true }}">
+<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="{{ n.weight }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ n.icon }}"></path></svg>
+</sc-if>
+</span>
+</span>
+</sc-for>
+</div>
+</div>
+<ul style="list-style:none;margin:0;padding:0;flex:1 1 260px;min-width:240px;display:flex;flex-direction:column;gap:10px">
+<li style="border-radius:16px;background:var(--sunken);border:1px solid var(--outline-soft);padding:13px 15px;font-size:14.5px;line-height:1.55"><b>No swipe surface.</b> Cards are a scrolling list, so nobody is dismissed by a gesture.</li>
+<li style="border-radius:16px;background:var(--sunken);border:1px solid var(--outline-soft);padding:13px 15px;font-size:14.5px;line-height:1.55"><b>Words above photos.</b> The quote is body-17; the photo is a container, not the headline.</li>
+<li style="border-radius:16px;background:var(--sunken);border:1px solid var(--outline-soft);padding:13px 15px;font-size:14.5px;line-height:1.55"><b>Events sit in the same feed</b> as people, in cream — meeting in person is a first-class result.</li>
+<li style="border-radius:16px;background:var(--sunken);border:1px solid var(--outline-soft);padding:13px 15px;font-size:14.5px;line-height:1.55"><b>One primary action per card,</b> at 52px, and it costs a sentence to use.</li>
+</ul>
+</div>
+</section>
+
+<sc-if value="{{ showMapping }}" hint-placeholder-val="{{ true }}">
+<section style="border-radius:28px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:{{ pad }}">
+<header style="margin-bottom:14px">
+<p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Handoff</p>
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;letter-spacing:-.015em">Material 3 → Angular Material</h2>
+<span style="display:block;margin-top:10px;height:3px;width:40px;border-radius:99px;background:var(--gold)"></span>
+</header>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.6;color:var(--muted);max-width:70ch;text-wrap:pretty">Every brand colour lands on a standard M3 role, so <code style="font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--sunken);padding:2px 6px;border-radius:6px">mat.define-theme</code> can generate the palettes and nothing here needs a custom component.</p>
+<div style="display:grid;gap:8px">
+<div style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1.2fr);gap:10px;padding:0 4px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">
+<span>M3 role</span><span>Kitchen Table</span><span>Used for</span>
+</div>
+<sc-for list="{{ mapping }}" as="m" hint-placeholder-count="8">
+<div style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1.2fr);gap:10px;align-items:center;border-radius:14px;background:var(--sunken);border:1px solid var(--outline-soft);padding:11px 14px">
+<span style="min-width:0;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--ink)">{{ m.role }}</span>
+<span style="min-width:0;display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700"><span style="width:14px;height:14px;flex:none;border-radius:5px;border:1px solid oklch(0.3 0.12 300 / .15);background:{{ m.swatch }}"></span>{{ m.value }}</span>
+<span style="min-width:0;font-size:13.5px;color:var(--muted);line-height:1.5">{{ m.use }}</span>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:14px;border-radius:18px;border:1px solid var(--cream-strong);background:var(--cream);padding:14px 16px;font-size:14px;line-height:1.6;color:var(--ink)">
+Density: Angular Material default (0) with primary actions overridden to 52px. Shape: <code style="font-family:ui-monospace,Menlo,monospace;font-size:12.5px">--mat-sys-corner-large: 20px</code>, full-round on buttons and chips.
+</div>
+</section>
+</sc-if>
+
+<section style="border-radius:28px;border:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-soft);padding:{{ pad }}">
+<header style="margin-bottom:14px">
+<p style="margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Non-negotiable</p>
+<h2 style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;line-height:1.2;letter-spacing:-.015em">Accessibility rules</h2>
+<span style="display:block;margin-top:10px;height:3px;width:40px;border-radius:99px;background:var(--outline)"></span>
+</header>
+<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ rules }}" as="r" hint-placeholder-count="6">
+<li style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;font-size:15px;line-height:1.6">
+<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--violet-soft)" stroke-width="2.6" stroke-linecap="round" aria-hidden="true" style="margin-top:5px"><path d="M4 12.5l5.2 5.2L20 7"></path></svg>
+<span style="min-width:0;text-wrap:pretty">{{ r }}</span>
+</li>
+</sc-for>
+</ul>
+</section>
+
+<p style="margin:8px 4px 0;font-size:13.5px;line-height:1.6;color:var(--muted);text-wrap:pretty">Next: I can take Discover to a full interactive prototype, add the profile / introduction flow, or write the Angular Material theme file from these tokens.</p>
+
+</main>
+
+<div onClick="{{ closeSheet }}" style="position:fixed;inset:0;z-index:40;background:oklch(0.29 0.15 300.5 / .4);transition:opacity .3s;opacity:{{ scrimOpacity }};pointer-events:{{ scrimEvents }}"></div>
+<div role="dialog" aria-modal="true" aria-label="Example bottom sheet" style="position:fixed;left:0;right:0;bottom:0;z-index:50;margin:0 auto;width:100%;max-width:480px;border-radius:32px 32px 0 0;border-top:1px solid var(--outline-soft);background:var(--raised);box-shadow:var(--shadow-lift);padding:20px 20px 28px;transition:transform .3s ease-out;transform:{{ sheetTransform }};pointer-events:{{ sheetEvents }}">
+<div style="margin:0 auto;height:5px;width:44px;border-radius:99px;background:var(--outline-soft)"></div>
+<h2 style="margin:16px 0 0;font-family:var(--display);font-size:23px;font-weight:700;color:var(--violet)">Write an introduction</h2>
+<p style="margin:6px 0 0;font-size:15px;line-height:1.6;color:var(--muted)">The same container used for boundary editing, reporting and event RSVPs.</p>
+<div style="margin-top:16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px">
+<button onClick="{{ closeSheet }}" style="height:52px;border:0;border-radius:99px;background:var(--violet);color:oklch(0.995 0.004 95);font-family:var(--sans);font-size:16px;font-weight:700;cursor:pointer">Primary action</button>
+<button onClick="{{ closeSheet }}" style="height:52px;padding:0 22px;border:1px solid var(--outline-soft);border-radius:99px;background:var(--raised);color:var(--ink);font-family:var(--sans);font-size:16px;font-weight:700;cursor:pointer">Cancel</button>
+</div>
+</div>
+
+<div role="status" style="position:fixed;left:50%;bottom:24px;z-index:60;transform:translateX(-50%) translateY({{ toastY }});transition:transform .25s,opacity .25s;opacity:{{ toastOpacity }};pointer-events:none;display:flex;align-items:center;gap:14px;max-width:min(92vw,420px);border-radius:16px;background:var(--ink);color:oklch(0.995 0.004 95);padding:14px 18px;box-shadow:var(--shadow-lift);font-size:14.5px;line-height:1.45">
+<span style="min-width:0">Introduction sent. They have 7 days to reply.</span>
+<span style="font-weight:700;color:oklch(0.86 0.07 90)">Undo</span>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Comfortable&quot;,&quot;Compact&quot;],&quot;default&quot;:&quot;Comfortable&quot;,&quot;tsType&quot;:&quot;'Comfortable' | 'Compact'&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;canvasTone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Warm white&quot;,&quot;Cream&quot;],&quot;default&quot;:&quot;Warm white&quot;,&quot;tsType&quot;:&quot;'Warm white' | 'Cream'&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;showAngularMapping&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Sections&quot;}}">
+class Component extends DCLogic {
+  state = {
+    chips: { Polyamorous: false, Queer: false, "Relationship anarchist": false, "Slow dating": true, "Kink-aware": false, "Solo poly": false, "New to this": false },
+    segment: "Slow dating",
+    tab: "People",
+    nav: "Search",
+    mapOn: true,
+    communityIcon: "Logo mark",
+    sheet: false,
+    toast: false,
+  };
+
+  tones = {
+    Polyamorous: ["var(--sky-container)", "var(--sky)"],
+    Queer: ["var(--magenta-container)", "var(--magenta)"],
+    "Relationship anarchist": ["var(--violet-container)", "var(--violet-soft)"],
+    "Slow dating": ["var(--gold-container)", "var(--gold)"],
+    "Kink-aware": ["var(--sunken)", "var(--muted)"],
+    "Solo poly": ["var(--sky-container)", "var(--sky)"],
+    "New to this": ["var(--sunken)", "var(--muted)"],
+  };
+
+  tabCopy = {
+    People: "Members near you, newest introductions first. No ranking, no boost.",
+    Events: "Suppers, walks, book swaps. Hosted by members, pay what you can.",
+    Groups: "Borough hubs and interest tables you can join without being matched.",
+  };
+
+  communityIcons = {
+    "Real logo": { path: "", note: "Full colour, gold heart" },
+    "Logo mark": { path: "", note: "One colour, four arcs, wider gap" },
+    "Two people": { path: "M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM17.5 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM3 19c.7-3 3-4.5 6-4.5S14.3 16 15 19M17 14.5c2 .4 3.4 1.8 4 4.5", note: "Familiar, reads as a group" },
+    "Long table": { path: "M3 10h18M5 10V7.5h14V10M7 10v9M17 10v9M11 10v3.5M13 10v3.5", note: "The table itself" },
+    "Shared plate": { path: "M4.5 12.5a7.5 7.5 0 0 1 15 0zM3 12.5h18M12 5V3M8 20h8", note: "Suppers and hosting" },
+    "Table from above": { path: "M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0M13.6 4.4a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0M21.2 12a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0M13.6 19.6a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0M6 12a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0", note: "Seats around one table" },
+    "Overlapping": { path: "M9.5 7a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11M14.5 7a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11", note: "Lives that overlap" },
+    "Concentric": { path: "M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M12 5.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13", note: "Echoes the logo ring" },
+    "Conversations": { path: "M3.5 8.5A2.5 2.5 0 0 1 6 6h7.5A2.5 2.5 0 0 1 16 8.5v2.5a2.5 2.5 0 0 1-2.5 2.5H8l-4.5 3.5zM18.5 10A2.5 2.5 0 0 1 21 12.5V15a2.5 2.5 0 0 1-2.5 2.5H18l-3 2.5V17", note: "Talking, not matching" },
+    "Noticeboard": { path: "M4 6h16v12H4zM4 9.5h16M8 13h8M12 3.5V6", note: "What's on, pinned up" },
+    "Forum threads": { path: "M3 6.5A1.5 1.5 0 0 1 4.5 5h11A1.5 1.5 0 0 1 17 6.5v6A1.5 1.5 0 0 1 15.5 14H8l-5 3.5zM6.5 8.5h7M6.5 11h4", note: "Threads, replies in view" },
+    "Say something": { path: "M3.5 8.5A2.5 2.5 0 0 1 6 6h12a2.5 2.5 0 0 1 2.5 2.5v5A2.5 2.5 0 0 1 18 16H8.5L4 19.5V16h-.5zM12 13.6c-2-1.6-3.4-2.6-3.4-4a1.9 1.9 0 0 1 3.4-1.1 1.9 1.9 0 0 1 3.4 1.1c0 1.4-1.4 2.4-3.4 4z", note: "Feedback, with care" },
+    "Megaphone": { path: "M3.6 12.9 19 5.2a.7.7 0 0 1 1 .7v10.6a.7.7 0 0 1-1 .6l-15.4-7.7a.7.7 0 0 1 0-1.3zM7.2 11.1l2.2 6.6a1.7 1.7 0 0 0 3.2-1.1l-1.5-4.4", note: "Raise something with us" },
+    "Raised hand": { path: "M10 20v-3.5L7.6 14.1a1.8 1.8 0 0 1 2.6-2.5l1.3 1.3V5a1.6 1.6 0 0 1 3.2 0v6.5M14.7 11.5V8.2a1.6 1.6 0 0 1 3.2 0V15a5 5 0 0 1-5 5h-2.9", note: "Speak up, take the floor" },
+    "Ballot box": { path: "M4 12h16v8H4zM8.5 12V4.5h7V12M10.3 7.6l1.4 1.4 2.6-2.8M10 16h4", note: "Members decide things" },
+    "Lightbulb": { path: "M12 3.5a5.5 5.5 0 0 1 3.2 10c-.5.4-.7.9-.7 1.5h-5c0-.6-.2-1.1-.7-1.5A5.5 5.5 0 0 1 12 3.5zM9.5 17.5h5M10.5 20h3", note: "Ideas for the app" },
+    "Post box": { path: "M5 10h14v10H5zM7.5 10V6.8a4.5 4.5 0 0 1 9 0V10M9.5 13.6h5", note: "Drop us a note" },
+    "Listening": { path: "M8 9.2a4 4 0 1 1 8 0c0 2-1.6 2.8-2.5 3.7-.8.8-1.1 1.4-1.1 2.4a2 2 0 0 1-4 0M9 19.2c1 1 2.1 1.5 3.6 1.5", note: "We're listening" },
+  };
+
+  componentWillUnmount() { clearTimeout(this._t); }
+
+  showToast = () => {
+    this.setState({ toast: true });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: false }), 3200);
+  };
+
+  renderVals() {
+    const dense = (this.props.density ?? "Comfortable") === "Compact";
+    const cream = (this.props.canvasTone ?? "Warm white") === "Cream";
+
+    const chips = Object.keys(this.state.chips).map((label) => {
+      const on = this.state.chips[label];
+      const [bg, color] = this.tones[label];
+      return {
+        label, on, bg, color,
+        border: on ? "2px solid " + color : "2px solid transparent",
+        toggle: () => this.setState((s) => ({ chips: { ...s.chips, [label]: !s.chips[label] } })),
+      };
+    });
+
+    const segments = ["Slow dating", "Friends first", "Events only"].map((label) => {
+      const on = this.state.segment === label;
+      return {
+        label, on,
+        bg: on ? "var(--raised)" : "transparent",
+        color: on ? "var(--violet)" : "var(--muted)",
+        shadow: on ? "var(--shadow-soft)" : "none",
+        pick: () => this.setState({ segment: label }),
+      };
+    });
+
+    const tabs = ["People", "Events", "Groups"].map((label) => {
+      const on = this.state.tab === label;
+      return {
+        label,
+        color: on ? "var(--violet)" : "var(--muted)",
+        bar: on ? "var(--magenta)" : "transparent",
+        pick: () => this.setState({ tab: label }),
+      };
+    });
+
+    const icons = {
+      "Your profile": "M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM5 20c.8-3.4 3.6-5 7-5s6.2 1.6 7 5",
+      Search: "M11 17.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM16 16l4.5 4.5",
+      Likes: "M12 20C6.4 15.4 3 12.4 3 8.6 3 5.5 5.4 3 8.4 3c1.9 0 3 1 3.6 2.3C12.6 4 13.7 3 15.6 3 18.6 3 21 5.5 21 8.6c0 3.8-3.4 6.8-9 11.4z",
+      Messages: "M20 12a7 7 0 0 1-7 7H8l-4 3v-4.5A7 7 0 0 1 8 5h5a7 7 0 0 1 7 7z",
+      Community: this.communityIcons[this.state.communityIcon].path,
+    };
+    const navItems = ["Your profile", "Search", "Likes", "Messages", "Community"].map((label) => {
+      const on = this.state.nav === label;
+      return {
+        label, icon: icons[label],
+        isMark: label === "Community" && this.state.communityIcon === "Logo mark",
+        isFull: label === "Community" && this.state.communityIcon === "Real logo",
+        isPath: !(label === "Community" && (this.state.communityIcon === "Logo mark" || this.state.communityIcon === "Real logo")),
+        pill: on ? "var(--violet-container)" : "transparent",
+        color: on ? "var(--violet)" : "var(--muted)",
+        weight: on ? 2.4 : 1.9,
+        current: on ? "page" : undefined,
+        pick: () => this.setState({ nav: label }),
+      };
+    });
+
+    return {
+      pad: dense ? "18px" : "24px",
+      canvas: cream ? "oklch(0.972 0.02 90)" : "oklch(0.995 0.004 95)",
+      showMapping: this.props.showAngularMapping ?? true,
+      chips, segments, tabs, navItems,
+      communityOptions: Object.keys(this.communityIcons).map((name) => {
+        const on = this.state.communityIcon === name;
+        return {
+          name,
+          path: this.communityIcons[name].path,
+          note: this.communityIcons[name].note,
+          isMark: name === "Logo mark",
+          isFull: name === "Real logo",
+          isPath: name !== "Logo mark" && name !== "Real logo",
+          border: on ? "2px solid var(--violet)" : "2px solid var(--outline-soft)",
+          bg: on ? "var(--violet-container)" : "var(--raised)",
+          color: on ? "var(--violet)" : "var(--muted)",
+          pick: () => this.setState({ communityIcon: name, nav: "Community" }),
+        };
+      }),
+      tabBody: this.tabCopy[this.state.tab],
+      mapOn: this.state.mapOn,
+      toggleMap: () => this.setState((s) => ({ mapOn: !s.mapOn })),
+      switchBg: this.state.mapOn ? "var(--violet)" : "var(--input)",
+      switchX: this.state.mapOn ? "26px" : "4px",
+      openSheet: () => this.setState({ sheet: true }),
+      closeSheet: () => this.setState({ sheet: false }),
+      sheetTransform: this.state.sheet ? "translateY(0)" : "translateY(110%)",
+      sheetEvents: this.state.sheet ? "auto" : "none",
+      scrimOpacity: this.state.sheet ? 1 : 0,
+      scrimEvents: this.state.sheet ? "auto" : "none",
+      showToast: this.showToast,
+      toastOpacity: this.state.toast ? 1 : 0,
+      toastY: this.state.toast ? "0px" : "16px",
+      swatches: [
+        { name: "Violet", role: "Primary", token: "--violet", bg: "var(--violet)", fg: "oklch(0.995 0.004 95)" },
+        { name: "Violet soft", role: "Primary hover", token: "--violet-soft", bg: "var(--violet-soft)", fg: "oklch(0.995 0.004 95)" },
+        { name: "Violet container", role: "Tonal fill", token: "--violet-container", bg: "var(--violet-container)", fg: "var(--violet)" },
+        { name: "Sky", role: "Accent · calm", token: "--sky", bg: "var(--sky)", fg: "oklch(0.995 0.004 95)" },
+        { name: "Magenta", role: "Accent · alive", token: "--magenta", bg: "var(--magenta)", fg: "oklch(0.995 0.004 95)" },
+        { name: "Gold", role: "Accent · care", token: "--gold", bg: "var(--gold)", fg: "oklch(0.995 0.004 95)" },
+        { name: "Warm white", role: "App canvas", token: "--bg", bg: "var(--bg)", fg: "var(--ink)" },
+        { name: "White", role: "Raised card", token: "--raised", bg: "var(--raised)", fg: "var(--ink)" },
+        { name: "Grey warm", role: "Sunken / quiet", token: "--sunken", bg: "var(--sunken)", fg: "var(--ink)" },
+        { name: "Cream", role: "Tonal panel", token: "--cream", bg: "var(--cream)", fg: "var(--ink)" },
+        { name: "Ink", role: "On surface", token: "--ink", bg: "var(--ink)", fg: "oklch(0.995 0.004 95)" },
+        { name: "Outline", role: "Hairlines", token: "--outline", bg: "var(--outline)", fg: "oklch(0.995 0.004 95)" },
+      ],
+      radii: [
+        { name: "Chip / button", value: "999px" },
+        { name: "Field", value: "14px" },
+        { name: "Card", value: "18px" },
+        { name: "Surface", value: "28px" },
+        { name: "Sheet", value: "32px" },
+      ],
+      spacing: [
+        { label: "4", value: "4px" }, { label: "8", value: "8px" }, { label: "12", value: "12px" },
+        { label: "16", value: "16px" }, { label: "24", value: "24px" }, { label: "32", value: "32px" },
+      ],
+      mapping: [
+        { role: "primary", value: "Violet", swatch: "var(--violet)", use: "Primary buttons, active nav, focus ring" },
+        { role: "on-primary", value: "Warm white", swatch: "var(--bg)", use: "Label on filled buttons" },
+        { role: "primary-container", value: "Violet container", swatch: "var(--violet-container)", use: "Tonal buttons, selected nav pill" },
+        { role: "secondary", value: "Sky", swatch: "var(--sky)", use: "Calm accent, info notes" },
+        { role: "tertiary", value: "Magenta", swatch: "var(--magenta)", use: "Alive accent, eyebrows, tab indicator" },
+        { role: "tertiary-container", value: "Gold container", swatch: "var(--gold-container)", use: "Care actions, vouching, FAB" },
+        { role: "surface", value: "Warm white", swatch: "var(--bg)", use: "App canvas" },
+        { role: "surface-container-lowest", value: "White", swatch: "var(--raised)", use: "Raised cards" },
+        { role: "surface-container", value: "Cream", swatch: "var(--cream)", use: "Tonal panels only" },
+        { role: "outline-variant", value: "Outline soft", swatch: "var(--outline-soft)", use: "Hairlines on cards and fields" },
+        { role: "error", value: "Red 50", swatch: "oklch(0.5 0.2 25)", use: "Report and destructive flows" },
+      ],
+      rules: [
+        "Body text meets 4.5:1 on white and on cream panels; accents appear as tint, or as ink on light.",
+        "Section headers are 22px ink — hierarchy comes from size and weight, not faint uppercase labels.",
+        "Touch targets are at least 44px; primary actions are 52px.",
+        "Colour never carries meaning alone — every chip, badge and status has a text label.",
+        "Sticky bars respect env(safe-area-inset-bottom) on iOS.",
+        "Focus is a 3px violet ring with 2px offset on every interactive element.",
+        "A member's own words are never restyled into brand type or truncated with an ellipsis mid-sentence.",
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

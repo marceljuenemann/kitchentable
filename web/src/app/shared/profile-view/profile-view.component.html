@@ -1,0 +1,97 @@
+<div class="page">
+  <div class="hero" [style.view-transition-name]="transitionName()">
+    @if (profile().photos.length > 0) {
+      <div class="track" #track (scroll)="onTrackScroll()">
+        @for (photo of profile().photos; track photo) {
+          @let url = photoUrls()[$index];
+          @if (url) {
+            <img
+              [src]="url"
+              [alt]="'Photo ' + ($index + 1) + ' of ' + profile().photos.length"
+              draggable="false"
+            />
+          } @else {
+            <div class="slide-placeholder"></div>
+          }
+        }
+      </div>
+      @if (profile().photos.length > 1) {
+        <div class="dots" aria-hidden="true">
+          @for (photo of profile().photos; track $index) {
+            <span class="dot" [class.current]="$index === photoIndex()"></span>
+          }
+        </div>
+        @if (photoIndex() > 0) {
+          <button
+            class="step previous"
+            type="button"
+            aria-label="Previous photo"
+            (click)="showPhoto(photoIndex() - 1)"
+          >
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+        }
+        @if (photoIndex() < profile().photos.length - 1) {
+          <button
+            class="step next"
+            type="button"
+            aria-label="Next photo"
+            (click)="showPhoto(photoIndex() + 1)"
+          >
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        }
+      }
+    } @else {
+      <span class="initial" aria-hidden="true">{{ profile().name.charAt(0) }}</span>
+    }
+  </div>
+
+  <button class="back" type="button" [attr.aria-label]="backLabel()" (click)="close()">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+
+  <div class="content">
+    <h1 class="fade-in header">{{ profile().name }}</h1>
+    <p class="fade-in meta">
+      <span>{{ profile().pronouns }}</span>
+      <span class="separator" aria-hidden="true">·</span>
+      @if (age() !== null) {
+        <span>{{ age() }} years old</span>
+        <span class="separator" aria-hidden="true">·</span>
+      }
+      <span class="location">
+        <mat-icon aria-hidden="true">place</mat-icon>
+        {{ profile().location }}
+      </span>
+    </p>
+
+    @if (profile().gender.length > 0 || profile().sexuality.length > 0) {
+      <ul class="fade-in chips" aria-label="Gender and sexuality">
+        @for (value of profile().gender; track value) {
+          <li class="chip gender">{{ value }}</li>
+        }
+        @for (value of profile().sexuality; track value) {
+          <li class="chip sexuality">{{ value }}</li>
+        }
+      </ul>
+    }
+
+    <section class="fade-in about" aria-label="About me">
+      @for (paragraph of aboutParagraphs(); track $index) {
+        <p>{{ paragraph }}</p>
+      }
+    </section>
+
+    <section class="fade-in looking-for" aria-labelledby="looking-for-title">
+      <h2 id="looking-for-title">Looking for</h2>
+      <ul class="chips">
+        @for (value of lookingFor(); track value) {
+          <li class="chip">{{ value }}</li>
+        }
+      </ul>
+    </section>
+
+    <ng-content />
+  </div>
+</div>

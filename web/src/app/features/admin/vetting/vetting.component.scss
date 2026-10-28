@@ -1,0 +1,55 @@
+// Scrolls on its own rather than the window: opening a profile is a navigation, and the router
+// scrolls the window to the top on every navigation, which would lose the grid's place.
+:host {
+  display: block;
+  height: 100dvh;
+  overflow-y: auto;
+  background: var(--kt-bg);
+  color: var(--kt-ink);
+  font-family: var(--kt-font-sans);
+}
+
+.page {
+  max-width: var(--kt-page-width);
+  margin: 0 auto;
+  padding: 0 16px 48px;
+}
+
+mat-spinner {
+  margin: 48px auto 0;
+}
+
+.count {
+  margin: 24px 0 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--kt-muted);
+}
+
+.message {
+  margin: 24px 0 16px;
+}
+
+.empty {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid var(--kt-cream-strong);
+  border-radius: 20px;
+  background: var(--kt-cream);
+  text-align: center;
+
+  p {
+    margin: 8px 0 0;
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--kt-muted);
+  }
+
+  .empty-title {
+    margin: 0;
+    font-family: var(--kt-font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--kt-ink);
+  }
+}
