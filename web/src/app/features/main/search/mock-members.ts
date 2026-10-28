@@ -84,7 +84,7 @@ export const MOCK_MEMBERS: Member[] = [
       'at pub quizzes and unbothered about it.\n\n' +
       'I like walks with no destination and being told about your obsessive interest in detail. ' +
       'Bonus points for maps.',
-    gender: ['Genderfluid'],
+    gender: [],
     sexuality: ['Queer', 'Demisexual'],
     birth: [1993, 9],
     looking_for: ['relationship-anarchy'],
@@ -152,7 +152,7 @@ export const MOCK_MEMBERS: Member[] = [
       'and fixing other people’s bikes.\n\n' +
       'Solo poly and happy that way. I would love more friends who are up for an adventure and ' +
       'an honest chat afterwards.',
-    gender: ['Agender'],
+    gender: ['Agender', 'Neutrois'],
     sexuality: ['Asexual', 'Aromantic'],
     birth: [1999, 8],
     looking_for: ['friends', 'Solo poly'],

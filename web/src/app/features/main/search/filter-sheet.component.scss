@@ -1,0 +1,110 @@
+.filter-sheet {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 20px 24px;
+  font-family: var(--kt-font-sans);
+  // Not the bottom sheet's (Material's body text tracking).
+  letter-spacing: normal;
+}
+
+.grab-handle {
+  align-self: center;
+  width: 44px;
+  height: 5px;
+  margin-bottom: 14px;
+  border-radius: 99px;
+  background: var(--kt-outline-soft);
+}
+
+h2 {
+  margin: 0;
+  font-family: var(--kt-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--kt-violet);
+}
+
+// The chips bring 4px of their own.
+mat-chip-listbox {
+  margin-top: 2px;
+}
+
+.text-button {
+  min-height: 32px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--kt-violet);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bulk {
+  display: flex;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+// A switch under a filter: a setting rather than an option, so in regular weight, and only the
+// switch itself turns violet when on.
+.setting {
+  margin-top: 16px;
+  font-weight: 400;
+
+  &[aria-checked='true'] {
+    border-color: var(--kt-outline-soft);
+    background: var(--kt-raised);
+  }
+}
+
+// Two lines: the setting in bold, and what it does.
+.only-show-me {
+  padding-block: 10px;
+  font-weight: 700;
+
+  .hint {
+    display: block;
+    margin-top: 2px;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--kt-muted);
+  }
+}
+
+// At the ends of the range, the thumbs' outer edges line up with the content's (measured: they
+// reach 7px past the slider's own edges).
+mat-slider {
+  --mat-slider-inactive-track-color: var(--kt-input);
+  display: flex;
+  margin: 12px 7px 0;
+}
+
+.age-range {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+
+  span {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--kt-muted);
+  }
+}
+
+.age-label {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.footer {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 20px;
+}

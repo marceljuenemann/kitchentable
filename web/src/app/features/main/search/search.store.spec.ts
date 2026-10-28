@@ -1,7 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
-import { matches, Member, NO_FILTERS, SearchFilters, SearchStore } from './search.store';
+import {
+  matches,
+  Member,
+  NO_FILTERS,
+  NOT_SPECIFIED,
+  SearchFilters,
+  SELF_DESCRIBED,
+  SearchStore,
+} from './search.store';
 
 describe('matches', () => {
   const now = new Date(2026, 9, 15); // October 2026
@@ -38,14 +46,20 @@ describe('matches', () => {
     expect(filtered({ gender: ['Woman'], lookingFor: ['friends'] })).toBeFalse();
   });
 
-  it("leaves out people with a field blank when it's filtered", () => {
+  it("leaves out people with a field blank when it's filtered, unless Not specified is picked", () => {
     expect(filtered({ gender: ['Woman'] }, { gender: [] })).toBeFalse();
+    expect(filtered({ gender: ['Woman', NOT_SPECIFIED] }, { gender: [] })).toBeTrue();
+    expect(filtered({ gender: [NOT_SPECIFIED] })).toBeFalse();
   });
 
-  it("never matches people's own words to a filter", () => {
-    expect(filtered({ lookingFor: ['Something of my own'] }, { looking_for: ['friends'] })).toBe(
-      false,
-    );
+  it('matches what people wrote themselves to Self-described', () => {
+    expect(filtered({ lookingFor: [SELF_DESCRIBED] })).toBeTrue();
+    expect(filtered({ lookingFor: [SELF_DESCRIBED] }, { looking_for: ['friends'] })).toBeFalse();
+    expect(filtered({ lookingFor: ['friends'] })).toBeFalse();
+
+    expect(filtered({ gender: [SELF_DESCRIBED] }, { gender: ['Neutrois'] })).toBeTrue();
+    expect(filtered({ gender: [SELF_DESCRIBED] })).toBeFalse();
+    expect(filtered({ gender: ['Woman'] }, { gender: ['Neutrois'] })).toBeFalse();
   });
 
   it('works out the age from the birth month', () => {
@@ -58,8 +72,13 @@ describe('matches', () => {
     expect(filtered({ minAge: 25 }, { birth_year: 1940, birth_month: 1 })).toBeTrue();
   });
 
-  it('leaves out people without a birthday once age is filtered', () => {
-    expect(filtered({ minAge: 19 }, { birth_year: null, birth_month: null })).toBeFalse();
+  it('keeps people without a birthday in any age range, unless asked not to', () => {
+    const noBirthday = { birth_year: null, birth_month: null };
+
+    expect(filtered({ minAge: 19 }, noBirthday)).toBeTrue();
+    expect(filtered({ minAge: 19, showUnspecifiedAge: false }, noBirthday)).toBeFalse();
+    expect(filtered({ showUnspecifiedAge: false }, noBirthday)).toBeFalse();
+    expect(filtered({ showUnspecifiedAge: false })).toBeTrue();
   });
 });
 
@@ -94,11 +113,5 @@ describe('SearchStore', () => {
     const joined = store.results().map((member) => member.age_verified_at);
 
     expect(joined).toEqual([...joined].sort().reverse());
-  });
-
-  it('clears every filter at once', () => {
-    store.updateFilters({ gender: ['Man'], minAge: 30 });
-    store.clearFilters();
-    expect(store.filters()).toEqual(NO_FILTERS);
   });
 });

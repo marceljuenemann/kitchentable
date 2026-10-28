@@ -102,10 +102,6 @@ main {
   padding: 14px 16px calc(8px + 60px + max(16px, env(safe-area-inset-bottom)) + 1px + 24px);
 }
 
-.kt-notice {
-  margin: 0 0 14px;
-}
-
 .results {
   display: flex;
   align-items: baseline;

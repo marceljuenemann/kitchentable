@@ -251,6 +251,12 @@ mat-checkbox {
   --mat-chip-label-text-weight: 700;
   --mat-chip-label-text-size: 14px;
 
+  // 8px between rows, as between chips in a row; Material has 16px.
+  &.mat-mdc-chip-set .mdc-evolution-chip {
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+
   &.primary {
     --mat-chip-elevated-selected-container-color: var(--mat-sys-primary-container);
     --mat-chip-selected-label-text-color: var(--mat-sys-on-primary-container);
@@ -292,6 +298,11 @@ mat-checkbox {
   &:focus-visible {
     outline: 2px solid var(--kt-violet);
     outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
   }
 }
 

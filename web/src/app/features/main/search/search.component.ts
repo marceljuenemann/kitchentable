@@ -1,15 +1,19 @@
 import { Component, computed, inject, signal, ViewContainerRef } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
-import { MatIconModule } from '@angular/material/icon';
 import { RouterOutlet } from '@angular/router';
 import { InviteLinkComponent } from '../../../shared/invite-link/invite-link.component';
 import {
   ProfileGridComponent,
   ProfileTile,
 } from '../../../shared/profile-grid/profile-grid.component';
-import { GENDER_OPTIONS, LOOKING_FOR_OPTIONS } from '../../onboarding/onboarding-options';
 import { FilterField, FilterSheetComponent } from './filter-sheet.component';
-import { AGE_MAX, ageFiltered, SearchStore } from './search.store';
+import {
+  AGE_MAX,
+  ageRanged,
+  GENDER_FILTERS,
+  LOOKING_FOR_FILTERS,
+  SearchStore,
+} from './search.store';
 
 interface FilterPill {
   field: FilterField;
@@ -27,7 +31,7 @@ interface FilterPill {
 @Component({
   selector: 'app-search',
   standalone: true,
-  imports: [MatIconModule, RouterOutlet, InviteLinkComponent, ProfileGridComponent],
+  imports: [RouterOutlet, InviteLinkComponent, ProfileGridComponent],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss',
   host: {
@@ -58,11 +62,11 @@ export class SearchComponent {
 
   readonly pills = computed<FilterPill[]>(() => {
     const filters = this.store.filters();
-    const lookingFor = filters.lookingFor.map(
-      (id) => LOOKING_FOR_OPTIONS.find((option) => option.id === id)?.label ?? id,
-    );
     // In the sheet's order, not the order they were picked in.
-    const gender = GENDER_OPTIONS.filter((value) => filters.gender.includes(value));
+    const labels = (options: { value: string; label: string }[], picked: string[]) =>
+      options.filter(({ value }) => picked.includes(value)).map(({ label }) => label);
+    const lookingFor = labels(LOOKING_FOR_FILTERS, filters.lookingFor);
+    const gender = labels(GENDER_FILTERS, filters.gender);
     const choice = (field: FilterField, label: string, values: string[]): FilterPill => ({
       field,
       label,
@@ -70,11 +74,10 @@ export class SearchComponent {
       active: values.length > 0,
       ariaLabel: `${label}, ${values.length > 0 ? values.join(', ') : 'any'}`,
     });
-    const age = ageFiltered(filters);
-    const range =
-      filters.maxAge < AGE_MAX
-        ? `${filters.minAge} to ${filters.maxAge}`
-        : `${filters.minAge} and older`;
+    let range = 'any';
+    if (filters.maxAge < AGE_MAX) range = `${filters.minAge} to ${filters.maxAge}`;
+    else if (ageRanged(filters)) range = `${filters.minAge} and older`;
+    const withoutUnspecified = filters.showUnspecifiedAge ? '' : ', not profiles with no age';
     return [
       choice('lookingFor', 'Looking for', lookingFor),
       choice('gender', 'Gender', gender),
@@ -82,8 +85,8 @@ export class SearchComponent {
         field: 'age',
         label: 'Age',
         count: 0,
-        active: age,
-        ariaLabel: `Age, ${age ? range : 'any'}`,
+        active: ageRanged(filters) || !filters.showUnspecifiedAge,
+        ariaLabel: `Age, ${range}${withoutUnspecified}`,
       },
     ];
   });
