@@ -1,0 +1,53 @@
+<router-outlet />
+
+<nav aria-label="Main" [class.animated]="animated()">
+  <!-- The active tab's pill, one for all tabs, so it can slide from one to the next. -->
+  <span class="indicator" aria-hidden="true"><span></span></span>
+  @for (tab of tabs; track tab.path) {
+    <a
+      [routerLink]="tab.path"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: tab.path === '/app' }"
+      ariaCurrentWhenActive="page"
+      [attr.aria-label]="tab.label"
+    >
+      <span class="pill">
+        @if (tab.icon) {
+          <svg
+            class="icon"
+            viewBox="0 0 24 24"
+            width="26"
+            height="26"
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path [attr.d]="tab.icon" />
+          </svg>
+        } @else {
+          <!-- The logo's arc mark. -->
+          <svg
+            viewBox="0 0 360 360"
+            width="28"
+            height="28"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="26"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <g transform="translate(180 180)">
+              <circle r="58" />
+              <path d="M-109.5 -23.3A112 112 0 0 1 -23.3 -109.5" />
+              <path d="M23.3 -109.5A112 112 0 0 1 109.5 -23.3" />
+              <path d="M109.5 23.3A112 112 0 0 1 23.3 109.5" />
+              <path d="M-23.3 109.5A112 112 0 0 1 -109.5 23.3" />
+            </g>
+          </svg>
+        }
+      </span>
+    </a>
+  }
+</nav>

@@ -20,12 +20,55 @@ nav {
   border-top: 1px solid var(--kt-outline-soft);
 }
 
+// Behind the links, the size of one tab, moved to the active one. The `transform` percentage is
+// of its own width, so `--tab` counts in tabs.
+.indicator {
+  --tab: 0;
+  position: absolute;
+  top: 8px;
+  left: 4px;
+  width: calc((100% - 8px) / 5);
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(calc(var(--tab) * 100%));
+
+  span {
+    width: 60px;
+    height: 40px;
+    border-radius: 99px;
+    background: var(--kt-violet-container);
+  }
+
+  .animated & {
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+}
+
+@for $i from 2 through 5 {
+  nav:has(a.active:nth-of-type(#{$i})) .indicator {
+    --tab: #{$i - 1};
+  }
+}
+
+nav:not(:has(a.active)) .indicator {
+  visibility: hidden;
+}
+
 a {
+  // Above the indicator.
+  position: relative;
   min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--kt-muted);
+  transition: color 0.2s;
   -webkit-tap-highlight-color: transparent;
 
   &:focus-visible {
@@ -44,7 +87,6 @@ a {
   width: 60px;
   height: 40px;
   border-radius: 99px;
-  transition: background-color 0.2s;
 }
 
 .icon {
@@ -53,10 +95,6 @@ a {
 
 .active {
   color: var(--kt-violet);
-
-  .pill {
-    background: var(--kt-violet-container);
-  }
 
   .icon {
     stroke-width: 2.4;

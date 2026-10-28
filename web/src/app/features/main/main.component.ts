@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { afterNextRender, Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 interface Tab {
@@ -45,4 +45,14 @@ export class MainComponent {
     },
     { label: 'Community', path: '/app/community', icon: null },
   ];
+
+  /**
+   * Whether the pill slides when the tab changes. Off for the first render, so that opening a
+   * tab directly doesn't slide it in from the first one.
+   */
+  readonly animated = signal(false);
+
+  constructor() {
+    afterNextRender(() => setTimeout(() => this.animated.set(true)));
+  }
 }
