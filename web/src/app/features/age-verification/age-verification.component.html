@@ -1,0 +1,66 @@
+<app-header />
+
+<div class="kt-status-heading">
+  <span class="kt-status-heading-icon" aria-hidden="true"><mat-icon>check</mat-icon></span>
+  <h1>You're approved!</h1>
+</div>
+<p>
+  One last step before your profile goes live: to comply with the UK's Online Safety Act, we need to
+  confirm that you're 18 or over.
+</p>
+
+<mat-card class="kt-card check" appearance="outlined">
+  @switch (phase()) {
+    @case ('finishing') {
+      <h2>Finishing up</h2>
+      <p>Your age check went through. Your profile goes live in a moment.</p>
+      <mat-spinner diameter="32" />
+    }
+    @case ('slow') {
+      <h2>Almost there</h2>
+      <p>
+        We haven't heard back from our provider yet. This usually takes seconds, but can take a few
+        minutes. If it's still not done after that, get in touch at
+        <a href="mailto:hello@kitchentable.dating">hello&#64;kitchentable.dating</a>.
+      </p>
+      <button mat-flat-button type="button" (click)="waitForActivation()">Check again</button>
+    }
+    @case ('review') {
+      <h2>Your check is being reviewed</h2>
+      <p>
+        Your age check needs a closer look. Your profile goes live as soon as it's confirmed, so
+        check back later.
+      </p>
+    }
+    @default {
+      @if (phase() === 'declined') {
+        <h2>We couldn't confirm your age</h2>
+        <p>
+          This can happen when the photo isn't clear enough. You can try again, or get in touch at
+          <a href="mailto:hello@kitchentable.dating">hello&#64;kitchentable.dating</a> if you think
+          something went wrong.
+        </p>
+      } @else {
+        <h2>Verify your age</h2>
+        <p>
+          Our provider, Didit, estimates your age from a selfie. Only if that's inconclusive will it
+          ask for a photo ID. We don't receive your selfie or ID, and keep only whether you passed.
+        </p>
+      }
+      <button mat-flat-button type="button" [disabled]="starting()" (click)="start()">
+        {{ phase() === 'declined' ? 'Try again' : 'Verify my age' }}
+      </button>
+      @if (failed()) {
+        <p class="error" role="alert">
+          We couldn't start the check. Check your connection and try again.
+        </p>
+      }
+      <p class="kt-fine-print">
+        How we handle age checks:
+        <a href="/about/privacy" (click)="openPrivacyPolicy($event)">Privacy Policy</a>
+      </p>
+    }
+  }
+</mat-card>
+
+<app-footer />

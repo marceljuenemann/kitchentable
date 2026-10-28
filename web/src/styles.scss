@@ -142,6 +142,43 @@ mat-form-field textarea {
   padding-right: 4px;
 }
 
+// The heading of a screen that tells the user where their application stands ("Thanks for
+// applying!"): a round gold icon next to the title. Put the `mat-icon` in a
+// `.kt-status-heading-icon` span and the title in an `h1`.
+.kt-status-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 38px;
+
+  h1 {
+    margin: 0;
+    font-family: var(--kt-font-display);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--kt-violet);
+  }
+}
+
+.kt-status-heading-icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--kt-gold-container);
+  color: var(--kt-gold);
+
+  mat-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 26px;
+  }
+}
+
 // A soft, rounded card with a display-font heading, such as the landing page's sign-up form.
 // Put it on a `mat-card appearance="outlined"`.
 .kt-card {

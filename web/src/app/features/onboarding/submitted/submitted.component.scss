@@ -2,40 +2,6 @@
   display: block;
 }
 
-.heading {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 38px;
-}
-
-.check {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: var(--kt-gold-container);
-  color: var(--kt-gold);
-
-  mat-icon {
-    width: 26px;
-    height: 26px;
-    font-size: 26px;
-  }
-}
-
-h1 {
-  margin: 0;
-  font-family: var(--kt-font-display);
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--kt-violet);
-}
-
 p {
   margin: 16px 0 0;
   font-size: 16px;

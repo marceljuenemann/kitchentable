@@ -11,7 +11,7 @@ import {
   switchMap,
 } from 'rxjs';
 import { AuthService } from './auth/auth.service';
-import { NewProfile, Profile } from './profile.model';
+import { NewProfile, Profile, ProfileStatus } from './profile.model';
 import { SupabaseService } from './supabase.service';
 
 /**
@@ -88,6 +88,26 @@ export class ProfileService {
       .insert({ version: TERMS_VERSION });
     if (error && error.code !== ALREADY_DONE) throw error;
     this.refresh();
+  }
+
+  /**
+   * Starts an age check (see "Age verification" in docs/database.md) and returns the URL of
+   * Didit's page to send the user to.
+   */
+  async startAgeVerification(): Promise<string> {
+    const { data, error } = await this.supabase.client.functions.invoke<{ url: string }>(
+      'start-age-verification',
+    );
+    if (error) throw error;
+    return data!.url;
+  }
+
+  /**
+   * The profile's status, or null without a profile, for polling. Unlike `refresh()`, it doesn't
+   * put `state$` back into `loading`, which would make the shell replace the current screen.
+   */
+  async fetchStatus(): Promise<ProfileStatus | null> {
+    return (await this.getMyProfile())?.status ?? null;
   }
 
   private fetchState(): Observable<ProfileState> {

@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+:host > p {
+  margin: 16px 0 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--kt-ink);
+}
+
+.check {
+  margin-top: 28px;
+
+  p:not(.kt-fine-print) a {
+    color: var(--mat-sys-primary);
+  }
+
+  button {
+    width: 100%;
+  }
+
+  mat-spinner {
+    margin: 0 auto;
+  }
+
+  .error {
+    margin: 12px 0 0;
+    color: var(--mat-sys-error);
+  }
+}

@@ -41,6 +41,26 @@ export async function profilesNamed(name: string): Promise<Record<string, unknow
   return response.json();
 }
 
+/** The profile row of the given user, read with the service role. */
+export async function profileOf(id: string): Promise<Record<string, unknown>> {
+  const response = await fetch(`${API_URL}/rest/v1/profiles?select=*&id=eq.${id}`, {
+    headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}` },
+  });
+  if (!response.ok) throw new Error(`Reading the profile failed: ${await response.text()}`);
+  const [profile] = await response.json();
+  return profile;
+}
+
+/** The id of the user with the given email address. */
+export async function userIdOf(email: string): Promise<string> {
+  const { users } = await api(
+    `/auth/v1/admin/users?filter=${encodeURIComponent(email)}`,
+    undefined,
+    'GET',
+  );
+  return users.find((user: { email: string }) => user.email === email).id;
+}
+
 /** A file in the private `photos` bucket, read (or deleted) with the service role. */
 export async function photoObject(
   path: string,

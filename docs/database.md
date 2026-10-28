@@ -31,13 +31,13 @@ Sections marked **(planned)** describe connections and messaging, which aren't b
 
 There is no `rejected` status; a rejected applicant simply stays in `vetting`. Add one when someone actually needs rejecting.
 
-Only onboarding submission (`submit_onboarding`) and approval (`admin_approve_application`) are implemented so far; until the other functions exist, statuses are changed by an admin in Studio. `admin` has no transitions: it is only ever set by hand.
+Only onboarding submission (`submit_onboarding`), approval (`admin_approve_application`) and [age verification](#age-verification) (`complete_age_verification`) are implemented so far; until the other functions exist, statuses are changed by an admin in Studio. `admin` has no transitions: it is only ever set by hand.
 
 | From                 | To          | Who                                 |
 | -------------------- | ----------- | ----------------------------------- |
 | _(no row)_           | `vetting`   | user (onboarding submit)            |
 | `vetting`            | `approved`  | admin (`admin_approve_application`) |
-| `approved`           | `active`    | age-verification webhook            |
+| `approved`           | `active`    | Didit, through `didit-webhook`      |
 | `active`             | `disabled`  | user                                |
 | `disabled`           | `active`    | user                                |
 | `active`, `disabled` | `suspended` | admin                               |
@@ -64,6 +64,7 @@ One row per user who has **completed onboarding**. Signing up creates only an `a
 | `gender`, `sexuality`                                    | `text[]`      | The options picked in onboarding, in the order picked, stored as their text (`GENDER_OPTIONS`, `SEXUALITY_OPTIONS` in `onboarding-options.ts`). Can also hold the user's own descriptions, as they typed them. May be empty.                                                                                                                       |
 | `looking_for`                                            | `text[]`      | Ids of the standard options (`LOOKING_FOR_OPTIONS`, so labels can be reworded without a migration), or the user's own text for anything else. May be empty.                                                                                                                                                                                        |
 | `birth_year`, `birth_month`                              | `int`         | Optional, so the only nullable columns.                                                                                                                                                                                                                                                                                                            |
+| `age_verified_at`                                        | `timestamptz` | When the user passed the [age check](#age-verification); null until then. Kept when the status moves on: it's the record the Privacy Policy describes (whether they passed, and when).                                                                                                                                                            |
 | `photos`                                                 | `uuid[]`      | Photo ids in display order, the first being the main photo; at most 6 (a check). The files are in the `photos` bucket: see [photos.md](photos.md).                                                                                                                                                                                                 |
 | `intros_emailed_at`, `messages_emailed_at` **(planned)** | `timestamptz` | When the user was last emailed about new intros, and about new messages; null until the first. See [Member emails](#member-emails-planned).                                                                                                                                                                                                        |
 | `created_at`, `updated_at`                               | `timestamptz` | `updated_at` is set by a trigger.                                                                                                                                                                                                                                                                                                                  |
@@ -146,7 +147,7 @@ The sender and recipient can `select` them.
 
 ## Functions
 
-All are `security definer` and check `auth.uid()`. Admin functions raise `insufficient_privilege` (`42501`, "Admins only.") for anyone else.
+All are `security definer` and check `auth.uid()`, except `complete_age_verification`, which only the service role may call. Admin functions raise `insufficient_privilege` (`42501`, "Admins only.") for anyone else.
 
 | Function                                                                                                                                                              | Who       | Does                                                                                                                                                                                                                                                                |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -156,6 +157,7 @@ All are `security definer` and check `auth.uid()`. Admin functions raise `insuff
 | `is_admin()`                                                                                                                                                          | anyone    | Whether the caller is an admin (false when signed out). Also used by the `photos_select_admin` storage policy.                                                                                                                                                      |
 | `admin_list_applications()`                                                                                                                                           | admin     | The profiles in `vetting`, oldest first, as whole rows (`vetting_answers` included), so opening one needs no further request.                                                                                                                                       |
 | `admin_approve_application(p_id)`                                                                                                                                     | admin     | Moves a profile from `vetting` to `approved`; raises for anything else, so an application can't be decided twice.                                                                                                                                                   |
+| `complete_age_verification(p_user_id)`                                                                                                                               | webhook   | Moves a profile from `approved` to `active` and sets `age_verified_at`; returns whether it did. Anything else is left alone, so a retried webhook is harmless. Only the service role may call it (from `didit-webhook`, see [Age verification](#age-verification)). |
 | **(planned)** `send_intro(p_recipient_id, p_looking_for, p_message_id, p_content)`                                                                                    | user      | Creates the `pending` connection, the first message and both `connection_secrets` rows (or updates them, if one exists from a dismissal). Checks the daily intro limit (PRODUCT.md suggests 3), that both users are `active`, and that they have no connection yet. |
 | **(planned)** `accept_intro(p_initiator_id)`                                                                                                                          | recipient | Sets the connection to `accepted`.                                                                                                                                                                                                                                  |
 | **(planned)** `decline_intro(p_initiator_id)`                                                                                                                         | recipient | While the connection is `pending`, sets `declined_at` on the recipient's `connection_secrets` row. The connection is untouched, so the initiator isn't told.                                                                                                        |
@@ -178,6 +180,27 @@ The app keeps connections and messages in a local RxDB database, so it feels ins
 - **Profiles stay out of RxDB** at first: they come from `get_connection_profiles()` and are cached in memory.
 - **Local data is per user** and deleted on sign-out, alongside `UserStorage.onSignOut()`.
 - **To check before building:** what RxDB's Supabase replication plugin expects (column names, `select *`), or whether to use the generic replication directly as planned.
+
+## Age verification
+
+Approved applicants confirm they're 18 or over with Didit before their profile goes live. Didit's "Adaptive Age Estimation" workflow estimates the age from a selfie and asks for an ID only when the estimate is borderline.
+
+Set up in the Didit console, the same for each environment's application:
+
+- **Workflow:** Adaptive Age Estimation, minimum age 18.
+- **Duplicate face detection: off.** It would compare every selfie with everyone else's faces, which is biometric identification. The Privacy Policy says the selfie doesn't identify anyone, and vetting by hand catches one person behind several accounts.
+- **Data retention: 1 month.** Didit then deletes the session, images included, as the Privacy Policy says.
+- **Webhook destination:** `status.updated` events to the environment's `didit-webhook` function, without ID details.
+- **API key:** a scoped one rather than the application's primary key: Sessions write, nothing else, restricted to the age verification workflow.
+
+1. The age verification screen (`features/age-verification/`) calls the `start-age-verification` edge function with the user's JWT. It reads the caller's profile with `get_my_profile` and, if it's `approved`, creates a Didit session with the user id as `vendor_data` and `<SITE_URL>/app` as the callback. It returns the URL of Didit's page, and the app sends the user there.
+2. Didit calls the `didit-webhook` edge function (`verify_jwt = false`) on every status change. The function checks Didit's `X-Signature` (the hex HMAC-SHA256 of the raw body, with `DIDIT_WEBHOOK_SECRET`), refuses events whose `timestamp` is more than 5 minutes off, and ignores other workflows. For an `Approved` check it calls `complete_age_verification` with the service role. Any other status changes nothing: the user stays `approved` and can try again. It answers 500 if the database call fails, so Didit retries.
+3. Didit sends the user back to `/app?verificationSessionId=…&status=…`. The status is only a hint for the screen: after `Approved` it polls `get_my_profile` until the webhook has activated the profile, then reloads it, which shows the main app. After `Declined` it offers another try, and after `In Review` it says to check back later.
+
+- **Nothing about the check is stored but `age_verified_at`.** The webhook destination is set in the Didit console not to send ID details, and the function never logs or stores the payload anyway. Didit keeps its session data for 1 month (set in the console) and then deletes it.
+- **Checks that need a manual review** ("In Review") are decided by an admin in the Didit console. Nothing notifies us of them yet.
+- **Environments:** each one has its own Didit application, with its own API key, workflow and webhook secret: sandbox applications for local development and staging (free, with mocked checks and a picker for the outcome), a live one for production. The settings are in README.md.
+- **Locally,** Didit can't reach the webhook, and `supabase/functions/.env` has no API key, so "Verify my age" fails. The e2e tests sign their own webhooks with the local stand-in secret (`e2e/support/didit.ts`). To get past the screen by hand, run `select complete_age_verification(id) from auth.users where email = '<address>';` in Studio. To try the real sandbox flow, see README.md.
 
 ## Emails
 

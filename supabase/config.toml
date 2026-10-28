@@ -412,6 +412,10 @@ deno_version = 2
 [functions.notify-admin]
 verify_jwt = false
 
+# Called by Didit, not by users: it checks Didit's signature instead of a JWT.
+[functions.didit-webhook]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327
