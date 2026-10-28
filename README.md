@@ -4,7 +4,7 @@ An open-source, non-profit dating app, starting with a focus on the ENM (ethical
 
 See [PRODUCT.md](PRODUCT.md) for the full mission, principles, business model, and MVP plan.
 
-Status: early-stage. Invite-gated sign-up and magic-link sign-in are built, and signed-in users see a screen based on their profile status; onboarding, age verification, browse, connections, and messaging are not yet.
+Status: early-stage. Invite-gated sign-up, magic-link sign-in, onboarding, vetting and age verification are built, and signed-in users see a screen based on their profile status; browse, connections, and messaging are not yet.
 
 A redesign of the onboarding/application flow is specced (not yet built) as a design handoff in [prototype/onboarding](prototype/onboarding/README.md) — open `design/Onboarding.dc.html` in a browser to click through it.
 
@@ -32,6 +32,20 @@ Useful local URLs (from `supabase start` output):
 - App: http://localhost:4200
 - Supabase Studio (DB browser/table editor): http://127.0.0.1:54323
 - Mailpit (captured emails): http://127.0.0.1:54324
+
+### Age verification locally
+
+Approved applicants verify their age with Didit (see "Age verification" in [docs/database.md](docs/database.md)). Locally there's no Didit API key, so "Verify my age" fails. To get past the screen, run this in Studio's SQL editor:
+
+```sql
+select complete_age_verification(id) from auth.users where email = '<address>';
+```
+
+To try the real flow against Didit's sandbox:
+
+1. In the Didit console, create a sandbox application with the age verification workflow. Didit doesn't send webhooks to localhost, so start a tunnel (`cloudflared tunnel --url http://127.0.0.1:54321`) and add `<tunnel URL>/functions/v1/didit-webhook` as the application's webhook destination.
+2. Copy `supabase/functions/.env` to `supabase/functions/.env.local` (gitignored) and set `DIDIT_API_KEY`, `DIDIT_WORKFLOW_ID` and `DIDIT_WEBHOOK_SECRET` to the application's values there.
+3. Run `npx supabase functions serve --env-file supabase/functions/.env.local` while you test. It serves the functions with that file instead of `.env`. Stop it afterwards, then run `npx supabase stop && npx supabase start` to go back to the default settings, which the e2e tests need.
 
 ### Backend tests
 
@@ -94,6 +108,17 @@ select vault.create_secret('https://ceqkaciklgqzfwycrrfx.supabase.co/functions/v
 select vault.create_secret('<secret>', 'notify_admin_secret');
 ```
 
+For age verification (see "Age verification" in [docs/database.md](docs/database.md)), staging uses a Didit sandbox application: free, with mocked checks. Set it up in the Didit console as described in "Age verification" in [docs/database.md](docs/database.md), with `https://ceqkaciklgqzfwycrrfx.supabase.co/functions/v1/didit-webhook` as its webhook destination (event `status.updated`), then:
+
+```bash
+npx supabase secrets set --project-ref ceqkaciklgqzfwycrrfx \
+  DIDIT_API_KEY=<the application's API key> \
+  DIDIT_WORKFLOW_ID=<the workflow's id> \
+  DIDIT_WEBHOOK_SECRET=<the webhook destination's secret>
+```
+
+The console's "Try Webhook" sends a signed test event with sample data. Any answer but a 401 means the function accepts Didit's signature and timestamp.
+
 To push by hand instead (e.g. the first time), from the repo root:
 
 ```bash
@@ -110,7 +135,7 @@ https://kitchentable.dating — Supabase project "Kitchen Table" (`fdojaontbugkn
 
 `main` is always meant to be releasable: work that isn't ready stays on a PR branch (CI runs on PRs too) or behind a flag. After each staging deploy, the `deploy-production` job in `.github/workflows/ci.yml` waits for approval ("Review deployments" on the workflow run) and then runs the same steps as staging, with `[remotes.production]` from `supabase/config.toml` and `ng build --configuration production` (`environment.prod.ts`), and without the noindex header. It only deploys the latest commit on `main`: approving an older run that's still waiting fails rather than rolling production back, so reject those. To undo a change, revert it on `main` and deploy again; a migration that has reached staging can't be reverted, only followed by a new one.
 
-The `production` GitHub environment has the same secrets as `staging` (with the production database password and its own Mailtrap token) and requires a reviewer. The edge function secrets and Vault secrets are set by hand as for staging, with the production project ref and `SITE_URL=https://kitchentable.dating`.
+The `production` GitHub environment has the same secrets as `staging` (with the production database password and its own Mailtrap token) and requires a reviewer. The edge function secrets and Vault secrets are set by hand as for staging, with the production project ref and `SITE_URL=https://kitchentable.dating`. For age verification, production uses a live Didit application instead of a sandbox one, with its own API key, workflow and webhook secret.
 
 ## License
 

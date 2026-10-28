@@ -50,6 +50,7 @@ describe('ProfileService', () => {
   /** What inserting into `terms_acceptances` fails with, if anything. */
   let insertError: PostgrestError | null;
   let insert: jasmine.Spy;
+  let invoke: jasmine.Spy;
 
   /** Just the queries ProfileService makes on `terms_acceptances`. */
   const from = (table: string) => {
@@ -80,10 +81,11 @@ describe('ProfileService', () => {
       if (!insertError) acceptedVersions.push(row.version);
       return { error: insertError };
     });
+    invoke = jasmine.createSpy('invoke');
     TestBed.configureTestingModule({
       providers: [
         { provide: AuthService, useValue: { userId$ } },
-        { provide: SupabaseService, useValue: { client: { rpc, from } } },
+        { provide: SupabaseService, useValue: { client: { rpc, from, functions: { invoke } } } },
       ],
     });
     service = TestBed.inject(ProfileService);
@@ -267,6 +269,43 @@ describe('ProfileService', () => {
       subscription.unsubscribe();
 
       expect(states).toEqual(['loading', 'needs-terms']);
+    });
+  });
+
+  describe('startAgeVerification', () => {
+    it("returns the URL of Didit's page", async () => {
+      invoke.and.resolveTo({ data: { url: 'https://verify.didit.me/session/abc' }, error: null });
+
+      expect(await service.startAgeVerification()).toBe('https://verify.didit.me/session/abc');
+      expect(invoke).toHaveBeenCalledOnceWith('start-age-verification');
+    });
+
+    it('throws if the function fails', async () => {
+      const error = new Error('Edge Function returned a non-2xx status code');
+      invoke.and.resolveTo({ data: null, error });
+
+      await expectAsync(service.startAgeVerification()).toBeRejectedWith(error);
+    });
+  });
+
+  describe('fetchStatus', () => {
+    it('returns the status without reloading state$', async () => {
+      const states: ProfileState['kind'][] = [];
+      const subscription = service.state$.subscribe((state) => states.push(state.kind));
+      await settled();
+
+      rpc.and.resolveTo({ data: { ...PROFILE, status: 'active' }, error: null });
+      expect(await service.fetchStatus()).toBe('active');
+      await new Promise((resolve) => setTimeout(resolve));
+      subscription.unsubscribe();
+
+      expect(states).toEqual(['loading', 'loaded']);
+    });
+
+    it('is null without a profile', async () => {
+      rpc.and.resolveTo({ data: null, error: null });
+
+      expect(await service.fetchStatus()).toBeNull();
     });
   });
 });
