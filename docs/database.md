@@ -11,23 +11,23 @@ Sections marked **(planned)** describe connections and messaging, which aren't b
 - **RLS is used where the rules are simple enough for a policy:**
   - `terms_acceptances`: users read their own rows and insert their own (see [terms_acceptances](#terms_acceptances)).
   - the `photos` storage bucket: owner-only (`<user id>/<photo id>/...`), because uploads go straight from the browser, plus read access for admins (vetting). See [photos.md](photos.md).
-  - **(planned)** `connections`, `user_relations` and `messages`: `select` only, so RxDB can pull them (see [Messaging sync](#messaging-sync-planned)). Writes still go through functions.
+  - **(planned)** `connections`, `inbox`, `dismissals` and `messages`: `select` only, so RxDB can pull them (see [Messaging sync](#messaging-sync-planned)). Writes still go through functions.
 - **RLS filters rows, not columns.** Anything one participant may see but the other may not (such as read state) lives in its own row, never in a column of a shared row. Column privileges (`grant select (…)`) could hide a column, but they break `select *`, which replication uses, and it isn't clear that Realtime respects them.
 - **The `service_role` has full table access** (admin tooling, webhooks, e2e fixtures).
 
 ## Profile status
 
-| Status      | Meaning                                                            | Client sees            |
-| ----------- | ------------------------------------------------------------------ | ---------------------- |
-| _(no row)_  | signed up, terms not accepted                                      | terms screen           |
-| _(no row)_  | terms accepted, onboarding not submitted                           | onboarding             |
-| `vetting`   | submitted, an admin is reviewing                                   | "being vetted" message |
-| `approved`  | admin approved, age verification pending                           | age verification       |
-| `active`    | verified and live                                                  | main app               |
-| `disabled`  | hidden by the user: not in search, can still message               | main app               |
-| `suspended` | suspended by an admin                                              | suspended message      |
-| `deleted`   | deleted by the user: can no longer message; personal data scrubbed | deleted message        |
-| `admin`     | an admin account, never shown to members (see [Admins](#admins))   | main app               |
+| Status      | Meaning                                                            | Client sees                                                                                     |
+| ----------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| _(no row)_  | signed up, terms not accepted                                      | terms screen                                                                                    |
+| _(no row)_  | terms accepted, onboarding not submitted                           | onboarding                                                                                      |
+| `vetting`   | submitted, an admin is reviewing                                   | "being vetted" message                                                                          |
+| `approved`  | admin approved, age verification pending                           | age verification                                                                                |
+| `active`    | verified and live                                                  | main app                                                                                        |
+| `disabled`  | hidden by the user: not in search, can't message until unhidden    | "profile hidden" screen with a way to unhide it (planned; the shell shows the main app for now) |
+| `suspended` | suspended by an admin                                              | suspended message                                                                               |
+| `deleted`   | deleted by the user: can no longer message; personal data scrubbed | deleted message                                                                                 |
+| `admin`     | an admin account, never shown to members (see [Admins](#admins))   | main app                                                                                        |
 
 There is no `rejected` status; a rejected applicant simply stays in `vetting`. Add one when someone actually needs rejecting.
 
@@ -61,7 +61,8 @@ One row per user who has **completed onboarding**. Signing up creates only an `a
 | `vetting_answers`                     | `jsonb`       | Answers to the vetting questions, keyed by question id (one object rather than a column each, since the questions will change and are never filtered on). Also holds `invite_code` (see [Signup and invite codes](#signup-and-invite-codes)) and `onboarding_feedback`, the optional answer to "How did you find signing up?". Only admins see it. |
 | `name`, `pronouns`, `bio`, `location` | `text`        | Required.                                                                                                                                                                                                                                                                                                                                          |
 | `tagline`                             | `text`        | Required, but may be empty.                                                                                                                                                                                                                                                                                                                        |
-| `gender`, `sexuality`, `looking_for`  | `text[]`      | Ids of the options picked in onboarding; may be empty.                                                                                                                                                                                                                                                                                             |
+| `gender`, `sexuality`                 | `text[]`      | The options picked in onboarding, in the order picked, stored as their text (`GENDER_OPTIONS`, `SEXUALITY_OPTIONS` in `onboarding-options.ts`). Can also hold the user's own descriptions, as they typed them. May be empty.                                                                                                                       |
+| `looking_for`                         | `text[]`      | Ids of the standard options (`LOOKING_FOR_OPTIONS`, so labels can be reworded without a migration), or the user's own text for anything else. May be empty.                                                                                                                                                                                        |
 | `birth_year`, `birth_month`           | `int`         | Optional, so the only nullable columns.                                                                                                                                                                                                                                                                                                            |
 | `photos`                              | `uuid[]`      | Photo ids in display order, the first being the main photo; at most 6 (a check). The files are in the `photos` bucket: see [photos.md](photos.md).                                                                                                                                                                                                 |
 | `messages_emailed_at` **(planned)**   | `timestamptz` | When the user was last emailed about new messages; null until the first email. See [Message emails](#message-emails-planned).                                                                                                                                                                                                                      |
@@ -104,72 +105,85 @@ First-party product analytics: no third-party service and nothing stored in the 
 
 ### `connections` (planned)
 
-One per pair of users who have been in touch. An intro is a `pending` connection whose first message is the intro (PRODUCT.md: an intro message instead of a like). Both users can `select` it.
+One per pair of users who have been in touch: what they share. An intro is a `pending` connection; the intro text is its first message, in `messages` (PRODUCT.md: an intro message instead of a like). Both users can `select` it. The private side of a connection, which each user sees only for themselves, is in `inbox`.
 
-| Column                         | Type          | Notes                                                                                     |
-| ------------------------------ | ------------- | ----------------------------------------------------------------------------------------- |
-| `id`                           | `uuid`        | Primary key.                                                                              |
-| `initiator_id`, `recipient_id` | `uuid`        | Unique as a pair (in either order), so there's at most one connection between two people. |
-| `status`                       | enum          | `pending` (intro sent) or `accepted`. Declining isn't a status: see `user_relations`.     |
-| `created_at`, `updated_at`     | `timestamptz` | `updated_at` is set by a trigger, for replication.                                        |
+| Column                         | Type          | Notes                                                                                                                                       |
+| ------------------------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `initiator_id`, `recipient_id` | `uuid`        | Primary key. A unique index on `(least(…), greatest(…))` also stops the reverse pair, so there's at most one connection between two people. |
+| `status`                       | enum          | `pending` (intro sent) or `accepted`. Declining isn't a status, because the initiator can read this row: see `inbox`.                       |
+| `looking_for`                  | `text[]`      | What the initiator wants to connect on, picked from the `looking_for` values on the two profiles. Not empty.                                |
+| `created_at`, `updated_at`     | `timestamptz` | `updated_at` is set by a trigger, for replication.                                                                                          |
 
-### `user_relations` (planned)
+No separate id: a connection is identified by its two users, so messages and the functions refer to the other person instead. RxDB supports composite primary keys.
 
-One user's private view of another person. Only `user_id` can `select` it. A row exists only once there's something to record: `send_intro` creates one for each side, and dismissing someone creates one if needed.
+### `inbox` (planned)
 
-| Column                     | Type          | Notes                                                                                                                                                                                                                                |
-| -------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `user_id`, `about_user_id` | `uuid`        | Primary key.                                                                                                                                                                                                                         |
-| `last_read_at`             | `timestamptz` | Read watermark for the conversation with that person (one per pair, as connections are). Not null; starts as the time the row is created.                                                                                            |
-| `dismissed_at`             | `timestamptz` | The user dismissed that person in search. It only hides them from the user's own search: they can still send an intro, which shows as usual.                                                                                         |
-| `declined_at`              | `timestamptz` | The user declined that person's intro. Stored here rather than as a connection status because the sender can read the connection row: to them, a declined intro just looks unanswered. Also hides the person from the user's search. |
-| `updated_at`               | `timestamptz` | Set by a trigger, for replication.                                                                                                                                                                                                   |
+Each user's private side of a connection: one row per user per connection, created for both by `send_intro`. Only `user_id` can `select` it.
 
-**Read state without read receipts:** a message is unread for a user if the other person sent it after their `last_read_at`, unless they declined that person's intro. Opening a conversation moves the watermark: one write, however many messages there were. The sender never sees it, because it's in the reader's own row. A read flag on each message would have to be hidden from the sender by column, and the recipient would be updating rows someone else wrote.
+| Column                     | Type          | Notes                                                                                                                                                                             |
+| -------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `user_id`, `other_user_id` | `uuid`        | Primary key.                                                                                                                                                                      |
+| `last_read_at`             | `timestamptz` | Read watermark for the conversation. Null until the user first opens it, so a new intro is unread; the initiator's starts at the time of the intro.                               |
+| `declined_at`              | `timestamptz` | The user declined the other person's intro. Kept here so the initiator isn't told: to them, a declined intro just looks unanswered. Also hides the person from the user's search. |
+| `updated_at`               | `timestamptz` | Set by a trigger, for replication.                                                                                                                                                |
+
+**Read state without read receipts:** a message is unread for its recipient if it was sent after their `last_read_at` (or they've never opened the conversation), unless they declined the intro. An intro is just the first message, so new intros are unread the same way, and the same email covers them. Opening a conversation moves the watermark: one write, however many messages there were. The sender never sees it, because it's in the reader's own row. A read flag on each message would have to be hidden from the sender by column, and the recipient would be updating rows someone else wrote.
+
+### `dismissals` (planned)
+
+People a user has dismissed in search. Only `user_id` can `select` it.
+
+| Column                       | Type          | Notes                                                                     |
+| ---------------------------- | ------------- | ------------------------------------------------------------------------- |
+| `user_id`, `dismissed_id`    | `uuid`        | Primary key.                                                              |
+| `dismissed_at`, `updated_at` | `timestamptz` | Undoing a dismissal deletes the row softly (`deleted`), so it replicates. |
+| `deleted`                    | `boolean`     | For replication.                                                          |
+
+Dismissing only hides someone from the user's own search. The dismissed person can still send an intro, which shows as usual.
 
 ### `messages` (planned)
 
-Both users of the connection can `select` them.
+The sender and recipient can `select` them.
 
-| Column                  | Type          | Notes                                                                                                                                   |
-| ----------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                    | `uuid`        | Generated by the client, so a send retried after a dropped connection hits `on conflict do nothing` instead of a duplicate.             |
-| `connection_id`         | `uuid`        |                                                                                                                                         |
-| `sender_id`             | `uuid`        |                                                                                                                                         |
-| `body`                  | `text`        | Length-checked.                                                                                                                         |
-| `created_at`            | `timestamptz` | Set by the server.                                                                                                                      |
-| `updated_at`, `deleted` |               | For replication: `updated_at` is set by a trigger, and deletions are soft so they replicate too. Indexed `(connection_id, updated_at)`. |
+| Column                      | Type          | Notes                                                                                                                                                                                                                                   |
+| --------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                        | `uuid`        | Generated by the client, so a send retried after a dropped connection hits `on conflict do nothing` instead of a duplicate.                                                                                                             |
+| `sender_id`, `recipient_id` | `uuid`        | The connection is the pair. There's no foreign key to `connections` (the pair can be in either order there); `send_intro` and `send_message` check it. Indexed `(sender_id, updated_at)` and `(recipient_id, updated_at)` for the pull. |
+| `content`                   | `jsonb`       | `{"type": "text", "text": "…"}` for now, so other kinds (images, reactions) can be added later. Types are allowlisted in the functions, like event names in `track_event`, and the text is length-checked.                              |
+| `created_at`                | `timestamptz` | Set by the server.                                                                                                                                                                                                                      |
+| `updated_at`, `deleted`     |               | For replication: `updated_at` is set by a trigger, and deletions are soft so they replicate too (with `content` cleared).                                                                                                               |
 
 ## Functions
 
 All are `security definer` and check `auth.uid()`. Admin functions raise `insufficient_privilege` (`42501`, "Admins only.") for anyone else.
 
-| Function                                                                                                                                                              | Who       | Does                                                                                                                                                                                                                          |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `get_my_profile()`                                                                                                                                                    | user      | The caller's profile without `vetting_answers`, or `null` if there is no row. Drives which screen the app shows.                                                                                                              |
-| `submit_onboarding(p_name, p_pronouns, p_tagline, p_bio, p_location, p_gender, p_sexuality, p_birth_year, p_birth_month, p_looking_for, p_photos, p_vetting_answers)` | user      | Creates the caller's profile in `vetting` (it needs accepted terms), adding the invite code from their sign-up metadata to the vetting answers. Raises `unique_violation` (`23505`) if they already have one.                 |
-| `track_event(p_name, p_props)`                                                                                                                                        | user      | Records an analytics event. Rejects unknown names and `p_props` that isn't a JSON object of at most 500 characters.                                                                                                           |
-| `is_admin()`                                                                                                                                                          | anyone    | Whether the caller is an admin (false when signed out). Also used by the `photos_select_admin` storage policy.                                                                                                                |
-| `admin_list_applications()`                                                                                                                                           | admin     | The profiles in `vetting`, oldest first, as whole rows (`vetting_answers` included), so opening one needs no further request.                                                                                                 |
-| `admin_approve_application(p_id)`                                                                                                                                     | admin     | Moves a profile from `vetting` to `approved`; raises for anything else, so an application can't be decided twice.                                                                                                             |
-| **(planned)** `send_intro(recipient_id, message_id, body)`                                                                                                            | user      | Creates the `pending` connection, the first message and both `user_relations` rows. Checks the daily intro limit (PRODUCT.md suggests 3), that both users are `active`, and that they have no connection yet.                 |
-| **(planned)** `accept_intro(connection_id)`                                                                                                                           | recipient | Sets the connection to `accepted`.                                                                                                                                                                                            |
-| **(planned)** `decline_intro(connection_id)`                                                                                                                          | recipient | While the connection is `pending`, sets `declined_at` on the recipient's relation row. The connection is untouched, so the sender isn't told.                                                                                 |
-| **(planned)** `send_message(id, connection_id, body)`                                                                                                                 | either    | Needs an `accepted` connection and a sender who is `active` or `disabled`.                                                                                                                                                    |
-| **(planned)** `update_relation(about_user_id, read_at, dismissed)`                                                                                                    | user      | Sets the caller's own row, creating it if needed. `read_at` is when the user read the conversation on their device: it only moves `last_read_at` forward and is capped at `now()`. `dismissed` sets or clears `dismissed_at`. |
-| **(planned)** `get_connection_profiles()`                                                                                                                             | user      | Names and photos of the people the caller has connections with.                                                                                                                                                               |
+| Function                                                                                                                                                              | Who       | Does                                                                                                                                                                                                          |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `get_my_profile()`                                                                                                                                                    | user      | The caller's profile without `vetting_answers`, or `null` if there is no row. Drives which screen the app shows.                                                                                              |
+| `submit_onboarding(p_name, p_pronouns, p_tagline, p_bio, p_location, p_gender, p_sexuality, p_birth_year, p_birth_month, p_looking_for, p_photos, p_vetting_answers)` | user      | Creates the caller's profile in `vetting` (it needs accepted terms), adding the invite code from their sign-up metadata to the vetting answers. Raises `unique_violation` (`23505`) if they already have one. |
+| `track_event(p_name, p_props)`                                                                                                                                        | user      | Records an analytics event. Rejects unknown names and `p_props` that isn't a JSON object of at most 500 characters.                                                                                           |
+| `is_admin()`                                                                                                                                                          | anyone    | Whether the caller is an admin (false when signed out). Also used by the `photos_select_admin` storage policy.                                                                                                |
+| `admin_list_applications()`                                                                                                                                           | admin     | The profiles in `vetting`, oldest first, as whole rows (`vetting_answers` included), so opening one needs no further request.                                                                                 |
+| `admin_approve_application(p_id)`                                                                                                                                     | admin     | Moves a profile from `vetting` to `approved`; raises for anything else, so an application can't be decided twice.                                                                                             |
+| **(planned)** `send_intro(p_recipient_id, p_looking_for, p_message_id, p_content)`                                                                                    | user      | Creates the `pending` connection, the first message and both `inbox` rows. Checks the daily intro limit (PRODUCT.md suggests 3), that both users are `active`, and that they have no connection yet.          |
+| **(planned)** `accept_intro(p_initiator_id)`                                                                                                                          | recipient | Sets the connection to `accepted`.                                                                                                                                                                            |
+| **(planned)** `decline_intro(p_initiator_id)`                                                                                                                         | recipient | While the connection is `pending`, sets `declined_at` on the recipient's `inbox` row. The connection is untouched, so the initiator isn't told.                                                               |
+| **(planned)** `send_message(p_id, p_recipient_id, p_content)`                                                                                                         | either    | Needs an `accepted` connection between the two, a sender who is `active`, and a recipient who isn't `deleted`.                                                                                                |
+| **(planned)** `mark_read(p_other_user_id, p_read_at)`                                                                                                                 | either    | Moves the caller's `last_read_at` forward to `p_read_at`, the time they read the conversation on their device, capped at `now()`.                                                                             |
+| **(planned)** `set_dismissed(p_user_id, p_dismissed)`                                                                                                                 | user      | Dismisses someone in search, or undoes it.                                                                                                                                                                    |
+| **(planned)** `get_connection_profiles()`                                                                                                                             | user      | Names and photos of the people the caller has connections with.                                                                                                                                               |
 
-The device's time in `update_relation` matters offline: with the time of the push instead, messages that arrived on the server between reading and syncing would count as read without the user having seen them.
+The device's time in `mark_read` matters offline: with the time of the push instead, messages that arrived on the server between reading and syncing would count as read without the user having seen them.
 
 ## Messaging sync (planned)
 
-The app keeps connections and messages in a local RxDB database, so it feels instant and copes with spotty connections. It has three collections mirroring the tables: `connections`, `user_relations` (the user's own rows) and `messages`. The UI reads only from these, so the conversation list, unread badges and search filtering work offline.
+The app keeps connections and messages in a local RxDB database, so it feels instant and copes with spotty connections. It has four collections mirroring the tables: `connections`, `inbox` and `dismissals` (the user's own rows) and `messages`. The UI reads only from these, so the conversation list, unread badges and search filtering work offline.
 
-- **Pull:** RxDB reads the three tables through the REST API, under the `select` policies above, by an `(updated_at, id)` checkpoint.
+- **Pull:** RxDB reads the four tables through the REST API, under the `select` policies above, by an `(updated_at, id)` checkpoint.
 - **Live updates:** a Realtime subscription only tells RxDB to pull now (`RESYNC`); the pull is the only source of data, so a missed event just means the next pull catches up.
-- **Writes that work offline** go through RxDB: the local document is written first, and RxDB's generic replication (`replicateRxCollection`) pushes it with a custom handler per collection. A new message calls `send_message`; a changed relation calls `update_relation`.
+- **Writes that work offline** go through RxDB: the local document is written first, and RxDB's generic replication (`replicateRxCollection`) pushes it with a custom handler per collection. A new message calls `send_message`, a moved `last_read_at` calls `mark_read`, and a dismissal calls `set_dismissed`.
 - **Writes that should fail fast** (`send_intro`, `accept_intro`, `decline_intro`) are called directly, online only, so the user hears about the daily limit and the like straight away. The app then triggers a pull. `connections` is pull-only.
-- **Refused pushes:** conflicts can't really happen (messages are append-only, and only the owner writes a relation), but `send_message` can refuse a message, for example if the sender was suspended in the meantime. The push handler then marks the local message as failed so the app can show it. A pull wouldn't fix it: a refused message has no row on the server.
+- **Refused pushes:** conflicts can't really happen (messages are append-only, and only the owner writes their `inbox` and `dismissals` rows), but `send_message` can refuse a message, for example if the sender was suspended in the meantime. The push handler then marks the local message as failed so the app can show it. A pull wouldn't fix it: a refused message has no row on the server.
 - **Profiles stay out of RxDB** at first: they come from `get_connection_profiles()` and are cached in memory.
 - **Local data is per user** and deleted on sign-out, alongside `UserStorage.onSignOut()`.
 - **To check before building:** what RxDB's Supabase replication plugin expects (column names, `select *`), or whether to use the generic replication directly as planned.
@@ -187,7 +201,7 @@ When a profile row is inserted in `vetting` (that is, an application was submitt
 
 ### Message emails (planned)
 
-A pg_cron job runs every 10 minutes and, through `pg_net`, calls a `notify-messages` edge function (set up like `notify-admin`) for each user who is due an email. The email says "You have new messages on Kitchen Table" and links to the app: no names, no message text. One email covers all conversations, which is why the state is per user (`profiles.messages_emailed_at`).
+A pg_cron job runs every 10 minutes and, through `pg_net`, calls a `notify-messages` edge function (set up like `notify-admin`) for each user who is due an email. The email says "You have new messages on Kitchen Table" and links to the app: no names, no message text. Intros are messages, so new intros are covered too. One email covers all conversations, which is why the state is per user (`profiles.messages_emailed_at`).
 
 A user is due an email when:
 
@@ -195,7 +209,7 @@ A user is due an email when:
 2. that message is **at least 15 minutes old** (so people chatting in the app aren't emailed), and
 3. if they haven't read anything since the last email, enough time has passed since it: at least as long as they had already been away when it was sent, and at least 1 day, at most 30 days.
 
-"Read anything" means their latest `last_read_at` across all their `user_relations` rows. With `read` for that and `emailed` for `messages_emailed_at`, the last condition is:
+"Read anything" means their latest `last_read_at` across all their `inbox` rows, or when their profile was created if they've never opened a conversation. With `read` for that and `emailed` for `messages_emailed_at`, the last condition is:
 
 ```sql
 read >= emailed
@@ -240,6 +254,7 @@ The admin functions are listed under [Functions](#functions).
 ## Open questions (planned features)
 
 - **Declined intros, later:** the sender isn't told for now, and can't send another (one connection per pair). Should a declined intro eventually be shown to the sender, expire, or be undoable by the recipient? Blocking and reporting need their own design.
+- **`connections.looking_for`:** can the initiator pick only options both profiles list, or anything from their own? Custom text on either profile won't match the other's.
 - **Deleted users:** their profile stays as a tombstone. Do their sent messages stay visible to the other person, or are they scrubbed?
 - **Retention:** keep messages until either participant deletes their account, or for a fixed time?
 - **Back-off ceiling:** once the wait reaches 30 days, keep sending monthly, or stop until the user comes back?
