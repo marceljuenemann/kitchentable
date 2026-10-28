@@ -7,7 +7,7 @@
     <a
       [routerLink]="tab.path"
       routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: tab.path === '/app' }"
+      [routerLinkActiveOptions]="tab.path === '/app' ? searchActive : otherActive"
       ariaCurrentWhenActive="page"
       [attr.aria-label]="tab.label"
     >

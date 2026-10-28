@@ -1,5 +1,5 @@
 import { afterNextRender, Component, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { IsActiveMatchOptions, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 interface Tab {
   label: string;
@@ -45,6 +45,19 @@ export class MainComponent {
     },
     { label: 'Community', path: '/app/community', icon: null },
   ];
+
+  /**
+   * When a tab counts as the current one. Search is `/app` itself, so it needs the exact path:
+   * every tab's path starts with it. Query parameters and fragments never matter (`exact: true`
+   * would require them to match too, so Search wouldn't light up on `/app?…`).
+   */
+  readonly searchActive: IsActiveMatchOptions = {
+    paths: 'exact',
+    queryParams: 'ignored',
+    fragment: 'ignored',
+    matrixParams: 'ignored',
+  };
+  readonly otherActive: IsActiveMatchOptions = { ...this.searchActive, paths: 'subset' };
 
   /**
    * Whether the pill slides when the tab changes. Off for the first render, so that opening a
