@@ -29,6 +29,7 @@ http://localhost:4200/?invite=TESTCODE
 Sign-in uses passwordless magic links. Locally, Supabase routes outgoing email to **Mailpit** instead of a real inbox — after requesting a link on the landing page, open **http://127.0.0.1:54324** to find and click it.
 
 Useful local URLs (from `supabase start` output):
+
 - App: http://localhost:4200
 - Supabase Studio (DB browser/table editor): http://127.0.0.1:54323
 - Mailpit (captured emails): http://127.0.0.1:54324
@@ -94,6 +95,24 @@ Every push to `main` deploys automatically once `check` and `e2e` pass (the `dep
 ### GitHub secrets
 
 The deploy's secrets live in the `staging` GitHub environment: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_AUTH_SMTP_PASS` (Mailtrap API token), `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
+
+#### The Supabase access token
+
+`SUPABASE_ACCESS_TOKEN` is a scoped personal access token (Account → Access Tokens in the Supabase dashboard), one per environment, limited to that environment's project. It needs these permissions, named as in the dashboard; leave everything else at "No access":
+
+| Permission                                                             | Access     | Needed by                                                                                                                                                   |
+| ---------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project Settings                                                       | Read-write | `link` reads the project; `config push` needs write to update the auth settings, together with Auth Config                                                  |
+| API Keys, API Key Secrets                                              | Read       | `link`                                                                                                                                                      |
+| Connection Pooling                                                     | Read       | `link`. Without it, `link` silently skips the IPv4 pooler, and `db push` fails with "IPv6 is not supported"                                                 |
+| Add-ons, Database, Realtime Config, SSL Enforcement                    | Read       | `config push`, to read the project's current config                                                                                                         |
+| Auth Config                                                            | Read-write | `config push` (auth settings, email templates, SMTP)                                                                                                        |
+| Data API Config, Database Config, Storage Config, Network Restrictions | Read-write | `config push`, whenever `[api]`, `[db.settings]`, `[storage]` or `[db.network_restrictions]` in `config.toml` change (Storage Config is read by `link` too) |
+| Edge Functions                                                         | Read-write | `functions deploy`                                                                                                                                          |
+
+`db push` connects with the database password, not the token. The commands run by hand below (`secrets set`, `functions delete`) use your own login (`npx supabase login`), not this token. Scoped tokens expire after at most a year; set a reminder to replace them.
+
+This list comes from Supabase CLI v2.122.0, which records the Management API operations each command calls, and the Management API's spec, which gives the permission each operation needs (`x-fga-permissions` in https://api.supabase.com/api/v1-json). If a deploy fails with a 403 after a CLI update, the error names the `missing_permissions`; newer CLI versions also list them under `supabase <command> --help`.
 
 ### Edge function settings
 
