@@ -5,11 +5,12 @@ const screens: [ProfileStatus | null, string][] = [
   [null, 'Create profile'],
   ['vetting', 'Thanks for applying'],
   ['approved', "You're approved!"],
-  ['active', 'Kitchen Table'],
-  ['disabled', 'Kitchen Table'],
+  // The main app opens on the Search tab.
+  ['active', 'Search'],
+  ['disabled', 'Search'],
   ['suspended', 'Your profile is suspended'],
   ['deleted', 'Your profile has been deleted'],
-  ['admin', 'Kitchen Table'],
+  ['admin', 'Search'],
 ];
 
 for (const [status, heading] of screens) {

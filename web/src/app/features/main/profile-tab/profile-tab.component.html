@@ -1,0 +1,22 @@
+<app-under-construction />
+
+<mat-card class="kt-card account" appearance="outlined">
+  <h2>Account</h2>
+  @if (session(); as session) {
+    <p>
+      Signed in as <b>{{ session.user.email }}</b>
+    </p>
+  }
+  <button mat-stroked-button type="button" (click)="signOut()">Sign out</button>
+</mat-card>
+
+<ul class="links">
+  <li><a href="/about/terms" (click)="openPolicy($event, 'terms')">Terms of Use</a></li>
+  <li><a href="/about/privacy" (click)="openPolicy($event, 'privacy')">Privacy Policy</a></li>
+  <li><a href="mailto:hello@kitchentable.dating">Contact us</a></li>
+  <li>
+    <a href="https://github.com/marceljuenemann/kitchentable" target="_blank" rel="noopener">
+      Source code on GitHub
+    </a>
+  </li>
+</ul>

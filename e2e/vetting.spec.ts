@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { expect, Page, test } from '@playwright/test';
 import { createApplicant, profilesNamed, signInAs, uploadPhoto } from './support/admin';
+import { firstLink, getLatestEmail } from './support/mailpit';
 
 /** A plain JPEG of the given colour, made in the browser. */
 async function jpeg(page: Page, colour: string): Promise<Buffer> {
@@ -19,7 +20,7 @@ async function jpeg(page: Page, colour: string): Promise<Buffer> {
 async function applicantWithPhotos(page: Page) {
   const name = `Ivy ${Date.now()}`;
   const photos = [randomUUID(), randomUUID()];
-  const id = await createApplicant({
+  const { id, email } = await createApplicant({
     name,
     tagline: 'Long tables and longer walks',
     bio: 'I host a monthly supper club.\n\nAnd I like long walks.',
@@ -39,7 +40,7 @@ async function applicantWithPhotos(page: Page) {
     await uploadPhoto(`${id}/${photo}/thumb.jpg`, image);
     await uploadPhoto(`${id}/${photo}/full.jpg`, image);
   }
-  return { id, name };
+  return { id, name, email };
 }
 
 test('an admin reviews an application and approves it', async ({ page }) => {
@@ -72,6 +73,13 @@ test('an admin reviews an application and approves it', async ({ page }) => {
   await page.waitForURL((url) => url.pathname === '/admin/vetting');
   await expect(tile).toBeHidden();
   expect((await profilesNamed(applicant.name))[0]['status']).toBe('approved');
+
+  // The applicant is emailed a link to the next step, without personal data.
+  const email = await getLatestEmail(applicant.email);
+  expect(email.subject).toBe("You're approved!");
+  expect(firstLink(email.html)).toBe('http://localhost:4200/app');
+  expect(email.text).toContain('Open the app: http://localhost:4200/app');
+  expect(email.html).not.toContain(applicant.name);
 });
 
 test('the back button and the browser back both close a profile', async ({ page }) => {

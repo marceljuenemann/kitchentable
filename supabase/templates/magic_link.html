@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <!--
   The sign-in email (Supabase's "Magic Link" template, also used for "Confirm signup" so new
-  and existing users get the same message: see supabase/config.toml).
+  and existing users get the same message: see supabase/config.toml). The other emails use a
+  copy of this layout, in supabase/functions/send-email/layout.ts: change both together.
 
   Email clients ignore most modern CSS, so this is a table layout with inline styles and hex
   colours (the app's oklch variables don't work here). Keep the sign-in button as the FIRST

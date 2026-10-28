@@ -89,13 +89,13 @@ export async function uploadPhoto(path: string, jpeg: Buffer) {
 
 /**
  * Creates an applicant without going through onboarding: a user who accepted the terms, with a
- * profile in `vetting` made of the given fields (`name` at least). Returns the user id.
+ * profile in `vetting` made of the given fields (`name` at least).
  */
-export async function createApplicant(fields: Record<string, unknown>): Promise<string> {
-  const user = await api('/auth/v1/admin/users', {
-    email: uniqueEmail('applicant'),
-    email_confirm: true,
-  });
+export async function createApplicant(
+  fields: Record<string, unknown>,
+): Promise<{ id: string; email: string }> {
+  const email = uniqueEmail('applicant');
+  const user = await api('/auth/v1/admin/users', { email, email_confirm: true });
   await api('/rest/v1/terms_acceptances', { user_id: user.id, version: 1 });
   await api('/rest/v1/profiles', {
     id: user.id,
@@ -105,7 +105,7 @@ export async function createApplicant(fields: Record<string, unknown>): Promise<
     location: 'London',
     ...fields,
   });
-  return user.id;
+  return { id: user.id, email };
 }
 
 /**

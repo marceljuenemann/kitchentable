@@ -9,8 +9,9 @@ const PREFIX = 'kt.user.';
  * like in-progress onboarding drafts. Nothing is read or written while signed out.
  *
  * Deliberately survives session expiry so users can come back later and pick up where they
- * left off; it is only cleared by an explicit sign-out, for privacy on shared devices. Whatever
- * signs the user out must call `onSignOut()` first.
+ * left off; it is only cleared by an explicit sign-out, for privacy on shared devices.
+ * `injectSignOut()` (core/auth/sign-out.ts) calls `onSignOut()` before ending the session, so
+ * every "Sign out" must go through it.
  */
 @Injectable({ providedIn: 'root' })
 export class UserStorage {

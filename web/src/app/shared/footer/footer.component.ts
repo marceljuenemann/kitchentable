@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../core/auth/auth.service';
-import { UserStorage } from '../../core/user-storage';
+import { injectSignOut } from '../../core/auth/sign-out';
 
 /** Contact/legal links, plus "Signed in as … Sign out" when there is a session. */
 @Component({
@@ -13,15 +13,6 @@ import { UserStorage } from '../../core/user-storage';
   styleUrl: './footer.component.scss',
 })
 export class FooterComponent {
-  private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly userStorage = inject(UserStorage);
-
-  readonly session = this.auth.session;
-
-  async signOut() {
-    this.userStorage.onSignOut();
-    await this.auth.signOut();
-    await this.router.navigateByUrl('/');
-  }
+  readonly session = inject(AuthService).session;
+  readonly signOut = injectSignOut();
 }

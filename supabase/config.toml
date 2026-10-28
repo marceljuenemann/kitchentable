@@ -65,7 +65,7 @@ schema_paths = []
 
 [db.seed]
 # If enabled, seeds the database after migrations during a db reset. Local values only (vault
-# secrets for the notify-admin trigger); never pushed to staging.
+# secrets for send_email()); never pushed to staging.
 enabled = true
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
@@ -408,8 +408,8 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
-# Called by a database trigger, not by users: it checks a shared secret instead of a JWT.
-[functions.notify-admin]
+# Called by the database (send_email()), not by users: it checks a shared secret instead of a JWT.
+[functions.send-email]
 verify_jwt = false
 
 # Called by Didit, not by users: it checks Didit's signature instead of a JWT.
