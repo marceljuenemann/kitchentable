@@ -93,10 +93,19 @@ a {
   stroke-width: 1.9;
 }
 
+// In the logo's 360-unit box, drawn at 32px: as thick as the icons' strokes (21 × 32 / 360 ≈ 1.9px).
+.logo {
+  stroke-width: 21;
+}
+
 .active {
   color: var(--kt-violet);
 
   .icon {
     stroke-width: 2.4;
+  }
+
+  .logo {
+    stroke-width: 27;
   }
 }

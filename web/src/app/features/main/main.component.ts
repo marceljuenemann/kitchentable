@@ -4,7 +4,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 interface Tab {
   label: string;
   path: string;
-  /** A 24×24 stroke path, or null for the logo mark. */
+  /** A 24×24 stroke path, or null for the logo. */
   icon: string | null;
 }
 
