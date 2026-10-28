@@ -82,6 +82,8 @@ npm run typecheck:e2e  # type-check e2e/ (Playwright transpiles TS without check
 
 https://staging.kitchentable.dating — Supabase project "Kitchen Table - Staging" (`ceqkaciklgqzfwycrrfx`, London), frontend on Cloudflare Pages (`kitchentable-staging`), auth emails via Mailtrap. The staging build shows a "Staging" badge and is served with `X-Robots-Tag: noindex`.
 
+### Deploys
+
 Every push to `main` deploys automatically once `check` and `e2e` pass (the `deploy-staging` job in `.github/workflows/ci.yml`, which runs `.github/workflows/deploy.yml`):
 
 1. `supabase db push` — applies new migrations.
@@ -89,13 +91,21 @@ Every push to `main` deploys automatically once `check` and `e2e` pass (the `dep
 3. `supabase functions deploy` — the edge functions in `supabase/functions/` (settings below).
 4. `ng build --configuration staging` (`environment.staging.ts`), deployed with `wrangler pages deploy`.
 
-Secrets live in the `staging` GitHub environment: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_AUTH_SMTP_PASS` (Mailtrap API token), `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
+### GitHub secrets
 
-The edge functions' settings aren't in GitHub: they're set once by hand in the Supabase project and kept across deploys. For the admin notification on new applications (see "Admin notification" in [docs/database.md](docs/database.md)), pick a random shared secret (`openssl rand -hex 32`) and:
+The deploy's secrets live in the `staging` GitHub environment: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_AUTH_SMTP_PASS` (Mailtrap API token), `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
+
+### Edge function settings
+
+The edge functions' settings aren't in GitHub: they're set once by hand in the Supabase project and kept across deploys.
+
+#### Emails
+
+For `send-email` (see "Emails" in [docs/database.md](docs/database.md)), pick a random shared secret (`openssl rand -hex 32`) and:
 
 ```bash
 npx supabase secrets set --project-ref ceqkaciklgqzfwycrrfx \
-  NOTIFY_ADMIN_SECRET=<secret> \
+  SEND_EMAIL_SECRET=<secret> \
   ADMIN_EMAIL=admin@kitchentable.dating \
   SITE_URL=https://staging.kitchentable.dating \
   MAILTRAP_TOKEN=<mailtrap token>
@@ -104,11 +114,13 @@ npx supabase secrets set --project-ref ceqkaciklgqzfwycrrfx \
 Then in the Studio SQL editor:
 
 ```sql
-select vault.create_secret('https://ceqkaciklgqzfwycrrfx.supabase.co/functions/v1/notify-admin', 'notify_admin_url');
-select vault.create_secret('<secret>', 'notify_admin_secret');
+select vault.create_secret('https://ceqkaciklgqzfwycrrfx.supabase.co/functions/v1/send-email', 'send_email_url');
+select vault.create_secret('<secret>', 'send_email_secret');
 ```
 
-For age verification (see "Age verification" in [docs/database.md](docs/database.md)), staging uses a Didit sandbox application: free, with mocked checks. Set it up in the Didit console as described in "Age verification" in [docs/database.md](docs/database.md), with `https://ceqkaciklgqzfwycrrfx.supabase.co/functions/v1/didit-webhook` as its webhook destination (event `status.updated`), then:
+#### Age verification
+
+Staging uses a Didit sandbox application: free, with mocked checks. Set it up in the Didit console as described in "Age verification" in [docs/database.md](docs/database.md), with `https://ceqkaciklgqzfwycrrfx.supabase.co/functions/v1/didit-webhook` as its webhook destination (event `status.updated`), then:
 
 ```bash
 npx supabase secrets set --project-ref ceqkaciklgqzfwycrrfx \
@@ -119,7 +131,9 @@ npx supabase secrets set --project-ref ceqkaciklgqzfwycrrfx \
 
 The console's "Try Webhook" sends a signed test event with sample data. Any answer but a 401 means the function accepts Didit's signature and timestamp.
 
-To push by hand instead (e.g. the first time), from the repo root:
+### Pushing by hand
+
+To push by hand instead of through CI (e.g. the first time), from the repo root:
 
 ```bash
 npx supabase link --project-ref ceqkaciklgqzfwycrrfx
@@ -133,9 +147,17 @@ Note `config push` applies without waiting for confirmation when stdin isn't a t
 
 https://kitchentable.dating — Supabase project "Kitchen Table" (`fdojaontbugknmrjjxjo`, London), frontend on Cloudflare Pages (`kitchentable-production`), auth emails via Mailtrap.
 
-`main` is always meant to be releasable: work that isn't ready stays on a PR branch (CI runs on PRs too) or behind a flag. After each staging deploy, the `deploy-production` job in `.github/workflows/ci.yml` waits for approval ("Review deployments" on the workflow run) and then runs the same steps as staging, with `[remotes.production]` from `supabase/config.toml` and `ng build --configuration production` (`environment.prod.ts`), and without the noindex header. It only deploys the latest commit on `main`: approving an older run that's still waiting fails rather than rolling production back, so reject those. To undo a change, revert it on `main` and deploy again; a migration that has reached staging can't be reverted, only followed by a new one.
+### Deploys
 
-The `production` GitHub environment has the same secrets as `staging` (with the production database password and its own Mailtrap token) and requires a reviewer. The edge function secrets and Vault secrets are set by hand as for staging, with the production project ref and `SITE_URL=https://kitchentable.dating`. For age verification, production uses a live Didit application instead of a sandbox one, with its own API key, workflow and webhook secret.
+`main` is always meant to be releasable: work that isn't ready stays on a PR branch (CI runs on PRs too) or behind a flag. After each staging deploy, the `deploy-production` job in `.github/workflows/ci.yml` waits for approval ("Review deployments" on the workflow run) and then runs the same steps as staging, with `[remotes.production]` from `supabase/config.toml` and `ng build --configuration production` (`environment.prod.ts`), and without the noindex header.
+
+It only deploys the latest commit on `main`: approving an older run that's still waiting fails rather than rolling production back, so reject those. To undo a change, revert it on `main` and deploy again; a migration that has reached staging can't be reverted, only followed by a new one.
+
+### Secrets and settings
+
+- **GitHub:** the `production` environment has the same secrets as `staging` (with the production database password and its own Mailtrap token) and requires a reviewer.
+- **Edge functions and Vault:** set by hand as for staging, with the production project ref and `SITE_URL=https://kitchentable.dating`.
+- **Age verification:** a live Didit application instead of a sandbox one, with its own API key, workflow and webhook secret.
 
 ## License
 

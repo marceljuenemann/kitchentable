@@ -204,15 +204,21 @@ Set up in the Didit console, the same for each environment's application:
 
 ## Emails
 
-Emails are sent by edge functions, which the database calls through `pg_net` after the transaction commits (so nothing is sent for a rolled-back change, and nothing is retried). Each function's URL and shared secret are vault secrets; it checks the secret because it runs with `verify_jwt = false`. They're set in `supabase/seed.sql` and `supabase/functions/.env` locally, and by hand on staging (see "Staging" in README.md). Locally, emails go to Mailpit; elsewhere, through Mailtrap. No email holds names or message text.
+All emails apart from the sign-in email (which Supabase Auth sends) go through one edge function, `send-email`. The database calls it with `send_email(p_template, p_user_id)`, which posts `{"template": …, "user_id": …}` through `pg_net` after the transaction commits, so nothing is sent for a rolled-back change, and nothing is retried. Clients can't call `send_email`.
 
-### Admin notification
+- **Templates** are in the function (`supabase/functions/send-email/index.ts`): the subject, the text and a button linking into the app. Each goes either to `ADMIN_EMAIL` or to the user named by `user_id`, whose address the function looks up in Supabase Auth, so addresses never sit in the database's request queue. No email holds names or message text.
+- **Look:** HTML in the style of the sign-in email (`send-email/layout.ts`, a copy of the layout of `supabase/templates/magic_link.html`: change both together), plus a plain-text part.
+- **Settings:** the function's URL and shared secret are the vault secrets `send_email_url` and `send_email_secret`. The function checks the secret against `SEND_EMAIL_SECRET`, because it runs with `verify_jwt = false`. They're set in `supabase/seed.sql` and `supabase/functions/.env` locally, and by hand on staging and production (see README.md). If either vault secret is missing, `send_email` logs a warning and sends nothing.
+- **Delivery:** locally, emails go to Mailpit; elsewhere, through Mailtrap.
 
-When an application is submitted (a profile row inserted in `vetting`), the `notify_admin_of_application` trigger calls the `notify-admin` function, which emails `ADMIN_EMAIL` a link to `/admin/vetting`. Its settings are `notify_admin_url` and `notify_admin_secret` (checked against `NOTIFY_ADMIN_SECRET`); if either is missing, the trigger logs a warning and sends nothing.
+| Template                | To        | Sent when                                                                                                                       |
+| ----------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `application_submitted` | the admin | an application comes in (a profile row inserted in `vetting`, the `notify_admin_of_application` trigger). Links to `/admin/vetting`. |
+| `application_approved`  | the user  | the status changes from `vetting` to `approved` (the `notify_member_of_approval` trigger, so approving by hand in Studio sends it too). Links to `/app`, where the age check is next. |
 
 ### Member emails (planned)
 
-A pg_cron job runs every 10 minutes and calls a `notify-member` function for each email that is due. There are two kinds, each with its own timestamp on `profiles`, so they back off separately:
+A pg_cron job runs every 10 minutes and calls `send_email` for each email that is due, with new templates in `send-email`. There are two kinds, each with its own timestamp on `profiles`, so they back off separately:
 
 | Kind     | Says                                                           | About                                                                                                        | Timestamp             |
 | -------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------- |
