@@ -1,0 +1,261 @@
+// The logo's colours (public/logo.svg): its gold heart, and its arcs for the floating hearts.
+:host {
+  --panda-ink: var(--kt-violet);
+  --logo-sky: #70c4ec;
+  --logo-magenta: #c83897;
+  --logo-gold: #e3af47;
+  --logo-violet: #6c3ab2;
+
+  position: relative;
+  display: inline-block;
+}
+
+// Up and to the right of the panda's head, with an arrow curving down to it.
+.hint {
+  position: absolute;
+  top: -14px;
+  left: calc(100% - 10px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: var(--kt-muted);
+  pointer-events: none;
+  transition: opacity 0.3s;
+
+  &.gone {
+    opacity: 0;
+  }
+
+  span {
+    font-family: var(--kt-font-display);
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+    transform: rotate(-8deg);
+  }
+
+  svg {
+    width: 40px;
+    height: 30px;
+    margin-left: -18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+button {
+  position: relative;
+  display: block;
+  width: 148px;
+  height: 148px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  isolation: isolate;
+
+  &:focus-visible {
+    outline: 2px solid var(--kt-violet);
+    outline-offset: 4px;
+  }
+
+  // In front of the floating hearts, which come out from behind the head.
+  .drawing {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+}
+
+.outline {
+  fill: var(--kt-raised);
+  stroke: var(--panda-ink);
+  stroke-width: 3.5;
+}
+
+.ink-fill {
+  fill: var(--panda-ink);
+}
+
+.line {
+  fill: none;
+  stroke: var(--panda-ink);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.eyes-open {
+  fill: var(--kt-raised);
+
+  .pupil {
+    fill: var(--panda-ink);
+  }
+}
+
+.eyes-happy {
+  fill: none;
+  stroke: var(--kt-raised);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0;
+}
+
+.blush {
+  fill: var(--logo-magenta);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.heart {
+  fill: var(--logo-gold);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.arm {
+  fill: var(--panda-ink);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  // Each turns around its shoulder.
+  &.left {
+    transform-origin: 66px 135px;
+  }
+
+  &.right {
+    transform-origin: 134px 135px;
+  }
+}
+
+.panda {
+  transform-origin: 100px 195px;
+}
+
+// The hug: arms close in, the heart gets squeezed, happy eyes, a blush and a squish.
+.hugging {
+  .arm.left {
+    transform: rotate(-9deg);
+  }
+
+  .arm.right {
+    transform: rotate(9deg);
+  }
+
+  .heart {
+    transform: scale(0.84, 1.08);
+  }
+
+  .eyes-open {
+    opacity: 0;
+  }
+
+  .eyes-happy {
+    opacity: 1;
+  }
+
+  .blush {
+    opacity: 0.35;
+  }
+
+  .panda {
+    animation: squish 0.5s ease-out;
+  }
+}
+
+@keyframes squish {
+  30% {
+    transform: scale(1.05, 0.94);
+  }
+  60% {
+    transform: scale(0.98, 1.03);
+  }
+}
+
+// Start behind the panda's head and float up, drifting and tilting, then fade.
+.floating-heart {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  width: 20px;
+  height: 18px;
+  pointer-events: none;
+  animation: float 1.3s ease-out both;
+
+  &.colour-0 {
+    fill: var(--logo-magenta);
+  }
+  &.colour-1 {
+    fill: var(--logo-sky);
+  }
+  &.colour-2 {
+    fill: var(--logo-gold);
+  }
+  &.colour-3 {
+    fill: var(--logo-violet);
+  }
+}
+
+@keyframes float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--dx) * 0.4), calc(-50% - 45px)) scale(1);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% - 120px)) rotate(var(--rotate))
+      scale(1.1);
+  }
+}
+
+// Nothing moves: the hug is the eyes and blush, and the hearts fade in and out above the panda.
+@media (prefers-reduced-motion: reduce) {
+  .arm,
+  .heart {
+    transition: none;
+  }
+
+  .hugging {
+    .arm.left,
+    .arm.right,
+    .heart {
+      transform: none;
+    }
+
+    .panda {
+      animation: none;
+    }
+  }
+
+  .floating-heart {
+    top: 0;
+    animation-name: fade;
+    transform: translate(calc(-50% + var(--dx)), -50%) rotate(var(--rotate));
+  }
+}
+
+@keyframes fade {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  30%,
+  70% {
+    opacity: 1;
+  }
+}

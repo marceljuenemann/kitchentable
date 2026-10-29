@@ -337,6 +337,16 @@ mat-checkbox {
   }
 }
 
+// For screen readers only, like a tab's `h1` when the bottom nav already shows which tab it is.
+.kt-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 // A gold note about something unfinished or out of the ordinary ("Still under construction").
 // Put a `mat-icon` and a `span` in it.
 .kt-notice {

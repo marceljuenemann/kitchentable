@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { PROFILE_ROUTE_DATA } from '../../shared/profile-view/profile-transition';
+import { ConnectionsComponent } from './connections/connections.component';
 import { ProfileTabComponent } from './profile-tab/profile-tab.component';
 import { SearchProfileComponent } from './search/search-profile.component';
 import { SearchComponent } from './search/search.component';
@@ -24,7 +25,7 @@ export const MAIN_ROUTES: Routes = [
     ],
   },
   { path: 'profile', component: ProfileTabComponent, data: { title: 'Your profile' } },
-  { path: 'connections', component: UnderConstructionComponent, data: { title: 'Connections' } },
+  { path: 'connections', component: ConnectionsComponent },
   { path: 'messages', component: UnderConstructionComponent, data: { title: 'Messages' } },
   { path: 'community', component: UnderConstructionComponent, data: { title: 'Community' } },
   { path: '**', redirectTo: '' },
