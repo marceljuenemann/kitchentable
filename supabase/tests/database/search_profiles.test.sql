@@ -1,5 +1,5 @@
 begin;
-select plan(11);
+select plan(12);
 
 -- Amy (a woman in London) searches. Everyone else is someone she should or shouldn't see:
 -- Ben, Gil, Jo and Kai are live members in London she may see; Cat lives elsewhere; Dan has
@@ -59,6 +59,12 @@ from (values
 ) as h (id, g)
 where profiles.id = h.id;
 
+do $$
+begin
+  perform public.connect_with_admins(id) from public.profiles where status = 'active';
+end;
+$$;
+
 insert into public.connection_secrets (user_id, other_user_id, dismissed_at)
 values ('f0000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000008', now());
 
@@ -117,7 +123,16 @@ select results_eq(
   'nobody else lives in Manchester'
 );
 
--- Hiding by gender works both ways ----------------------------------------------
+-- The admin is connected with every member, like in real life, and lives in London, so they
+-- see the members who don't hide from their (empty) gender. Gil and Fay do.
+set local request.jwt.claim.sub = 'f0000000-0000-0000-0000-000000000012';
+select results_eq(
+  $$ select e ->> 'name' from jsonb_array_elements(public.search_profiles()) with ordinality t (e, n) order by n $$,
+  $$ values ('Hal'), ('Ivy'), ('Max'), ('Jo'), ('Ben'), ('Kai'), ('Amy') $$,
+  'admins can browse, though they are connected with everyone'
+);
+
+-- Hiding by gender ------------------------------------------------------------------
 
 reset role;
 update public.profiles
@@ -129,8 +144,8 @@ set local role authenticated;
 set local request.jwt.claim.sub = 'f0000000-0000-0000-0000-000000000001';
 select results_eq(
   $$ select e ->> 'name' from jsonb_array_elements(public.search_profiles()) with ordinality t (e, n) order by n $$,
-  $$ values ('Jo'), ('Gil') $$,
-  'someone hiding by gender sees only the genders they show themselves to (not Ben, a man, or Kai, not specified)'
+  $$ values ('Jo'), ('Ben'), ('Gil'), ('Kai') $$,
+  'hiding by gender does not narrow your own results (the app applies your Gender filter)'
 );
 
 set local request.jwt.claim.sub = 'f0000000-0000-0000-0000-000000000002';

@@ -19,16 +19,17 @@ as $$
   ) end;
 $$;
 
--- The `active` members the caller may see in search, newest members first, as their profile
--- shows them: the age rather than the birth date, and no status, timestamps, search settings or
--- vetting answers (like get_connected_profiles(): keep the age rule in step with it and with
--- ageFrom() in the app). Leaves out:
+-- The `active` members the caller (a member or an admin) may see in search, newest members
+-- first, as their profile shows them: the age rather than the birth date, and no status,
+-- timestamps, search settings or vetting answers (like get_connected_profiles(): keep the age
+-- rule in step with it and with ageFrom() in the app). Leaves out:
 -- - the caller, and anyone in another location (case-insensitive: it's free text);
 -- - anyone with a connection with the caller, whatever its status (pending, accepted, ended),
---   and anyone the caller dismissed in search or whose intro they declined;
--- - with hide_by_gender, both ways: people who hide from the caller's gender, and, if the caller
---   hides by gender, people outside the caller's own Gender filter, so nobody can see people
---   who can't see them.
+--   except for admins, who are connected with every member from the start;
+-- - anyone the caller dismissed in search or whose intro they declined;
+-- - people who hide from the caller's gender (hide_by_gender).
+-- The caller's own filters, their Gender filter included, are applied in the app, so changing
+-- them needs no new request.
 create or replace function public.search_profiles()
 returns jsonb
 language plpgsql
@@ -41,7 +42,7 @@ declare
   me public.profiles;
 begin
   select * into me from public.profiles where id = uid;
-  if not found or me.status <> 'active' then
+  if not found or me.status not in ('active', 'admin') then
     raise exception 'Only members can search.' using errcode = 'insufficient_privilege';
   end if;
 
@@ -66,11 +67,11 @@ begin
       where p.status = 'active'
         and p.id <> uid
         and lower(p.location) = lower(me.location)
-        and not exists (
+        and (me.status = 'admin' or not exists (
           select 1 from public.connections c
           where (c.initiator_id = uid and c.recipient_id = p.id)
              or (c.initiator_id = p.id and c.recipient_id = uid)
-        )
+        ))
         and not exists (
           select 1 from public.connection_secrets s
           where s.user_id = uid and s.other_user_id = p.id
@@ -78,8 +79,6 @@ begin
         )
         and (not p.hide_by_gender
           or p.search_filters -> 'gender' ?| public.gender_filter_values(me.gender))
-        and (not me.hide_by_gender
-          or me.search_filters -> 'gender' ?| public.gender_filter_values(p.gender))
     ),
     '[]'
   );
