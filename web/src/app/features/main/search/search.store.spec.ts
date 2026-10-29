@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
+import { SupabaseService } from '../../../core/supabase.service';
 import {
   matches,
   Member,
@@ -85,16 +86,75 @@ describe('matches', () => {
 describe('SearchStore', () => {
   let store: SearchStore;
   let undo: Subject<void>;
+  let open: jasmine.Spy;
+  let rpc: jasmine.Spy;
 
   beforeEach(() => {
     undo = new Subject();
+    open = jasmine.createSpy('open').and.returnValue({ onAction: () => undo });
+    rpc = jasmine.createSpy('rpc').and.resolveTo({ error: null });
     TestBed.configureTestingModule({
       providers: [
         SearchStore,
-        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => undo }) } },
+        { provide: MatSnackBar, useValue: { open } },
+        { provide: SupabaseService, useValue: { client: { rpc } } },
       ],
     });
     store = TestBed.inject(SearchStore);
+  });
+
+  /** Lets the queued saves run. */
+  const settle = () => new Promise((resolve) => setTimeout(resolve));
+  const saved = () => rpc.calls.allArgs().map(([, args]) => args.p_genders);
+
+  describe('visible to genders', () => {
+    it('saves the Gender filter while the switch is on, and null once it is off', async () => {
+      store.updateFilters({ gender: ['Woman'] });
+      store.setOnlyShowMeToGenders(true);
+      store.updateFilters({ gender: ['Woman', NOT_SPECIFIED] });
+      store.setOnlyShowMeToGenders(false);
+      await settle();
+
+      expect(rpc).toHaveBeenCalledWith('set_visible_to_genders', jasmine.any(Object));
+      expect(saved()).toEqual([['Woman'], ['Woman', NOT_SPECIFIED], null]);
+    });
+
+    it('is off, and saves nothing, while no gender is picked', async () => {
+      store.setOnlyShowMeToGenders(true);
+      await settle();
+
+      expect(store.visibleToGenders()).toBeNull();
+      expect(rpc).not.toHaveBeenCalled();
+    });
+
+    it('saves nothing for changes that leave it as it was', async () => {
+      store.updateFilters({ gender: ['Woman', 'Man'] });
+      store.setOnlyShowMeToGenders(true);
+      store.updateFilters({ minAge: 30 });
+      store.updateFilters({ gender: ['Man', 'Woman'] });
+      await settle();
+
+      expect(saved()).toEqual([['Woman', 'Man']]);
+    });
+
+    it('offers to retry after a failure, and sends the current value again', async () => {
+      rpc.and.resolveTo({ error: { message: 'offline' } });
+      store.updateFilters({ gender: ['Woman'] });
+      store.setOnlyShowMeToGenders(true);
+      await settle();
+
+      expect(open).toHaveBeenCalledWith(
+        "Couldn't save who can see you",
+        'Retry',
+        jasmine.any(Object),
+      );
+
+      rpc.and.resolveTo({ error: null });
+      undo.next();
+      await settle();
+
+      expect(saved()).toEqual([['Woman'], ['Woman']]);
+    });
   });
 
   it('hides someone until the hiding is undone', () => {

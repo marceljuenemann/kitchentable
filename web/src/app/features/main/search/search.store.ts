@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ageFrom } from '../../../core/age';
 import { Profile } from '../../../core/profile.model';
+import { SupabaseService } from '../../../core/supabase.service';
 import { GENDER_OPTIONS, LOOKING_FOR_OPTIONS } from '../../onboarding/onboarding-options';
 import { MOCK_MEMBERS, mockPhotoUrls } from './mock-members';
 
@@ -76,6 +77,12 @@ export function matches(member: Member, filters: SearchFilters, now = new Date()
   return true;
 }
 
+/** Whether two lists hold the same values, in any order (null and undefined only match themselves). */
+function sameValues(a: string[] | null | undefined, b: string[] | null | undefined): boolean {
+  if (!a || !b) return a === b;
+  return a.length === b.length && a.every((value) => b.includes(value));
+}
+
 /**
  * The members search shows, shared by the grid and the profile route, with the viewer's
  * filters and hidden people, newest members first.
@@ -87,6 +94,7 @@ export function matches(member: Member, filters: SearchFilters, now = new Date()
 @Injectable()
 export class SearchStore {
   private readonly snackBar = inject(MatSnackBar);
+  private readonly supabase = inject(SupabaseService);
 
   readonly members = signal<Member[]>(MOCK_MEMBERS);
   /** Photo URLs by member id, in display order. */
@@ -94,11 +102,25 @@ export class SearchStore {
     new Map(MOCK_MEMBERS.map((member) => [member.id, mockPhotoUrls(member)])),
   );
   readonly filters = signal<SearchFilters>(NO_FILTERS);
+  /** The "Only show me to these genders" switch, as the viewer last set it. */
+  private readonly onlyShowMeToGenders = signal(false);
   /**
-   * Whether only people of the genders in the Gender filter may see the viewer in their search.
-   * MOCK: only kept here; the real one is saved on the profile and applied to others' searches.
+   * The genders whose members may see the viewer in their search (their Gender filter while the
+   * switch is on), or null for anyone. Off while no gender is picked: there's nobody to limit it
+   * to. Saved as `visible_to_genders` on every change, but not read back yet, so the switch
+   * starts off on each visit.
    */
-  readonly onlyShowMeToGenders = signal(false);
+  readonly visibleToGenders = computed(() => {
+    const genders = this.filters().gender;
+    return this.onlyShowMeToGenders() && genders.length > 0 ? genders : null;
+  });
+  /**
+   * What was last sent to the database, so unrelated filter changes send nothing; undefined
+   * after a failure, so the next change sends again.
+   */
+  private savedVisibleToGenders: string[] | null | undefined = null;
+  /** Saves run one after another, so the last change is the one that's kept. */
+  private saving = Promise.resolve();
   readonly hiddenIds = signal<ReadonlySet<string>>(new Set());
   /** The member showing over the grid, if any. */
   readonly openId = signal<string | null>(null);
@@ -117,6 +139,37 @@ export class SearchStore {
 
   updateFilters(change: Partial<SearchFilters>) {
     this.filters.update((filters) => ({ ...filters, ...change }));
+    this.saveVisibleToGenders();
+  }
+
+  setOnlyShowMeToGenders(on: boolean) {
+    this.onlyShowMeToGenders.set(on);
+    this.saveVisibleToGenders();
+  }
+
+  /** Fire-and-forget: a failure shows a snackbar to retry, and search carries on regardless. */
+  private saveVisibleToGenders() {
+    const genders = this.visibleToGenders();
+    if (sameValues(genders, this.savedVisibleToGenders)) return;
+    this.savedVisibleToGenders = genders;
+    this.saving = this.saving
+      .then(async () => {
+        const { error } = await this.supabase.client.rpc('set_visible_to_genders', {
+          p_genders: genders,
+        });
+        if (error) throw error;
+      })
+      .catch((error: unknown) => {
+        console.warn('Could not save visible_to_genders', error);
+        this.savedVisibleToGenders = undefined;
+        this.snackBar
+          .open("Couldn't save who can see you", 'Retry', {
+            duration: 6000,
+            panelClass: 'kt-snackbar',
+          })
+          .onAction()
+          .subscribe(() => this.saveVisibleToGenders());
+      });
   }
 
   /** Takes someone off the grid for good, with a snackbar to undo it. */
