@@ -1,7 +1,9 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ageFrom } from '../../../core/age';
-import { Profile } from '../../../core/profile.model';
+import { first } from 'rxjs';
+import { MyProfile, Profile, SavedSearchFilters } from '../../../core/profile.model';
+import { ProfileService } from '../../../core/profile.service';
 import { SupabaseService } from '../../../core/supabase.service';
 import { GENDER_OPTIONS, LOOKING_FOR_OPTIONS } from '../../onboarding/onboarding-options';
 import { MOCK_MEMBERS, mockPhotoUrls } from './mock-members';
@@ -77,12 +79,6 @@ export function matches(member: Member, filters: SearchFilters, now = new Date()
   return true;
 }
 
-/** Whether two lists hold the same values, in any order (null and undefined only match themselves). */
-function sameValues(a: string[] | null | undefined, b: string[] | null | undefined): boolean {
-  if (!a || !b) return a === b;
-  return a.length === b.length && a.every((value) => b.includes(value));
-}
-
 /**
  * The members search shows, shared by the grid and the profile route, with the viewer's
  * filters and hidden people, newest members first.
@@ -96,6 +92,13 @@ export class SearchStore {
   private readonly snackBar = inject(MatSnackBar);
   private readonly supabase = inject(SupabaseService);
 
+  constructor() {
+    // The shell shows search only once the profile has loaded, so this runs straight away.
+    inject(ProfileService)
+      .state$.pipe(first((state) => state.kind === 'loaded'))
+      .subscribe((state) => state.kind === 'loaded' && this.load(state.profile));
+  }
+
   readonly members = signal<Member[]>(MOCK_MEMBERS);
   /** Photo URLs by member id, in display order. */
   readonly photoUrls = signal(
@@ -105,22 +108,28 @@ export class SearchStore {
   /** The "Only show me to these genders" switch, as the viewer last set it. */
   private readonly onlyShowMeToGenders = signal(false);
   /**
-   * The genders whose members may see the viewer in their search (their Gender filter while the
-   * switch is on), or null for anyone. Off while no gender is picked: there's nobody to limit it
-   * to. Saved as `visible_to_genders` on every change, but not read back yet, so the switch
-   * starts off on each visit.
+   * Whether only members of the genders in the Gender filter may see the viewer in their search.
+   * Off while no gender is picked: there's nobody to limit it to.
    */
-  readonly visibleToGenders = computed(() => {
-    const genders = this.filters().gender;
-    return this.onlyShowMeToGenders() && genders.length > 0 ? genders : null;
+  readonly hideByGender = computed(
+    () => this.onlyShowMeToGenders() && this.filters().gender.length > 0,
+  );
+  /** The `set_search_filters` arguments for the current filters and switch, as JSON. */
+  private readonly saveArgs = computed(() => {
+    const { lookingFor, gender, minAge, maxAge, showUnspecifiedAge } = this.filters();
+    const filters: SavedSearchFilters = {
+      looking_for: lookingFor,
+      gender,
+      min_age: minAge,
+      max_age: maxAge,
+      show_unspecified_age: showUnspecifiedAge,
+    };
+    return JSON.stringify({ p_filters: filters, p_hide_by_gender: this.hideByGender() });
   });
-  /**
-   * What was last sent to the database, so unrelated filter changes send nothing; undefined
-   * after a failure, so the next change sends again.
-   */
-  private savedVisibleToGenders: string[] | null | undefined = null;
-  /** Saves run one after another, so the last change is the one that's kept. */
-  private saving = Promise.resolve();
+  /** What the database has, as `saveArgs`, so changes that end up the same send nothing. */
+  private saved: string | null = null;
+  /** One save at a time; changes made meanwhile go out together once it's done. */
+  private saving = false;
   readonly hiddenIds = signal<ReadonlySet<string>>(new Set());
   /** The member showing over the grid, if any. */
   readonly openId = signal<string | null>(null);
@@ -139,37 +148,52 @@ export class SearchStore {
 
   updateFilters(change: Partial<SearchFilters>) {
     this.filters.update((filters) => ({ ...filters, ...change }));
-    this.saveVisibleToGenders();
+    void this.save();
   }
 
   setOnlyShowMeToGenders(on: boolean) {
     this.onlyShowMeToGenders.set(on);
-    this.saveVisibleToGenders();
+    void this.save();
   }
 
-  /** Fire-and-forget: a failure shows a snackbar to retry, and search carries on regardless. */
-  private saveVisibleToGenders() {
-    const genders = this.visibleToGenders();
-    if (sameValues(genders, this.savedVisibleToGenders)) return;
-    this.savedVisibleToGenders = genders;
-    this.saving = this.saving
-      .then(async () => {
-        const { error } = await this.supabase.client.rpc('set_visible_to_genders', {
-          p_genders: genders,
-        });
-        if (error) throw error;
-      })
-      .catch((error: unknown) => {
-        console.warn('Could not save visible_to_genders', error);
-        this.savedVisibleToGenders = undefined;
-        this.snackBar
-          .open("Couldn't save who can see you", 'Retry', {
-            duration: 6000,
-            panelClass: 'kt-snackbar',
-          })
-          .onAction()
-          .subscribe(() => this.saveVisibleToGenders());
+  /** Starts from the filters and switch saved on the profile, if there are any. */
+  private load({ search_filters: saved, hide_by_gender }: MyProfile) {
+    if (saved) {
+      this.filters.set({
+        lookingFor: saved.looking_for,
+        gender: saved.gender,
+        minAge: saved.min_age,
+        maxAge: saved.max_age,
+        showUnspecifiedAge: saved.show_unspecified_age,
       });
+    }
+    this.onlyShowMeToGenders.set(hide_by_gender);
+    this.saved = this.saveArgs();
+  }
+
+  /**
+   * Saves the filters and switch on the profile. Fire-and-forget: a failure shows a snackbar to
+   * retry, and search carries on regardless.
+   */
+  private async save() {
+    const args = this.saveArgs();
+    if (this.saving || args === this.saved) return;
+    this.saving = true;
+    try {
+      const { error } = await this.supabase.client.rpc('set_search_filters', JSON.parse(args));
+      if (error) throw error;
+      this.saved = args;
+    } catch (error) {
+      console.warn('Could not save the search filters', error);
+      this.saving = false;
+      this.snackBar
+        .open("Couldn't save your filters", 'Retry', { duration: 6000, panelClass: 'kt-snackbar' })
+        .onAction()
+        .subscribe(() => void this.save());
+      return;
+    }
+    this.saving = false;
+    void this.save();
   }
 
   /** Takes someone off the grid for good, with a snackbar to undo it. */

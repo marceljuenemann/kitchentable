@@ -26,8 +26,25 @@ export interface NewProfile {
   vetting_answers: Record<string, string>;
 }
 
-/** A stored profile, as returned by `get_my_profile()` (which leaves out the vetting answers). */
+/** A stored profile, as other people see it (and the part of the user's own that they see too). */
 export interface Profile extends Omit<NewProfile, 'vetting_answers'> {
   id: string;
   status: ProfileStatus;
+}
+
+/** Search filters as saved with `set_search_filters` (see docs/database.md). */
+export interface SavedSearchFilters {
+  looking_for: string[];
+  gender: string[];
+  min_age: number;
+  max_age: number;
+  show_unspecified_age: boolean;
+}
+
+/** The user's own profile, as returned by `get_my_profile()` (which leaves out the vetting answers). */
+export interface MyProfile extends Profile {
+  /** Null until search first saves them. */
+  search_filters: SavedSearchFilters | null;
+  /** "Only show me to these genders" (only ever true with a Gender filter). */
+  hide_by_gender: boolean;
 }

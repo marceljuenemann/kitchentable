@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { MyProfile } from '../../../core/profile.model';
+import { ProfileService, ProfileState } from '../../../core/profile.service';
 import { SupabaseService } from '../../../core/supabase.service';
 import {
   matches,
@@ -88,76 +90,137 @@ describe('SearchStore', () => {
   let undo: Subject<void>;
   let open: jasmine.Spy;
   let rpc: jasmine.Spy;
+  let profileState: BehaviorSubject<ProfileState>;
+
+  const profile = (saved: Partial<MyProfile> = {}) =>
+    ({ search_filters: null, hide_by_gender: false, ...saved }) as MyProfile;
 
   beforeEach(() => {
     undo = new Subject();
     open = jasmine.createSpy('open').and.returnValue({ onAction: () => undo });
     rpc = jasmine.createSpy('rpc').and.resolveTo({ error: null });
+    profileState = new BehaviorSubject<ProfileState>({ kind: 'loaded', profile: profile() });
     TestBed.configureTestingModule({
       providers: [
         SearchStore,
         { provide: MatSnackBar, useValue: { open } },
         { provide: SupabaseService, useValue: { client: { rpc } } },
+        { provide: ProfileService, useValue: { state$: profileState } },
       ],
     });
-    store = TestBed.inject(SearchStore);
   });
 
-  /** Lets the queued saves run. */
+  const create = () => (store = TestBed.inject(SearchStore));
+  /** Lets the pending saves run. */
   const settle = () => new Promise((resolve) => setTimeout(resolve));
-  const saved = () => rpc.calls.allArgs().map(([, args]) => args.p_genders);
+  const saved = () => rpc.calls.allArgs().map(([, args]) => args);
 
-  describe('visible to genders', () => {
-    it('saves the Gender filter while the switch is on, and null once it is off', async () => {
-      store.updateFilters({ gender: ['Woman'] });
-      store.setOnlyShowMeToGenders(true);
-      store.updateFilters({ gender: ['Woman', NOT_SPECIFIED] });
-      store.setOnlyShowMeToGenders(false);
-      await settle();
+  describe('saved filters', () => {
+    it('starts from the filters and switch saved on the profile', () => {
+      profileState.next({
+        kind: 'loaded',
+        profile: profile({
+          search_filters: {
+            looking_for: ['friends'],
+            gender: ['Woman'],
+            min_age: 25,
+            max_age: 40,
+            show_unspecified_age: false,
+          },
+          hide_by_gender: true,
+        }),
+      });
+      create();
 
-      expect(rpc).toHaveBeenCalledWith('set_visible_to_genders', jasmine.any(Object));
-      expect(saved()).toEqual([['Woman'], ['Woman', NOT_SPECIFIED], null]);
+      expect(store.filters()).toEqual({
+        lookingFor: ['friends'],
+        gender: ['Woman'],
+        minAge: 25,
+        maxAge: 40,
+        showUnspecifiedAge: false,
+      });
+      expect(store.hideByGender()).toBeTrue();
     });
 
-    it('is off, and saves nothing, while no gender is picked', async () => {
-      store.setOnlyShowMeToGenders(true);
+    it('starts without filters when none are saved, and saves nothing for loading', async () => {
+      create();
       await settle();
 
-      expect(store.visibleToGenders()).toBeNull();
+      expect(store.filters()).toEqual(NO_FILTERS);
+      expect(store.hideByGender()).toBeFalse();
       expect(rpc).not.toHaveBeenCalled();
     });
 
-    it('saves nothing for changes that leave it as it was', async () => {
-      store.updateFilters({ gender: ['Woman', 'Man'] });
+    it('saves the filters and the switch on every change', async () => {
+      create();
+      store.updateFilters({ gender: ['Woman', NOT_SPECIFIED] });
+      await settle();
       store.setOnlyShowMeToGenders(true);
-      store.updateFilters({ minAge: 30 });
-      store.updateFilters({ gender: ['Man', 'Woman'] });
       await settle();
 
-      expect(saved()).toEqual([['Woman', 'Man']]);
+      expect(rpc).toHaveBeenCalledWith('set_search_filters', jasmine.any(Object));
+      expect(saved()).toEqual([
+        {
+          p_filters: {
+            looking_for: [],
+            gender: ['Woman', NOT_SPECIFIED],
+            min_age: 18,
+            max_age: 70,
+            show_unspecified_age: true,
+          },
+          p_hide_by_gender: false,
+        },
+        jasmine.objectContaining({ p_hide_by_gender: true }),
+      ]);
     });
 
-    it('offers to retry after a failure, and sends the current value again', async () => {
-      rpc.and.resolveTo({ error: { message: 'offline' } });
-      store.updateFilters({ gender: ['Woman'] });
-      store.setOnlyShowMeToGenders(true);
+    it('sends one save at a time, then only the latest of the changes made meanwhile', async () => {
+      let finish!: () => void;
+      rpc.and.returnValue(new Promise((resolve) => (finish = () => resolve({ error: null }))));
+      create();
+      store.updateFilters({ minAge: 20 });
+      store.updateFilters({ minAge: 21 });
+      store.updateFilters({ minAge: 22 });
+
+      expect(rpc).toHaveBeenCalledTimes(1);
+
+      rpc.and.resolveTo({ error: null });
+      finish();
       await settle();
 
-      expect(open).toHaveBeenCalledWith(
-        "Couldn't save who can see you",
-        'Retry',
-        jasmine.any(Object),
-      );
+      expect(saved().map((args) => args.p_filters.min_age)).toEqual([20, 22]);
+    });
+
+    it('saves nothing for changes that end up as they were', async () => {
+      create();
+      store.setOnlyShowMeToGenders(true); // no gender picked, so still off
+      store.updateFilters({ minAge: 30 });
+      store.updateFilters({ minAge: 31 }); // while the first save is out…
+      store.updateFilters({ minAge: 30 }); // …and back, so nothing more to send
+      await settle();
+
+      expect(store.hideByGender()).toBeFalse();
+      expect(saved().map((args) => args.p_filters.min_age)).toEqual([30]);
+    });
+
+    it('offers to retry after a failure, and sends the current filters again', async () => {
+      rpc.and.resolveTo({ error: { message: 'offline' } });
+      create();
+      store.updateFilters({ minAge: 30 });
+      await settle();
+
+      expect(open).toHaveBeenCalledWith("Couldn't save your filters", 'Retry', jasmine.any(Object));
 
       rpc.and.resolveTo({ error: null });
       undo.next();
       await settle();
 
-      expect(saved()).toEqual([['Woman'], ['Woman']]);
+      expect(saved().map((args) => args.p_filters.min_age)).toEqual([30, 30]);
     });
   });
 
   it('hides someone until the hiding is undone', () => {
+    create();
     const someone = store.results()[0];
     const count = store.results().length;
 
@@ -170,6 +233,7 @@ describe('SearchStore', () => {
   });
 
   it('shows the newest members first', () => {
+    create();
     const joined = store.results().map((member) => member.age_verified_at);
 
     expect(joined).toEqual([...joined].sort().reverse());

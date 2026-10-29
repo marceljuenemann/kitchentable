@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject, filter, firstValueFrom } from 'rxjs';
 import { AuthService } from './auth/auth.service';
-import { NewProfile, Profile } from './profile.model';
+import { MyProfile, NewProfile } from './profile.model';
 import { ProfileService, ProfileState, TERMS_VERSION } from './profile.service';
 import { SupabaseService } from './supabase.service';
 
-const PROFILE: Profile = {
+const PROFILE: MyProfile = {
   id: 'user-1',
   status: 'vetting',
   name: 'Sam',
@@ -19,6 +19,8 @@ const PROFILE: Profile = {
   birth_month: null,
   looking_for: ['polyamory'],
   photos: ['photo-1'],
+  search_filters: null,
+  hide_by_gender: false,
 };
 
 const NEW_PROFILE: NewProfile = {
