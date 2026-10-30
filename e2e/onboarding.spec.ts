@@ -57,9 +57,15 @@ test('age is worked out from the birth month and year in the age sheet', async (
   await expect(page.getByRole('listbox')).toBeHidden();
   await expect(page.getByText('Age shown on profile: 18')).toBeVisible();
 
-  // Born in June 2007: already had it.
+  // Born in June 2007: the birthday counts only once the birth month is over.
   await page.getByRole('combobox', { name: 'Month' }).click();
   await page.getByRole('option', { name: 'June' }).click();
+  await expect(page.getByRole('listbox')).toBeHidden();
+  await expect(page.getByText('Age shown on profile: 18')).toBeVisible();
+
+  // Born in May 2007: already had it.
+  await page.getByRole('combobox', { name: 'Month' }).click();
+  await page.getByRole('option', { name: 'May' }).click();
   await expect(page.getByRole('listbox')).toBeHidden();
   await expect(page.getByText('Age shown on profile: 19')).toBeVisible();
 
@@ -68,7 +74,7 @@ test('age is worked out from the birth month and year in the age sheet', async (
 
   // Reopening shows what was picked.
   await ageRow.click();
-  await expect(page.getByRole('combobox', { name: 'Month' })).toContainText('June');
+  await expect(page.getByRole('combobox', { name: 'Month' })).toContainText('May');
   await expect(page.getByRole('combobox', { name: 'Year' })).toContainText('2007');
 });
 

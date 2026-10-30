@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { MyProfile } from '../../../core/profile.model';
@@ -112,7 +112,7 @@ describe('SearchStore', () => {
 
   const create = () => (store = TestBed.inject(SearchStore));
   /** Lets the pending saves run. */
-  const settle = () => new Promise((resolve) => setTimeout(resolve));
+  const settle = () => tick(300);
   const saved = () => rpc.calls.allArgs().map(([, args]) => args);
 
   describe('saved filters', () => {
@@ -142,21 +142,21 @@ describe('SearchStore', () => {
       expect(store.hideByGender()).toBeTrue();
     });
 
-    it('starts without filters when none are saved, and saves nothing for loading', async () => {
+    it('starts without filters when none are saved, and saves nothing for loading', fakeAsync(() => {
       create();
-      await settle();
+      settle();
 
       expect(store.filters()).toEqual(NO_FILTERS);
       expect(store.hideByGender()).toBeFalse();
       expect(rpc).not.toHaveBeenCalled();
-    });
+    }));
 
-    it('saves the filters and the switch on every change', async () => {
+    it('saves the filters and the switch after every change', fakeAsync(() => {
       create();
       store.updateFilters({ gender: ['Woman', NOT_SPECIFIED] });
-      await settle();
+      settle();
       store.setOnlyShowMeToGenders(true);
-      await settle();
+      settle();
 
       expect(rpc).toHaveBeenCalledWith('set_search_filters', jasmine.any(Object));
       expect(saved()).toEqual([
@@ -172,51 +172,88 @@ describe('SearchStore', () => {
         },
         jasmine.objectContaining({ p_hide_by_gender: true }),
       ]);
-    });
+    }));
 
-    it('sends one save at a time, then only the latest of the changes made meanwhile', async () => {
-      let finish!: () => void;
-      rpc.and.returnValue(new Promise((resolve) => (finish = () => resolve({ error: null }))));
+    it('saves once, shortly after the last change', fakeAsync(() => {
       create();
       store.updateFilters({ minAge: 20 });
+      tick(200);
       store.updateFilters({ minAge: 21 });
+      tick(200);
+      expect(rpc).not.toHaveBeenCalled();
+
+      tick(100);
+
+      expect(saved().map((args) => args.p_filters.min_age)).toEqual([21]);
+    }));
+
+    /** Holds the next save open until the returned function finishes it. */
+    const holdSave = () => {
+      let finish!: (result: { error: unknown }) => void;
+      rpc.and.returnValue(new Promise((resolve) => (finish = resolve)));
+      return (result: { error: unknown }) => {
+        rpc.and.resolveTo({ error: null });
+        finish(result);
+      };
+    };
+
+    it('sends one save at a time, then only the latest of the changes made meanwhile', fakeAsync(() => {
+      const finish = holdSave();
+      create();
+      store.updateFilters({ minAge: 20 });
+      settle();
+      store.updateFilters({ minAge: 21 });
+      settle();
       store.updateFilters({ minAge: 22 });
+      settle();
 
       expect(rpc).toHaveBeenCalledTimes(1);
 
-      rpc.and.resolveTo({ error: null });
-      finish();
-      await settle();
+      finish({ error: null });
+      settle();
 
       expect(saved().map((args) => args.p_filters.min_age)).toEqual([20, 22]);
-    });
+    }));
 
-    it('saves nothing for changes that end up as they were', async () => {
+    it('still sends a change made during a save that fails', fakeAsync(() => {
+      const finish = holdSave();
+      create();
+      store.updateFilters({ minAge: 20 });
+      settle();
+      store.updateFilters({ minAge: 21 });
+      settle();
+
+      finish({ error: { message: 'offline' } });
+      settle();
+
+      expect(saved().map((args) => args.p_filters.min_age)).toEqual([20, 21]);
+    }));
+
+    it('saves nothing for changes that end up as they were', fakeAsync(() => {
       create();
       store.setOnlyShowMeToGenders(true); // no gender picked, so still off
       store.updateFilters({ minAge: 30 });
-      store.updateFilters({ minAge: 31 }); // while the first save is out…
-      store.updateFilters({ minAge: 30 }); // …and back, so nothing more to send
-      await settle();
+      store.updateFilters({ minAge: NO_FILTERS.minAge });
+      settle();
 
       expect(store.hideByGender()).toBeFalse();
-      expect(saved().map((args) => args.p_filters.min_age)).toEqual([30]);
-    });
+      expect(rpc).not.toHaveBeenCalled();
+    }));
 
-    it('offers to retry after a failure, and sends the current filters again', async () => {
+    it('offers to retry after a failure, and sends the current filters again', fakeAsync(() => {
       rpc.and.resolveTo({ error: { message: 'offline' } });
       create();
       store.updateFilters({ minAge: 30 });
-      await settle();
+      settle();
 
       expect(open).toHaveBeenCalledWith("Couldn't save your filters", 'Retry', jasmine.any(Object));
 
       rpc.and.resolveTo({ error: null });
       undo.next();
-      await settle();
+      settle();
 
       expect(saved().map((args) => args.p_filters.min_age)).toEqual([30, 30]);
-    });
+    }));
   });
 
   it('hides someone until the hiding is undone', () => {

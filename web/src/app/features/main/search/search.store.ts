@@ -1,7 +1,8 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ageFrom } from '../../../core/age';
-import { first } from 'rxjs';
+import { Subject, concatMap, debounceTime, first } from 'rxjs';
 import { MyProfile, Profile, SavedSearchFilters } from '../../../core/profile.model';
 import { ProfileService } from '../../../core/profile.service';
 import { SupabaseService } from '../../../core/supabase.service';
@@ -13,6 +14,9 @@ export interface Member extends Profile {
   /** When they became a member (passed the age check). Search shows the newest first. */
   age_verified_at: string;
 }
+
+/** How long the filters must stay put before they're saved, so a slider drag is one save. */
+const SAVE_DELAY_MS = 300;
 
 /** The age slider's ends. The top one means "and older". */
 export const AGE_MIN = 18;
@@ -97,6 +101,16 @@ export class SearchStore {
     inject(ProfileService)
       .state$.pipe(first((state) => state.kind === 'loaded'))
       .subscribe((state) => state.kind === 'loaded' && this.load(state.profile));
+
+    // concatMap, not switchMap: an abandoned request still reaches the database, where it could
+    // land after a newer one. Waiting saves pick up the latest filters when their turn comes.
+    this.saveRequests
+      .pipe(
+        debounceTime(SAVE_DELAY_MS),
+        concatMap(() => this.save()),
+        takeUntilDestroyed(),
+      )
+      .subscribe();
   }
 
   readonly members = signal<Member[]>(MOCK_MEMBERS);
@@ -128,8 +142,7 @@ export class SearchStore {
   });
   /** What the database has, as `saveArgs`, so changes that end up the same send nothing. */
   private saved: string | null = null;
-  /** One save at a time; changes made meanwhile go out together once it's done. */
-  private saving = false;
+  private readonly saveRequests = new Subject<void>();
   readonly hiddenIds = signal<ReadonlySet<string>>(new Set());
   /** The member showing over the grid, if any. */
   readonly openId = signal<string | null>(null);
@@ -148,12 +161,12 @@ export class SearchStore {
 
   updateFilters(change: Partial<SearchFilters>) {
     this.filters.update((filters) => ({ ...filters, ...change }));
-    void this.save();
+    this.saveRequests.next();
   }
 
   setOnlyShowMeToGenders(on: boolean) {
     this.onlyShowMeToGenders.set(on);
-    void this.save();
+    this.saveRequests.next();
   }
 
   /** Starts from the filters and switch saved on the profile, if there are any. */
@@ -177,23 +190,18 @@ export class SearchStore {
    */
   private async save() {
     const args = this.saveArgs();
-    if (this.saving || args === this.saved) return;
-    this.saving = true;
+    if (args === this.saved) return;
     try {
       const { error } = await this.supabase.client.rpc('set_search_filters', JSON.parse(args));
       if (error) throw error;
       this.saved = args;
     } catch (error) {
       console.warn('Could not save the search filters', error);
-      this.saving = false;
       this.snackBar
         .open("Couldn't save your filters", 'Retry', { duration: 6000, panelClass: 'kt-snackbar' })
         .onAction()
-        .subscribe(() => void this.save());
-      return;
+        .subscribe(() => this.saveRequests.next());
     }
-    this.saving = false;
-    void this.save();
   }
 
   /** Takes someone off the grid for good, with a snackbar to undo it. */
