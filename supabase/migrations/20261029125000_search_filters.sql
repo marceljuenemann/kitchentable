@@ -60,5 +60,45 @@ begin
 end;
 $$;
 
-revoke execute on function public.set_search_filters(jsonb, boolean) from public, anon, authenticated;
+-- A profile's `gender` as Gender filter values: the standard options as they are (copied from
+-- GENDER_OPTIONS in onboarding-options.ts, like in set_search_filters(): keep them in step),
+-- `self-described` for a value of their own, and `not-specified` for none.
+create or replace function public.gender_filter_values(p_gender text[])
+returns text[]
+language sql
+immutable
+set search_path = public
+as $$
+  select case when cardinality(p_gender) = 0 then array['not-specified'] else array(
+    select distinct case when g = any (array[
+      'Non-binary', 'Man', 'Woman', 'Genderqueer', 'Genderfluid', 'Agender', 'Gender questioning'
+    ]) then g else 'self-described' end
+    from unnest(p_gender) g
+  ) end;
+$$;
+
+-- Whether "Only show me to these genders" hides this profile from someone of the given gender.
+-- Used by search_profiles() and send_intro(), so a member can neither find nor reach someone who
+-- hides from them.
+create or replace function public.is_hidden_by_gender(
+  p_profile public.profiles,
+  p_viewer_gender text[]
+)
+returns boolean
+language sql
+immutable
+set search_path = public
+as $$
+  select p_profile.hide_by_gender
+    and not coalesce(
+      p_profile.search_filters -> 'gender' ?| public.gender_filter_values(p_viewer_gender),
+      false
+    );
+$$;
+
+revoke execute on function
+  public.set_search_filters(jsonb, boolean),
+  public.gender_filter_values(text[]),
+  public.is_hidden_by_gender(public.profiles, text[])
+from public, anon, authenticated;
 grant execute on function public.set_search_filters(jsonb, boolean) to authenticated;

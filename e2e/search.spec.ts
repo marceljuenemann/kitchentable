@@ -255,6 +255,41 @@ test('a profile opens over the grid with its photos, and can be hidden and broug
   await expect(page.getByText('1 person found')).toBeVisible();
 });
 
+test('members can sign the photos they are shown, but not list anyone else’s', async ({ page }) => {
+  const photo = randomUUID();
+  const {
+    ids: [id],
+  } = await searchAmong(page, [{ ...MAYA, photos: [photo] }]);
+  await uploadPhoto(`${id}/${photo}/thumb.jpg`, await jpeg(page, '#c83897'));
+
+  // Uploaded after the page first loaded search.
+  const signing = page.waitForRequest('**/storage/v1/object/sign/photos');
+  await page.reload();
+  await expect.poll(() => loaded(tile(page, 'Maya').locator('img'))).toBe(true);
+
+  // Calls the Storage API as the member, the way someone would from the browser console.
+  const request = await signing;
+  const { apikey, authorization } = await request.allHeaders();
+  const storage = async (path: string, body: unknown) => {
+    const response = await fetch(`${new URL(request.url()).origin}/storage/v1/object/${path}`, {
+      method: 'POST',
+      headers: { apikey, authorization, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    expect(response.status).toBe(200);
+    return response.json();
+  };
+
+  expect(await storage('list/photos', { prefix: '', limit: 5, offset: 0 })).toEqual([]);
+  expect(await storage('list/photos', { prefix: id, limit: 5, offset: 0 })).toEqual([]);
+  const { folders, objects } = await storage('list-v2/photos', {
+    prefix: '',
+    limit: 5,
+    with_delimiter: true,
+  });
+  expect([...folders, ...objects]).toEqual([]);
+});
+
 test('a profile opens by its URL, unless the member may not see it', async ({ page }) => {
   const {
     ids: [id],

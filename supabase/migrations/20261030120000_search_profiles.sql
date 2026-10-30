@@ -2,23 +2,6 @@
 -- whom; the member's own filters are applied in the browser. See `search_profiles` in
 -- docs/database.md.
 
--- A profile's `gender` as Gender filter values: the standard options as they are (copied from
--- GENDER_OPTIONS in onboarding-options.ts, like in set_search_filters(): keep them in step),
--- `self-described` for a value of their own, and `not-specified` for none.
-create or replace function public.gender_filter_values(p_gender text[])
-returns text[]
-language sql
-immutable
-set search_path = public
-as $$
-  select case when cardinality(p_gender) = 0 then array['not-specified'] else array(
-    select distinct case when g = any (array[
-      'Non-binary', 'Man', 'Woman', 'Genderqueer', 'Genderfluid', 'Agender', 'Gender questioning'
-    ]) then g else 'self-described' end
-    from unnest(p_gender) g
-  ) end;
-$$;
-
 -- The `active` members the caller (a member or an admin) may see in search, newest members
 -- first, as their profile shows them: the age rather than the birth date, and no status,
 -- timestamps, search settings or vetting answers (like get_connected_profiles(): keep the age
@@ -77,14 +60,12 @@ begin
           where s.user_id = uid and s.other_user_id = p.id
             and (s.dismissed_at is not null or s.declined_at is not null)
         )
-        and (not p.hide_by_gender
-          or p.search_filters -> 'gender' ?| public.gender_filter_values(me.gender))
+        and not public.is_hidden_by_gender(p, me.gender)
     ),
     '[]'
   );
 end;
 $$;
 
-revoke execute on function public.gender_filter_values(text[]), public.search_profiles()
-from public, anon, authenticated;
+revoke execute on function public.search_profiles() from public, anon, authenticated;
 grant execute on function public.search_profiles() to authenticated;

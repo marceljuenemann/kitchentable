@@ -182,7 +182,9 @@ where status in ('active', 'disabled', 'suspended');
 
 -- Sends an intro: the pending connection, its first message, and both people's
 -- connection_secrets rows. If the caller has already sent this person an intro, it does nothing,
--- so a retry after a dropped connection is harmless.
+-- so a retry after a dropped connection is harmless. Someone who hides from the caller's gender
+-- gets the same error as someone who isn't live, before looking_for is checked, so the caller
+-- can't tell they're hiding or what they're looking for.
 create or replace function public.send_intro(
   p_recipient_id uuid,
   p_looking_for text[],
@@ -196,10 +198,11 @@ set search_path = public
 as $$
 declare
   uid uuid := public.require_auth_uid();
+  my_gender text[];
   recipient public.profiles;
 begin
   -- Locking the initiator's row makes their intros one at a time, so the daily limit holds.
-  perform from public.profiles where id = uid and status = 'active' for update;
+  select gender into my_gender from public.profiles where id = uid and status = 'active' for update;
   if not found then
     raise exception 'Your profile needs to be live to send intros.';
   end if;
@@ -211,7 +214,10 @@ begin
   end if;
 
   select * into recipient from public.profiles where id = p_recipient_id;
-  if recipient.status is distinct from 'active' or uid = p_recipient_id then
+  if recipient.status is distinct from 'active'
+    or uid = p_recipient_id
+    or public.is_hidden_by_gender(recipient, my_gender)
+  then
     raise exception 'Intros can only go to members whose profiles are live.';
   end if;
 

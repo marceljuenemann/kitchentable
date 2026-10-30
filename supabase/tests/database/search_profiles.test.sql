@@ -1,5 +1,5 @@
 begin;
-select plan(30);
+select plan(31);
 
 -- Moves any profiles already in the database out of the way (Playwright leaves active members in
 -- London behind), so the lists below are exact.
@@ -89,6 +89,8 @@ insert into public.connections (initiator_id, recipient_id, status) values
 
 select ok(not has_function_privilege('authenticated', 'public.gender_filter_values(text[])', 'execute'),
   'the helper is not for clients');
+select ok(not has_function_privilege('authenticated', 'public.is_hidden_by_gender(public.profiles, text[])', 'execute'),
+  'nor is the one for hiding by gender');
 
 set local role anon;
 select throws_ok($$ select public.search_profiles() $$, '42501', null,

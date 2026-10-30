@@ -1,8 +1,9 @@
 begin;
-select plan(83);
+select plan(86);
 
--- Ada is an admin. Amy, Ben, Cat, Dan and Hal are live members, Eve has hidden her profile, Fay
--- has deleted hers, and Gil is approved and waiting for his age check.
+-- Ada is an admin. Amy, Ben, Cat, Dan, Hal, Ivy and Una are live members, Eve has hidden her
+-- profile, Fay has deleted hers, and Gil is approved and waiting for his age check. Ivy only shows
+-- herself to women, which Una is and Amy isn't.
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, encrypted_password, email_confirmed_at, created_at, updated_at)
 select id::uuid, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
   email, '{}'::jsonb, '', now(), now(), now()
@@ -15,7 +16,9 @@ from (values
   ('d0000000-0000-0000-0000-000000000006', 'eve@example.com'),
   ('d0000000-0000-0000-0000-000000000007', 'fay@example.com'),
   ('d0000000-0000-0000-0000-000000000008', 'gil@example.com'),
-  ('d0000000-0000-0000-0000-000000000009', 'hal@example.com')
+  ('d0000000-0000-0000-0000-000000000009', 'hal@example.com'),
+  ('d0000000-0000-0000-0000-000000000010', 'ivy@example.com'),
+  ('d0000000-0000-0000-0000-000000000011', 'una@example.com')
 ) as u (id, email);
 
 insert into public.terms_acceptances (user_id, version)
@@ -33,7 +36,14 @@ insert into public.profiles (id, status, name, pronouns, bio, location, looking_
   ('d0000000-0000-0000-0000-000000000006', 'disabled', 'Eve', 'she/her', 'About Eve', 'London', '{friends}', null, null),
   ('d0000000-0000-0000-0000-000000000007', 'deleted', 'Fay', 'she/her', 'About Fay', 'London', '{friends}', null, null),
   ('d0000000-0000-0000-0000-000000000008', 'approved', 'Gil', 'he/him', 'About Gil', 'London', '{friends}', null, null),
-  ('d0000000-0000-0000-0000-000000000009', 'active', 'Hal', 'he/him', 'About Hal', 'London', '{friends}', null, null);
+  ('d0000000-0000-0000-0000-000000000009', 'active', 'Hal', 'he/him', 'About Hal', 'London', '{friends}', null, null),
+  ('d0000000-0000-0000-0000-000000000010', 'active', 'Ivy', 'she/her', 'About Ivy', 'London', '{friends}', null, null),
+  ('d0000000-0000-0000-0000-000000000011', 'active', 'Una', 'she/her', 'About Una', 'London', '{friends}', null, null);
+
+update public.profiles
+set hide_by_gender = true, search_filters = '{"gender": ["Woman"]}'
+where id = 'd0000000-0000-0000-0000-000000000010';
+update public.profiles set gender = '{Woman}' where id = 'd0000000-0000-0000-0000-000000000011';
 
 -- Amy and Ben went live before Ada became an admin, so they're connected by hand, as the docs say.
 do $$
@@ -142,6 +152,20 @@ select throws_ok(
   $$ select public.send_intro('d0000000-0000-0000-0000-000000000002', '{friends}', '{"type": "text", "text": "Hi"}') $$,
   'P0001', 'Intros can only go to members whose profiles are live.',
   'members cannot send an intro to themselves');
+select throws_ok(
+  $$ select public.send_intro('d0000000-0000-0000-0000-000000000010', '{friends}', '{"type": "text", "text": "Hi"}') $$,
+  'P0001', 'Intros can only go to members whose profiles are live.',
+  'members cannot send an intro to someone who hides from their gender');
+select throws_ok(
+  $$ select public.send_intro('d0000000-0000-0000-0000-000000000010', '{casual}', '{}') $$,
+  'P0001', 'Intros can only go to members whose profiles are live.',
+  'and cannot probe what that person is looking for');
+
+set local request.jwt.claim.sub = 'd0000000-0000-0000-0000-000000000011';
+select lives_ok(
+  $$ select public.send_intro('d0000000-0000-0000-0000-000000000010', '{friends}', '{"type": "text", "text": "Hi Ivy"}') $$,
+  'but someone of a gender they show themselves to can');
+set local request.jwt.claim.sub = 'd0000000-0000-0000-0000-000000000002';
 
 select lives_ok(
   $$ select public.send_intro('d0000000-0000-0000-0000-000000000003', '{casual,Long walks}',

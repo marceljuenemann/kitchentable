@@ -1,5 +1,5 @@
 begin;
-select plan(12);
+select plan(15);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, encrypted_password, email_confirmed_at, created_at, updated_at)
 values ('88888888-8888-8888-8888-888888888888', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
@@ -77,6 +77,9 @@ from generate_series(1, 5) n,
 set local role authenticated;
 set local request.jwt.claim.sub = 'e0000000-0000-0000-0000-000000000001';
 
+-- The Storage API sets this for each request. e2e/search.spec.ts tests the real thing.
+set local storage.operation = 'storage.object.sign_many';
+
 select is(
   (select count(*)::int from storage.objects where name like 'e0000000-0000-0000-0000-000000000002/%'),
   2,
@@ -93,6 +96,26 @@ select is(
   'nobody sees the photos of hidden, suspended or vetting profiles'
 );
 
+set local storage.operation = 'storage.object.list';
+select is(
+  (select count(*)::int from storage.objects where name like 'e0000000-0000-0000-0000-000000000002/%'),
+  0,
+  'members cannot list each other''s photos'
+);
+select is(
+  (select count(*)::int from storage.objects where name like 'e0000000-0000-0000-0000-000000000001/%'),
+  4,
+  'but can list their own'
+);
+
+set local storage.operation = 'storage.object.get_authenticated';
+select is(
+  (select count(*)::int from storage.objects where name like 'e0000000-0000-0000-0000-000000000002/%'),
+  0,
+  'and nothing but signing works, so a new way of listing does not open them up'
+);
+
+set local storage.operation = 'storage.object.sign_many';
 set local request.jwt.claim.sub = 'e0000000-0000-0000-0000-000000000003';
 select is(
   (select count(*)::int from storage.objects where name like 'e0000000-0000-0000-0000-000000000002/%'),
