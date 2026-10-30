@@ -1,22 +1,18 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ageFrom } from '../../../core/age';
 import { Subject, concatMap, debounceTime, first } from 'rxjs';
-import { MyProfile, Profile, SavedSearchFilters } from '../../../core/profile.model';
+import { PhotoStorageService } from '../../../core/photo-storage.service';
+import { Member, MyProfile, SavedSearchFilters } from '../../../core/profile.model';
 import { ProfileService } from '../../../core/profile.service';
 import { SupabaseService } from '../../../core/supabase.service';
 import { GENDER_OPTIONS, LOOKING_FOR_OPTIONS } from '../../onboarding/onboarding-options';
-import { MOCK_MEMBERS, mockPhotoUrls } from './mock-members';
-
-/** A member as search shows them. */
-export interface Member extends Profile {
-  /** When they became a member (passed the age check). Search shows the newest first. */
-  age_verified_at: string;
-}
 
 /** How long the filters must stay put before they're saved, so a slider drag is one save. */
 const SAVE_DELAY_MS = 300;
+
+/** Well within the hour that signed photo URLs last, so tiles shown again still load. */
+const RELOAD_AFTER_MS = 30 * 60 * 1000;
 
 /** The age slider's ends. The top one means "and older". */
 export const AGE_MIN = 18;
@@ -68,7 +64,7 @@ export function ageRanged(filters: SearchFilters): boolean {
 }
 
 /** Whether a member matches the filters. */
-export function matches(member: Member, filters: SearchFilters, now = new Date()): boolean {
+export function matches(member: Member, filters: SearchFilters): boolean {
   const overlaps = (values: string[], standard: string[], picked: string[]) =>
     picked.length === 0 ||
     values.some((value) => picked.includes(standard.includes(value) ? value : SELF_DESCRIBED));
@@ -76,7 +72,7 @@ export function matches(member: Member, filters: SearchFilters, now = new Date()
   if (!unspecified && !overlaps(member.gender, GENDER_OPTIONS, filters.gender)) return false;
   const lookingForIds = LOOKING_FOR_OPTIONS.map((option) => option.id);
   if (!overlaps(member.looking_for, lookingForIds, filters.lookingFor)) return false;
-  const age = ageFrom(`${member.birth_month ?? ''}`, `${member.birth_year ?? ''}`, now);
+  const { age } = member;
   if (age === null) return filters.showUnspecifiedAge;
   if (age < filters.minAge) return false;
   if (filters.maxAge < AGE_MAX && age > filters.maxAge) return false;
@@ -84,23 +80,21 @@ export function matches(member: Member, filters: SearchFilters, now = new Date()
 }
 
 /**
- * The members search shows, shared by the grid and the profile route, with the viewer's
- * filters and hidden people, newest members first.
- *
- * MOCK: the members are made up (mock-members.ts), and filtering, sorting and hiding happen
- * here, in memory. The real one asks the database, which filters and sorts in the query and
- * keeps hidden people per member (see prototype/browse/README.md).
+ * The members search shows, shared by the grid and the profile route. `search_profiles()` returns
+ * everyone the viewer may see, newest members first, in one request; their filters apply here, so
+ * changing them needs no further request (see docs/database.md).
  */
 @Injectable()
 export class SearchStore {
   private readonly snackBar = inject(MatSnackBar);
   private readonly supabase = inject(SupabaseService);
+  private readonly photos = inject(PhotoStorageService);
 
   constructor() {
     // The shell shows search only once the profile has loaded, so this runs straight away.
     inject(ProfileService)
       .state$.pipe(first((state) => state.kind === 'loaded'))
-      .subscribe((state) => state.kind === 'loaded' && this.load(state.profile));
+      .subscribe((state) => state.kind === 'loaded' && this.applySaved(state.profile));
 
     // concatMap, not switchMap: an abandoned request still reaches the database, where it could
     // land after a newer one. Waiting saves pick up the latest filters when their turn comes.
@@ -111,13 +105,23 @@ export class SearchStore {
         takeUntilDestroyed(),
       )
       .subscribe();
+
+    // In order, so that an undo can't land before the hiding it undoes.
+    this.dismissals
+      .pipe(
+        concatMap((dismissal) => this.saveDismissal(dismissal)),
+        takeUntilDestroyed(),
+      )
+      .subscribe();
   }
 
-  readonly members = signal<Member[]>(MOCK_MEMBERS);
-  /** Photo URLs by member id, in display order. */
-  readonly photoUrls = signal(
-    new Map(MOCK_MEMBERS.map((member) => [member.id, mockPhotoUrls(member)])),
-  );
+  /** Null while loading. */
+  readonly members = signal<Member[] | null>(null);
+  readonly loadFailed = signal(false);
+  /** Main photo thumbnails by member id. */
+  readonly thumbs = signal(new Map<string, string | null>());
+  /** When the members were last asked for. */
+  private loadedAt = 0;
   readonly filters = signal<SearchFilters>(NO_FILTERS);
   /** The "Only show me to these genders" switch, as the viewer last set it. */
   private readonly onlyShowMeToGenders = signal(false);
@@ -143,6 +147,8 @@ export class SearchStore {
   /** What the database has, as `saveArgs`, so changes that end up the same send nothing. */
   private saved: string | null = null;
   private readonly saveRequests = new Subject<void>();
+  private readonly dismissals = new Subject<{ member: Member; dismissed: boolean }>();
+  /** Hidden since the members loaded; the database leaves them out from the next load on. */
   readonly hiddenIds = signal<ReadonlySet<string>>(new Set());
   /** The member showing over the grid, if any. */
   readonly openId = signal<string | null>(null);
@@ -150,13 +156,40 @@ export class SearchStore {
   readonly results = computed(() => {
     const filters = this.filters();
     const hidden = this.hiddenIds();
-    return this.members()
-      .filter((member) => !hidden.has(member.id) && matches(member, filters))
-      .sort((a, b) => b.age_verified_at.localeCompare(a.age_verified_at));
+    return (this.members() ?? []).filter(
+      (member) => !hidden.has(member.id) && matches(member, filters),
+    );
   });
 
   member(id: string | null): Member | null {
-    return this.members().find((member) => member.id === id) ?? null;
+    return this.members()?.find((member) => member.id === id) ?? null;
+  }
+
+  /** Loads the members when search opens, unless that was only a little while ago. */
+  loadIfStale() {
+    if (Date.now() - this.loadedAt > RELOAD_AFTER_MS) void this.load();
+  }
+
+  /** Loads the members and their thumbnails, which show together. Keeps the old ones if it fails. */
+  async load(): Promise<void> {
+    this.loadedAt = Date.now();
+    this.loadFailed.set(false);
+    try {
+      const { data, error } = await this.supabase.client.rpc('search_profiles');
+      if (error) throw error;
+      const members = data as Member[];
+      const withPhoto = members.filter((member) => member.photos.length > 0);
+      const urls = await this.photos.signedUrls(
+        withPhoto.map(({ id, photos }) => ({ ownerId: id, photoId: photos[0] })),
+        'thumb',
+      );
+      this.thumbs.set(new Map(withPhoto.map(({ id }, index) => [id, urls[index]])));
+      this.members.set(members);
+    } catch (error) {
+      console.warn('Could not load search', error);
+      this.loadedAt = 0;
+      this.loadFailed.set(true);
+    }
   }
 
   updateFilters(change: Partial<SearchFilters>) {
@@ -170,7 +203,7 @@ export class SearchStore {
   }
 
   /** Starts from the filters and switch saved on the profile, if there are any. */
-  private load({ search_filters: saved, hide_by_gender }: MyProfile) {
+  private applySaved({ search_filters: saved, hide_by_gender }: MyProfile) {
     if (saved) {
       this.filters.set({
         lookingFor: saved.looking_for,
@@ -206,14 +239,37 @@ export class SearchStore {
 
   /** Takes someone off the grid for good, with a snackbar to undo it. */
   hide(member: Member) {
-    this.setHidden(member.id, true);
+    this.setDismissed(member, true);
     this.snackBar
       .open(`${member.name} won't show up again`, 'Undo', {
         duration: 4000,
         panelClass: 'kt-snackbar',
       })
       .onAction()
-      .subscribe(() => this.setHidden(member.id, false));
+      .subscribe(() => this.setDismissed(member, false));
+  }
+
+  /** Changes the grid straight away; a failure to save puts it back. */
+  private setDismissed(member: Member, dismissed: boolean) {
+    this.setHidden(member.id, dismissed);
+    this.dismissals.next({ member, dismissed });
+  }
+
+  private async saveDismissal({ member, dismissed }: { member: Member; dismissed: boolean }) {
+    try {
+      const { error } = await this.supabase.client.rpc('set_dismissed', {
+        p_user_id: member.id,
+        p_dismissed: dismissed,
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.warn('Could not save hiding a profile', error);
+      this.setHidden(member.id, !dismissed);
+      const message = dismissed
+        ? `Couldn't hide ${member.name}`
+        : `Couldn't bring back ${member.name}`;
+      this.snackBar.open(message, undefined, { duration: 4000, panelClass: 'kt-snackbar' });
+    }
   }
 
   private setHidden(id: string, hidden: boolean) {

@@ -46,28 +46,35 @@
   </header>
 
   <main>
-    <div class="results">
-      <p>{{ count() }}</p>
-      <p>Newest first</p>
-    </div>
+    @if (store.members() !== null) {
+      <div class="results">
+        <p>{{ count() }}</p>
+        <p>Newest first</p>
+      </div>
 
-    <app-profile-grid
-      [tiles]="tiles()"
-      [openId]="store.openId()"
-      [linkPrefix]="['profiles']"
-      [hideable]="true"
-      (hide)="hide($event)"
-    />
+      <app-profile-grid
+        [tiles]="tiles()"
+        [openId]="store.openId()"
+        [linkPrefix]="['profiles']"
+        [hideable]="true"
+        (hide)="hide($event)"
+      />
 
-    <!-- After the grid, however long: the list is short while Kitchen Table is small. -->
-    <div class="everyone">
-      <p class="everyone-title">That's everyone for now</p>
-      <p>
-        New members show up here as they join. Know someone who'd be a good fit? Help Kitchen Table
-        grow by inviting them with your link:
-      </p>
-      <app-invite-link />
-    </div>
+      <!-- After the grid, however long: the list is short while Kitchen Table is small. -->
+      <div class="everyone">
+        <p class="everyone-title">That's everyone for now</p>
+        <p>
+          New members show up here as they join. Know someone who'd be a good fit? Help Kitchen
+          Table grow by inviting them with your link:
+        </p>
+        <app-invite-link />
+      </div>
+    } @else if (store.loadFailed()) {
+      <p class="message">Something went wrong loading search.</p>
+      <button mat-flat-button type="button" (click)="store.load()">Try again</button>
+    } @else {
+      <mat-spinner diameter="32" />
+    }
   </main>
 </div>
 
