@@ -221,9 +221,12 @@ begin
     raise exception 'This person has already sent you an intro.';
   end if;
 
+  -- 3 intros a day, where days start at 3am UTC (the quietest hour, and simple).
   if (
     select count(*) from public.connections
-    where initiator_id = uid and created_at > now() - interval '1 day'
+    where initiator_id = uid
+      and created_at >= (date_trunc('day', now() at time zone 'UTC' - interval '3 hours')
+                         + interval '3 hours') at time zone 'UTC'
   ) >= 3 then
     raise exception 'You can send 3 intros a day.' using errcode = 'program_limit_exceeded';
   end if;

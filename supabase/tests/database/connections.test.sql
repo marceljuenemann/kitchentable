@@ -207,14 +207,17 @@ select throws_ok(
   '54000', 'You can send 3 intros a day.',
   'a fourth intro in a day is refused');
 
+-- Move one of them to just before today's 3am UTC: less than 24 hours ago, but yesterday.
 reset role;
-update public.connections set created_at = now() - interval '25 hours'
+update public.connections
+set created_at = (date_trunc('day', now() at time zone 'UTC' - interval '3 hours') + interval '3 hours')
+                 at time zone 'UTC' - interval '1 minute'
 where initiator_id = 'd0000000-0000-0000-0000-000000000002' and recipient_id = 'd0000000-0000-0000-0000-000000000009';
 set local role authenticated;
 
 select lives_ok(
   $$ select public.send_intro('d0000000-0000-0000-0000-000000000004', '{friends}', '{"type": "text", "text": "Hi Cat"}') $$,
-  'intros from more than a day ago do not count');
+  'intros from before 3am UTC today do not count');
 
 set local request.jwt.claim.sub = 'd0000000-0000-0000-0000-000000000006';
 select throws_ok(
