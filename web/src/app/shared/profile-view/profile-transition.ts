@@ -10,6 +10,9 @@ export function photoTransitionName(profileId: string): string {
   return `profile-photo-${profileId}`;
 }
 
+/** How long closing a profile animates (styles.scss), before its tile may go away. */
+export const CLOSE_ANIMATION_MS = 340;
+
 /** Route data marking a route that shows a profile over a grid. */
 export const PROFILE_ROUTE_DATA = { profileOverlay: true };
 

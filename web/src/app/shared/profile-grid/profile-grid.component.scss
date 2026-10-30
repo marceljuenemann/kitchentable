@@ -11,6 +11,34 @@
   list-style: none;
 }
 
+li {
+  position: relative;
+  border-radius: 10px;
+
+  // The colour uncovered behind a tile being swiped away. Clipped only meanwhile, so a focused
+  // tile's outline shows.
+  &.swiping {
+    overflow: hidden;
+    background: var(--kt-magenta);
+  }
+}
+
+.reveal {
+  position: absolute;
+  inset: 0 0 0 auto;
+  overflow: hidden;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: oklch(0.995 0.004 95);
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
 .tile {
   position: relative;
   display: block;
@@ -19,6 +47,21 @@
   background: var(--kt-raised);
   color: inherit;
   text-decoration: none;
+  // Springs back, or slides out, when let go.
+  transition:
+    transform 0.2s ease-out,
+    opacity 0.2s ease-out;
+
+  &.dragging {
+    transition: none;
+  }
+
+  // Horizontal swipes are ours; vertical ones still scroll.
+  .hideable & {
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
 
   &:focus-visible {
     outline: 3px solid var(--kt-violet-soft);
@@ -76,7 +119,7 @@
 // At most 60 characters (onboarding), so two lines or fewer.
 .tagline {
   margin: 4px 0 0;
-  font-size: 12.5px;
+  font-size: 13.5px;
   line-height: 1.35;
   color: oklch(0.995 0.004 95 / 0.95);
 }

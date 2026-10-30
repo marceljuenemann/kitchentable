@@ -40,6 +40,21 @@ describe('VettingStore', () => {
     expect(store.thumbs().has('jon')).toBeFalse();
   });
 
+  it('works out the age members will see', async () => {
+    const year = new Date().getFullYear() - 30;
+    rpc.and.resolveTo({
+      data: [
+        { ...application('ivy', []), birth_year: year, birth_month: 13 },
+        { ...application('jon', []), birth_year: null, birth_month: null },
+      ],
+      error: null,
+    });
+
+    await store.load();
+
+    expect(store.applications()?.map(({ age }) => age)).toEqual([29, null]);
+  });
+
   it('reports a failed load, and clears it when retrying', async () => {
     rpc.and.resolveTo({ data: null, error: { message: 'Admins only.' } });
     await store.load();

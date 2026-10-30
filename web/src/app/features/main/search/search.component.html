@@ -1,0 +1,81 @@
+<div class="page">
+  <!-- For screen readers: the bottom nav says which tab this is for everyone else. -->
+  <h1 class="kt-visually-hidden">Search</h1>
+  <header>
+    <svg
+      class="filter-glyph"
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.2"
+      stroke-linecap="round"
+      aria-hidden="true"
+    >
+      <path d="M4 7h16M7 12h10M10 17h4" />
+    </svg>
+    @for (pill of pills(); track pill.field) {
+      <button
+        class="pill"
+        type="button"
+        [class.active]="pill.active"
+        [attr.aria-pressed]="pill.active"
+        [attr.aria-label]="pill.ariaLabel"
+        (click)="openFilter(pill.field)"
+      >
+        <span>{{ pill.label }}</span>
+        @if (pill.count > 1) {
+          <span class="count" aria-hidden="true">{{ pill.count }}</span>
+        }
+        <svg
+          viewBox="0 0 24 24"
+          width="12"
+          height="12"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path [attr.d]="openField() === pill.field ? 'M6 15l6-6 6 6' : 'M6 9l6 6 6-6'" />
+        </svg>
+      </button>
+    }
+  </header>
+
+  <main>
+    @if (store.members() !== null) {
+      <div class="results">
+        <p>{{ count() }}</p>
+        <p>Newest first</p>
+      </div>
+
+      <app-profile-grid
+        [tiles]="tiles()"
+        [openId]="store.openId()"
+        [linkPrefix]="['profiles']"
+        [hideable]="true"
+        (hide)="hide($event)"
+      />
+
+      <!-- After the grid, however long: the list is short while Kitchen Table is small. -->
+      <div class="everyone">
+        <p class="everyone-title">That's everyone for now</p>
+        <p>
+          New members show up here as they join. Know someone who'd be a good fit? Help Kitchen
+          Table grow by inviting them with your link:
+        </p>
+        <app-invite-link />
+      </div>
+    } @else if (store.loadFailed()) {
+      <p class="message">Something went wrong loading search.</p>
+      <button mat-flat-button type="button" (click)="store.load()">Try again</button>
+    } @else {
+      <mat-spinner diameter="32" />
+    }
+  </main>
+</div>
+
+<router-outlet />

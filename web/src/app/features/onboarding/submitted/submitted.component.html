@@ -12,19 +12,7 @@
     We're looking for 100 sign ups for the initial launch. Know someone who'd be a good fit? Invite
     them with this link:
   </p>
-  @if (inviteLink(); as link) {
-    <p class="link">{{ link }}</p>
-    @if (canShare) {
-      <button mat-flat-button type="button" (click)="share()">Share invite link</button>
-      <button mat-button type="button" (click)="copy()">
-        {{ copied() ? 'Link copied' : 'Copy link' }}
-      </button>
-    } @else {
-      <button mat-flat-button type="button" (click)="copy()">
-        {{ copied() ? 'Link copied' : 'Copy link' }}
-      </button>
-    }
-  }
+  <app-invite-link />
 </mat-card>
 
 <app-footer />

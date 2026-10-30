@@ -27,8 +27,15 @@
       <app-main />
     }
     @case ('disabled') {
-      <!-- Hidden from search but still able to message, so the app stays usable. -->
-      <app-main />
+      <app-header />
+      <main>
+        <h1>Your profile is hidden</h1>
+        <p>
+          To show it again, please get in touch at
+          <a href="mailto:hello@kitchentable.dating">hello&#64;kitchentable.dating</a>.
+        </p>
+      </main>
+      <app-footer />
     }
     @case ('admin') {
       <!-- Admin accounts use the app too, but are never shown to members. -->

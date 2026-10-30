@@ -37,6 +37,17 @@ test('a tab opens directly by its URL, and an unknown one falls back to Search',
   await expect(page.getByRole('heading', { name: 'Search' })).toBeVisible();
 });
 
+test('a tab stays current with query parameters in the URL', async ({ page }) => {
+  await signInAs(page, 'active');
+  const nav = page.getByRole('navigation', { name: 'Main' });
+
+  await page.goto('/app?from=email');
+  await expect(nav.getByRole('link', { name: 'Search' })).toHaveAttribute('aria-current', 'page');
+
+  await page.goto('/app/messages?from=email');
+  await expect(nav.getByRole('link', { name: 'Messages' })).toHaveAttribute('aria-current', 'page');
+});
+
 test('the profile tab has the legal documents and signs out', async ({ page }) => {
   const email = await signInAs(page, 'active');
   await page.goto('/app/profile');

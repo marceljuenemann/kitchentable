@@ -11,23 +11,4 @@ p {
 
 .invite {
   margin-top: 28px;
-
-  .link {
-    padding: 12px 14px;
-    border-radius: 14px;
-    background: var(--kt-sunken);
-    font-size: 14.5px;
-    color: var(--kt-ink);
-    overflow-wrap: anywhere;
-    // A tap selects the whole link, for copying by hand.
-    user-select: all;
-  }
-
-  button {
-    width: 100%;
-
-    & + button {
-      margin-top: 8px;
-    }
-  }
 }

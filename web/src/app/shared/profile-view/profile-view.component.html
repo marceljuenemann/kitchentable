@@ -56,8 +56,8 @@
     <p class="fade-in meta">
       <span>{{ profile().pronouns }}</span>
       <span class="separator" aria-hidden="true">·</span>
-      @if (age() !== null) {
-        <span>{{ age() }} years old</span>
+      @if (profile().age !== null) {
+        <span>{{ profile().age }} years old</span>
         <span class="separator" aria-hidden="true">·</span>
       }
       <span class="location">

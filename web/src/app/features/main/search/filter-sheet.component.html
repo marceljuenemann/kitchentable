@@ -1,0 +1,83 @@
+<div class="filter-sheet">
+  <div class="grab-handle"></div>
+
+  <h2>{{ title }}</h2>
+
+  @if (choice; as choice) {
+    <div class="bulk">
+      <button class="text-button" type="button" (click)="selectAll()">Select all</button>
+      <button class="text-button" type="button" (click)="selectNone()">Select none</button>
+    </div>
+    <!-- Looking for in its usual colour (primary), gender in its own (secondary). -->
+    <mat-chip-listbox
+      class="kt-chips"
+      multiple
+      [class.primary]="field === 'lookingFor'"
+      [aria-label]="choice.title"
+      [value]="picked()"
+      (change)="setPicked($event.value)"
+    >
+      @for (option of choice.options; track option.value) {
+        <mat-chip-option [value]="option.value">{{ option.label }}</mat-chip-option>
+      }
+    </mat-chip-listbox>
+
+    @if (field === 'gender') {
+      <button
+        class="kt-switch-row setting only-show-me"
+        type="button"
+        role="switch"
+        [attr.aria-checked]="onlyShowMe()"
+        [disabled]="picked().length === 0"
+        (click)="toggleOnlyShowMe()"
+      >
+        <span>
+          Only show me to these genders
+          <span class="hint"
+            >Your profile will be hidden from people who don't match this filter.</span
+          >
+        </span>
+        <span class="kt-switch" aria-hidden="true"></span>
+      </button>
+    }
+  } @else {
+    <!-- On every input event, not just valueChange (on release), so it applies while dragging. -->
+    <mat-slider [min]="ageMin" [max]="ageMax" step="1">
+      <input
+        matSliderStartThumb
+        aria-label="Youngest"
+        [value]="store.filters().minAge"
+        (input)="setAge('minAge', $event)"
+      />
+      <input
+        matSliderEndThumb
+        aria-label="Oldest"
+        [value]="store.filters().maxAge"
+        (input)="setAge('maxAge', $event)"
+      />
+    </mat-slider>
+    <!-- The range picked, between the slider's ends. -->
+    <div class="age-range">
+      <span aria-hidden="true">{{ ageMin }}</span>
+      <p class="age-label" aria-live="polite">{{ ageLabel() }}</p>
+      <span aria-hidden="true">{{ ageMax }}+</span>
+    </div>
+
+    <!-- Applies with any age too, for those who'd rather not see profiles without one. -->
+    <button
+      class="kt-switch-row setting"
+      type="button"
+      role="switch"
+      [attr.aria-checked]="store.filters().showUnspecifiedAge"
+      (click)="toggleShowUnspecifiedAge()"
+    >
+      Include profiles with no age
+      <span class="kt-switch" aria-hidden="true"></span>
+    </button>
+  }
+
+  <div class="footer">
+    <button mat-stroked-button type="button" (click)="clear()">Clear</button>
+    <button mat-flat-button type="button" (click)="close()">{{ showLabel() }}</button>
+  </div>
+</div>

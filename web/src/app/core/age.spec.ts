@@ -10,12 +10,13 @@ describe('ageFrom', () => {
     expect(ageFrom('', '1990', now)).toBeNull();
   });
 
-  it('counts the birthday as passed from the start of the birth month', () => {
-    expect(ageFrom('6', '1990', now)).toBe(36);
+  it('counts the birthday as passed once the birth month is over', () => {
+    expect(ageFrom('5', '1990', now)).toBe(36);
     expect(ageFrom('1', '1990', now)).toBe(36);
   });
 
-  it('does not count a birthday later this year', () => {
+  it('does not count a birthday in the current month or later this year', () => {
+    expect(ageFrom('6', '1990', now)).toBe(35);
     expect(ageFrom('7', '1990', now)).toBe(35);
     expect(ageFrom('12', '1990', now)).toBe(35);
   });

@@ -1,20 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { expect, Page, test } from '@playwright/test';
-import { createApplicant, profilesNamed, signInAs, uploadPhoto } from './support/admin';
+import { createApplicant, jpeg, profilesNamed, signInAs, uploadPhoto } from './support/admin';
 import { firstLink, getLatestEmail } from './support/mailpit';
-
-/** A plain JPEG of the given colour, made in the browser. */
-async function jpeg(page: Page, colour: string): Promise<Buffer> {
-  const base64 = await page.evaluate(async (colour) => {
-    const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = 600;
-    const context = canvas.getContext('2d')!;
-    context.fillStyle = colour;
-    context.fillRect(0, 0, 600, 600);
-    return canvas.toDataURL('image/jpeg').split(',')[1];
-  }, colour);
-  return Buffer.from(base64, 'base64');
-}
 
 /** An applicant with two photos, the answers to the vetting questions and an invite code. */
 async function applicantWithPhotos(page: Page) {

@@ -1,0 +1,75 @@
+// The bar's height (border, padding, button), plus 14px after the content to match the space
+// above the buttons, less the profile view's 48px of bottom padding.
+.actions {
+  height: calc(1px + 14px + 52px + max(20px, env(safe-area-inset-bottom)) + 14px - 48px);
+}
+
+// Fixed like the bottom nav, across the page width, over the profile.
+.bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 1;
+  transform: translateX(-50%);
+  width: min(var(--kt-page-width), 100%);
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 14px 20px max(20px, env(safe-area-inset-bottom));
+  background: color-mix(in oklch, var(--kt-raised) 96%, transparent);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--kt-outline-soft);
+  animation: fade-in 0.2s 0.2s ease-out both;
+}
+
+// Side by side, the same size. Slim side padding, so "Hide profile" fits on a 360px phone.
+.hide,
+.reach-out {
+  --mat-button-filled-container-height: 52px;
+  --mat-button-filled-label-text-size: 16.5px;
+  --mat-button-filled-horizontal-padding: 12px;
+  --mat-button-outlined-container-height: 52px;
+  --mat-button-outlined-label-text-size: 16.5px;
+  --mat-button-outlined-horizontal-padding: 12px;
+}
+
+// White, like the back button.
+.hide {
+  --mat-button-outlined-outline-color: var(--kt-outline-soft);
+  --mat-button-outlined-label-text-color: var(--kt-violet);
+  background: var(--kt-raised);
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    animation: none;
+  }
+}
+
+// Like the profile view: covers the grid.
+.gone {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  padding: 64px 24px;
+  background: var(--kt-bg);
+  text-align: center;
+
+  p {
+    margin: 0 0 20px;
+    font-size: 16px;
+  }
+}

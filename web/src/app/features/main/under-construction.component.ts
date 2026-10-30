@@ -9,7 +9,7 @@ import { ActivatedRoute } from '@angular/router';
   imports: [MatIconModule],
   template: `
     <h1>{{ title }}</h1>
-    <p class="notice">
+    <p class="kt-notice">
       <mat-icon aria-hidden="true">construction</mat-icon>
       <span>Still under construction. Thank you for being an early tester!</span>
     </p>
@@ -28,23 +28,8 @@ import { ActivatedRoute } from '@angular/router';
       color: var(--kt-violet);
     }
 
-    .notice {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin: 20px 0 0;
-      padding: 14px 16px;
-      border: 1px solid color-mix(in oklch, var(--kt-gold) 35%, transparent);
-      border-radius: 14px;
-      background: var(--kt-gold-container);
-      font-size: 15px;
-      line-height: 1.5;
-      color: var(--kt-ink);
-
-      mat-icon {
-        flex: none;
-        color: var(--kt-gold);
-      }
+    .kt-notice {
+      margin-top: 20px;
     }
   `,
 })

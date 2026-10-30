@@ -1,9 +1,9 @@
 // Covers the screen over the grid, scrolling on its own, so the grid underneath keeps its
-// scroll position.
+// scroll position. Above the main app's bottom nav (z-index 10).
 :host {
   position: fixed;
   inset: 0;
-  z-index: 10;
+  z-index: 20;
   overflow-y: auto;
   overscroll-behavior: contain;
   background: var(--kt-bg);
