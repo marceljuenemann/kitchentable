@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test';
-import { signInAs } from './support/admin';
+import { profileOf, signIn, signInAs, userIdOf } from './support/admin';
 
 // MOCK: search shows the made-up members in web/src/app/features/main/search/mock-members.ts
 // (12 of them), so these counts come from there.
@@ -192,4 +192,64 @@ test('the filters stay while visiting another tab', async ({ page }) => {
   await nav.getByRole('link', { name: 'Messages' }).click();
   await nav.getByRole('link', { name: 'Search' }).click();
   await expect(page.getByText('1 person found')).toBeVisible();
+});
+
+test('the filters and the switch are saved on the profile and survive signing out', async ({
+  page,
+}) => {
+  const email = await signInAs(page, 'active');
+  const saved = async () => {
+    const profile = await profileOf(await userIdOf(email));
+    return { filters: profile.search_filters, hide: profile.hide_by_gender };
+  };
+
+  await page.getByRole('button', { name: 'Gender, any' }).click();
+  const sheet = page.locator('mat-bottom-sheet-container');
+  await sheet.getByRole('option', { name: 'Agender' }).click();
+  await sheet.getByRole('switch', { name: /Only show me to these genders/ }).click();
+  await page.keyboard.press('Escape');
+  await expect(page.getByText('1 person found')).toBeVisible();
+  await expect.poll(saved).toEqual({
+    filters: {
+      looking_for: [],
+      gender: ['Agender'],
+      min_age: 18,
+      max_age: 70,
+      show_unspecified_age: true,
+    },
+    hide: true,
+  });
+
+  await page
+    .getByRole('navigation', { name: 'Main' })
+    .getByRole('link', { name: 'Your profile' })
+    .click();
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await page.waitForURL('/');
+
+  await signIn(page, email);
+  await expect(page.getByText('1 person found')).toBeVisible();
+  await page.getByRole('button', { name: 'Gender, Agender' }).click();
+  await expect(
+    sheet.getByRole('switch', { name: /Only show me to these genders/ }),
+  ).toHaveAttribute('aria-checked', 'true');
+});
+
+test('filters that could not be saved can be retried', async ({ page }) => {
+  const email = await signInAs(page, 'active');
+  const rpc = '**/rest/v1/rpc/set_search_filters';
+  await page.route(rpc, (route) => route.abort());
+
+  await page.getByRole('button', { name: 'Gender, any' }).click();
+  await page.locator('mat-bottom-sheet-container').getByRole('option', { name: 'Agender' }).click();
+  await page.keyboard.press('Escape');
+  await expect(page.getByText("Couldn't save your filters")).toBeVisible();
+  // Search carries on regardless.
+  await expect(page.getByText('1 person found')).toBeVisible();
+
+  await page.unroute(rpc);
+  await page.getByRole('button', { name: 'Retry' }).click();
+  await expect
+    .poll(async () => (await profileOf(await userIdOf(email))).search_filters)
+    .toMatchObject({ gender: ['Agender'] });
 });
