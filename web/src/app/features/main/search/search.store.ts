@@ -1,7 +1,11 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ageFrom } from '../../../core/age';
-import { Profile } from '../../../core/profile.model';
+import { Subject, concatMap, debounceTime, first } from 'rxjs';
+import { MyProfile, Profile, SavedSearchFilters } from '../../../core/profile.model';
+import { ProfileService } from '../../../core/profile.service';
+import { SupabaseService } from '../../../core/supabase.service';
 import { GENDER_OPTIONS, LOOKING_FOR_OPTIONS } from '../../onboarding/onboarding-options';
 import { MOCK_MEMBERS, mockPhotoUrls } from './mock-members';
 
@@ -10,6 +14,9 @@ export interface Member extends Profile {
   /** When they became a member (passed the age check). Search shows the newest first. */
   age_verified_at: string;
 }
+
+/** How long the filters must stay put before they're saved, so a slider drag is one save. */
+const SAVE_DELAY_MS = 300;
 
 /** The age slider's ends. The top one means "and older". */
 export const AGE_MIN = 18;
@@ -87,6 +94,24 @@ export function matches(member: Member, filters: SearchFilters, now = new Date()
 @Injectable()
 export class SearchStore {
   private readonly snackBar = inject(MatSnackBar);
+  private readonly supabase = inject(SupabaseService);
+
+  constructor() {
+    // The shell shows search only once the profile has loaded, so this runs straight away.
+    inject(ProfileService)
+      .state$.pipe(first((state) => state.kind === 'loaded'))
+      .subscribe((state) => state.kind === 'loaded' && this.load(state.profile));
+
+    // concatMap, not switchMap: an abandoned request still reaches the database, where it could
+    // land after a newer one. Waiting saves pick up the latest filters when their turn comes.
+    this.saveRequests
+      .pipe(
+        debounceTime(SAVE_DELAY_MS),
+        concatMap(() => this.save()),
+        takeUntilDestroyed(),
+      )
+      .subscribe();
+  }
 
   readonly members = signal<Member[]>(MOCK_MEMBERS);
   /** Photo URLs by member id, in display order. */
@@ -94,11 +119,30 @@ export class SearchStore {
     new Map(MOCK_MEMBERS.map((member) => [member.id, mockPhotoUrls(member)])),
   );
   readonly filters = signal<SearchFilters>(NO_FILTERS);
+  /** The "Only show me to these genders" switch, as the viewer last set it. */
+  private readonly onlyShowMeToGenders = signal(false);
   /**
-   * Whether only people of the genders in the Gender filter may see the viewer in their search.
-   * MOCK: only kept here; the real one is saved on the profile and applied to others' searches.
+   * Whether only members of the genders in the Gender filter may see the viewer in their search.
+   * Off while no gender is picked: there's nobody to limit it to.
    */
-  readonly onlyShowMeToGenders = signal(false);
+  readonly hideByGender = computed(
+    () => this.onlyShowMeToGenders() && this.filters().gender.length > 0,
+  );
+  /** The `set_search_filters` arguments for the current filters and switch, as JSON. */
+  private readonly saveArgs = computed(() => {
+    const { lookingFor, gender, minAge, maxAge, showUnspecifiedAge } = this.filters();
+    const filters: SavedSearchFilters = {
+      looking_for: lookingFor,
+      gender,
+      min_age: minAge,
+      max_age: maxAge,
+      show_unspecified_age: showUnspecifiedAge,
+    };
+    return JSON.stringify({ p_filters: filters, p_hide_by_gender: this.hideByGender() });
+  });
+  /** What the database has, as `saveArgs`, so changes that end up the same send nothing. */
+  private saved: string | null = null;
+  private readonly saveRequests = new Subject<void>();
   readonly hiddenIds = signal<ReadonlySet<string>>(new Set());
   /** The member showing over the grid, if any. */
   readonly openId = signal<string | null>(null);
@@ -117,6 +161,47 @@ export class SearchStore {
 
   updateFilters(change: Partial<SearchFilters>) {
     this.filters.update((filters) => ({ ...filters, ...change }));
+    this.saveRequests.next();
+  }
+
+  setOnlyShowMeToGenders(on: boolean) {
+    this.onlyShowMeToGenders.set(on);
+    this.saveRequests.next();
+  }
+
+  /** Starts from the filters and switch saved on the profile, if there are any. */
+  private load({ search_filters: saved, hide_by_gender }: MyProfile) {
+    if (saved) {
+      this.filters.set({
+        lookingFor: saved.looking_for,
+        gender: saved.gender,
+        minAge: saved.min_age,
+        maxAge: saved.max_age,
+        showUnspecifiedAge: saved.show_unspecified_age,
+      });
+    }
+    this.onlyShowMeToGenders.set(hide_by_gender);
+    this.saved = this.saveArgs();
+  }
+
+  /**
+   * Saves the filters and switch on the profile. Fire-and-forget: a failure shows a snackbar to
+   * retry, and search carries on regardless.
+   */
+  private async save() {
+    const args = this.saveArgs();
+    if (args === this.saved) return;
+    try {
+      const { error } = await this.supabase.client.rpc('set_search_filters', JSON.parse(args));
+      if (error) throw error;
+      this.saved = args;
+    } catch (error) {
+      console.warn('Could not save the search filters', error);
+      this.snackBar
+        .open("Couldn't save your filters", 'Retry', { duration: 6000, panelClass: 'kt-snackbar' })
+        .onAction()
+        .subscribe(() => this.saveRequests.next());
+    }
   }
 
   /** Takes someone off the grid for good, with a snackbar to undo it. */

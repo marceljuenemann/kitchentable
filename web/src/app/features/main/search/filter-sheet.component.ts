@@ -43,10 +43,7 @@ export class FilterSheetComponent {
   readonly ageMax = AGE_MAX;
 
   readonly picked = computed(() => (this.field === 'age' ? [] : this.store.filters()[this.field]));
-  /** Off while no gender is picked: there's nobody to limit it to. */
-  readonly onlyShowMe = computed(
-    () => this.store.onlyShowMeToGenders() && this.store.filters().gender.length > 0,
-  );
+  readonly onlyShowMe = this.store.hideByGender;
   readonly ageLabel = computed(() => {
     const { minAge, maxAge } = this.store.filters();
     if (maxAge < AGE_MAX) return `${minAge} to ${maxAge} years old`;
@@ -66,7 +63,7 @@ export class FilterSheetComponent {
   }
 
   toggleOnlyShowMe() {
-    this.store.onlyShowMeToGenders.set(!this.onlyShowMe());
+    this.store.setOnlyShowMeToGenders(!this.onlyShowMe());
   }
 
   setAge(edge: 'minAge' | 'maxAge', event: Event) {

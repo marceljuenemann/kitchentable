@@ -11,7 +11,7 @@ import {
   switchMap,
 } from 'rxjs';
 import { AuthService } from './auth/auth.service';
-import { NewProfile, Profile, ProfileStatus } from './profile.model';
+import { MyProfile, NewProfile, ProfileStatus } from './profile.model';
 import { SupabaseService } from './supabase.service';
 
 /**
@@ -36,7 +36,7 @@ export const TERMS_VERSION = 1;
  */
 export type ProfileState =
   | { kind: 'loading' | 'signed-out' | 'needs-terms' | 'none' | 'error' }
-  | { kind: 'loaded'; profile: Profile };
+  | { kind: 'loaded'; profile: MyProfile };
 
 /** All profile access goes through stored procedures, never the tables (see docs/database.md). */
 @Injectable({ providedIn: 'root' })
@@ -134,9 +134,9 @@ export class ProfileService {
   }
 
   /** The profile, or null if the user hasn't completed onboarding yet. */
-  private async getMyProfile(): Promise<Profile | null> {
+  private async getMyProfile(): Promise<MyProfile | null> {
     const { data, error } = await this.supabase.client.rpc('get_my_profile');
     if (error) throw error;
-    return data as Profile | null;
+    return data as MyProfile | null;
   }
 }
