@@ -2,7 +2,7 @@
 
 Postgres via Supabase. The schema lives in `supabase/migrations/` and is covered by pgTAP tests in `supabase/tests/database/`. **Update this file with any schema change.**
 
-Sections marked **(planned)** describe the messaging sync and member emails, which aren't built yet. Some functions exist that no app uses yet: `search_profiles` (search still runs on mock data), and the connections and messages tables and their functions. Update them as they're built, and move anything that turns out differently.
+Sections marked **(planned)** describe the messaging sync and member emails, which aren't built yet. The connections and messages tables and their functions exist, but `set_dismissed` is the only one the app uses so far. Update them as they're built, and move anything that turns out differently.
 
 ## Access rules
 
@@ -24,7 +24,7 @@ Sections marked **(planned)** describe the messaging sync and member emails, whi
 | `vetting`   | submitted, an admin is reviewing                                   | "being vetted" message                                                                          |
 | `approved`  | admin approved, age verification pending                           | age verification                                                                                |
 | `active`    | verified and live                                                  | main app                                                                                        |
-| `disabled`  | hidden by the user: not in search, can't message until unhidden    | "profile hidden" screen with a way to unhide it (planned; the shell shows the main app for now) |
+| `disabled`  | hidden by the user: not in search, can't message until unhidden    | "profile hidden" message; hiding isn't supported in the app yet                                 |
 | `suspended` | suspended by an admin                                              | suspended message                                                                               |
 | `deleted`   | deleted by the user: can no longer message; personal data scrubbed | deleted message                                                                                 |
 | `admin`     | an admin account, never shown to members (see [Admins](#admins))   | main app                                                                                        |

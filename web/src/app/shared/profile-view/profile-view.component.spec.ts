@@ -1,12 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Profile } from '../../core/profile.model';
+import { Member } from '../../core/profile.model';
 import { ProfileViewComponent } from './profile-view.component';
 
 describe('ProfileViewComponent', () => {
-  const profile: Profile = {
+  const profile: Member = {
     id: 'ivy',
-    status: 'vetting',
     name: 'Ivy',
     pronouns: 'she/her',
     tagline: '',
@@ -14,8 +13,7 @@ describe('ProfileViewComponent', () => {
     location: 'London',
     gender: ['Woman', 'Genderfluid'],
     sexuality: ['Queer'],
-    birth_year: null,
-    birth_month: null,
+    age: null,
     looking_for: ['polyamory', 'Something of my own'],
     photos: [],
   };
@@ -24,18 +22,11 @@ describe('ProfileViewComponent', () => {
     TestBed.configureTestingModule({ providers: [provideRouter([])] });
   });
 
-  const create = (overrides: Partial<Profile> = {}) => {
+  const create = (overrides: Partial<Member> = {}) => {
     const fixture = TestBed.createComponent(ProfileViewComponent);
     fixture.componentRef.setInput('profile', { ...profile, ...overrides });
     return fixture.componentInstance;
   };
-
-  it('works out the age, when there is a birth date', () => {
-    const year = new Date().getFullYear() - 30;
-
-    expect(create({ birth_year: year, birth_month: 1 }).age()).toBe(30);
-    expect(create().age()).toBeNull();
-  });
 
   it('splits About me into paragraphs at blank lines', () => {
     expect(create().aboutParagraphs()).toEqual([

@@ -7,7 +7,7 @@ const screens: [ProfileStatus | null, string][] = [
   ['approved', "You're approved!"],
   // The main app opens on the Search tab.
   ['active', 'Search'],
-  ['disabled', 'Search'],
+  ['disabled', 'Your profile is hidden'],
   ['suspended', 'Your profile is suspended'],
   ['deleted', 'Your profile has been deleted'],
   ['admin', 'Search'],

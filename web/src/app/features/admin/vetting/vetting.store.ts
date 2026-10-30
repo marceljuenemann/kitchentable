@@ -1,10 +1,14 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { ageFrom } from '../../../core/age';
 import { PhotoStorageService } from '../../../core/photo-storage.service';
-import { Profile } from '../../../core/profile.model';
+import { Member, Profile } from '../../../core/profile.model';
 import { SupabaseService } from '../../../core/supabase.service';
 
-/** A profile in `vetting`, whole, as `admin_list_applications()` returns it. */
-export interface Application extends Profile {
+/**
+ * A profile in `vetting`, whole, as `admin_list_applications()` returns it, plus the age it will
+ * show to members.
+ */
+export interface Application extends Profile, Member {
   /** Answers by question id, plus `invite_code` and `onboarding_feedback` if given. */
   vetting_answers: Record<string, string>;
   created_at: string;
@@ -32,7 +36,10 @@ export class VettingStore {
     try {
       const { data, error } = await this.supabase.client.rpc('admin_list_applications');
       if (error) throw error;
-      const applications = data as Application[];
+      const applications = (data as Omit<Application, 'age'>[]).map((application) => ({
+        ...application,
+        age: ageFrom(`${application.birth_month ?? ''}`, `${application.birth_year ?? ''}`),
+      }));
       this.applications.set(applications);
       await this.loadThumbs(applications);
     } catch {

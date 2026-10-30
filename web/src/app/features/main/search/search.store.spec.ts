@@ -1,12 +1,12 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { MyProfile } from '../../../core/profile.model';
+import { PhotoStorageService } from '../../../core/photo-storage.service';
+import { Member, MyProfile } from '../../../core/profile.model';
 import { ProfileService, ProfileState } from '../../../core/profile.service';
 import { SupabaseService } from '../../../core/supabase.service';
 import {
   matches,
-  Member,
   NO_FILTERS,
   NOT_SPECIFIED,
   SearchFilters,
@@ -15,10 +15,8 @@ import {
 } from './search.store';
 
 describe('matches', () => {
-  const now = new Date(2026, 9, 15); // October 2026
   const member: Member = {
     id: 'ivy',
-    status: 'active',
     name: 'Ivy',
     pronouns: 'she/her',
     tagline: '',
@@ -26,17 +24,15 @@ describe('matches', () => {
     location: 'London',
     gender: ['Woman', 'Genderfluid'],
     sexuality: [],
-    birth_year: 1996,
-    birth_month: 11, // 29 in October 2026, 30 in November
+    age: 29,
     looking_for: ['polyamory', 'Something of my own'],
     photos: [],
-    age_verified_at: '2026-10-01T00:00:00Z',
   };
   const filtered = (filters: Partial<SearchFilters>, overrides: Partial<Member> = {}) =>
-    matches({ ...member, ...overrides }, { ...NO_FILTERS, ...filters }, now);
+    matches({ ...member, ...overrides }, { ...NO_FILTERS, ...filters });
 
   it('matches everyone without filters, even without a birthday', () => {
-    expect(filtered({}, { birth_year: null, birth_month: null, gender: [] })).toBeTrue();
+    expect(filtered({}, { age: null, gender: [] })).toBeTrue();
   });
 
   it('matches when any of their values is picked within a field', () => {
@@ -65,18 +61,18 @@ describe('matches', () => {
     expect(filtered({ gender: ['Woman'] }, { gender: ['Neutrois'] })).toBeFalse();
   });
 
-  it('works out the age from the birth month', () => {
+  it('keeps the age within the range', () => {
     expect(filtered({ minAge: 29, maxAge: 29 })).toBeTrue();
     expect(filtered({ minAge: 30 })).toBeFalse();
     expect(filtered({ maxAge: 28 })).toBeFalse();
   });
 
   it('treats the top of the age range as "and older"', () => {
-    expect(filtered({ minAge: 25 }, { birth_year: 1940, birth_month: 1 })).toBeTrue();
+    expect(filtered({ minAge: 25 }, { age: 86 })).toBeTrue();
   });
 
   it('keeps people without a birthday in any age range, unless asked not to', () => {
-    const noBirthday = { birth_year: null, birth_month: null };
+    const noBirthday = { age: null };
 
     expect(filtered({ minAge: 19 }, noBirthday)).toBeTrue();
     expect(filtered({ minAge: 19, showUnspecifiedAge: false }, noBirthday)).toBeFalse();
@@ -90,6 +86,7 @@ describe('SearchStore', () => {
   let undo: Subject<void>;
   let open: jasmine.Spy;
   let rpc: jasmine.Spy;
+  let signedUrls: jasmine.Spy;
   let profileState: BehaviorSubject<ProfileState>;
 
   const profile = (saved: Partial<MyProfile> = {}) =>
@@ -99,12 +96,14 @@ describe('SearchStore', () => {
     undo = new Subject();
     open = jasmine.createSpy('open').and.returnValue({ onAction: () => undo });
     rpc = jasmine.createSpy('rpc').and.resolveTo({ error: null });
+    signedUrls = jasmine.createSpy('signedUrls').and.resolveTo([]);
     profileState = new BehaviorSubject<ProfileState>({ kind: 'loaded', profile: profile() });
     TestBed.configureTestingModule({
       providers: [
         SearchStore,
         { provide: MatSnackBar, useValue: { open } },
         { provide: SupabaseService, useValue: { client: { rpc } } },
+        { provide: PhotoStorageService, useValue: { signedUrls } },
         { provide: ProfileService, useValue: { state$: profileState } },
       ],
     });
@@ -256,23 +255,147 @@ describe('SearchStore', () => {
     }));
   });
 
-  it('hides someone until the hiding is undone', () => {
-    create();
-    const someone = store.results()[0];
-    const count = store.results().length;
+  describe('members', () => {
+    const member = (id: string, photos: string[] = []) =>
+      ({ id, name: id, gender: [], looking_for: [], age: null, photos }) as unknown as Member;
+    const ivy = member('ivy', ['photo-1', 'photo-2']);
+    const jon = member('jon');
 
-    store.hide(someone);
-    expect(store.results()).not.toContain(someone);
-    expect(store.results().length).toBe(count - 1);
+    /** Answers `search_profiles` with these members, and anything else with no error. */
+    const respondWith = (members: Member[]) =>
+      rpc.and.callFake(async (name: string) =>
+        name === 'search_profiles' ? { data: members, error: null } : { error: null },
+      );
+    const searches = () => rpc.calls.allArgs().filter(([name]) => name === 'search_profiles');
+    const dismissals = () =>
+      rpc.calls
+        .allArgs()
+        .filter(([name]) => name === 'set_dismissed')
+        .map(([, args]) => args);
 
-    undo.next();
-    expect(store.results()).toContain(someone);
-  });
+    it('is null until loaded', () => {
+      create();
 
-  it('shows the newest members first', () => {
-    create();
-    const joined = store.results().map((member) => member.age_verified_at);
+      expect(store.members()).toBeNull();
+      expect(store.results()).toEqual([]);
+    });
 
-    expect(joined).toEqual([...joined].sort().reverse());
+    it('loads the members in the order given, with the main thumbnails in one request', async () => {
+      respondWith([jon, ivy]);
+      signedUrls.and.resolveTo(['https://signed/ivy']);
+      create();
+
+      await store.load();
+
+      expect(store.results()).toEqual([jon, ivy]);
+      expect(signedUrls).toHaveBeenCalledOnceWith(
+        [{ ownerId: 'ivy', photoId: 'photo-1' }],
+        'thumb',
+      );
+      expect(store.thumbs().get('ivy')).toBe('https://signed/ivy');
+      expect(store.thumbs().has('jon')).toBeFalse();
+    });
+
+    it('reports a failed load, and clears it when retrying', async () => {
+      rpc.and.resolveTo({ data: null, error: { message: 'offline' } });
+      create();
+      await store.load();
+      expect(store.loadFailed()).toBeTrue();
+      expect(store.members()).toBeNull();
+
+      respondWith([ivy]);
+      await store.load();
+      expect(store.loadFailed()).toBeFalse();
+      expect(store.members()).toEqual([ivy]);
+    });
+
+    it('keeps the members it has when a reload fails', async () => {
+      respondWith([ivy]);
+      create();
+      await store.load();
+
+      rpc.and.resolveTo({ data: null, error: { message: 'offline' } });
+      await store.load();
+
+      expect(store.members()).toEqual([ivy]);
+    });
+
+    it('loads again only once the thumbnails are getting old', fakeAsync(() => {
+      respondWith([ivy]);
+      create();
+      store.loadIfStale();
+      tick();
+      store.loadIfStale();
+      tick();
+      expect(searches().length).toBe(1);
+
+      tick(31 * 60 * 1000);
+      store.loadIfStale();
+      tick();
+
+      expect(searches().length).toBe(2);
+    }));
+
+    it('tries again on the next visit after a failed load', fakeAsync(() => {
+      rpc.and.resolveTo({ data: null, error: { message: 'offline' } });
+      create();
+      store.loadIfStale();
+      tick();
+
+      store.loadIfStale();
+      tick();
+
+      expect(searches().length).toBe(2);
+    }));
+
+    it('hides someone straight away, saves it, and saves undoing it', async () => {
+      respondWith([ivy, jon]);
+      create();
+      await store.load();
+
+      store.hide(ivy);
+      expect(store.results()).toEqual([jon]);
+
+      undo.next();
+      expect(store.results()).toEqual([ivy, jon]);
+
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(dismissals()).toEqual([
+        { p_user_id: 'ivy', p_dismissed: true },
+        { p_user_id: 'ivy', p_dismissed: false },
+      ]);
+    });
+
+    it('sends an undo only once the hiding it undoes is saved', fakeAsync(() => {
+      let finish!: (result: { error: null }) => void;
+      respondWith([ivy]);
+      create();
+      store.load();
+      tick();
+      rpc.and.returnValue(new Promise((resolve) => (finish = resolve)));
+
+      store.hide(ivy);
+      undo.next();
+      tick();
+      expect(dismissals().length).toBe(1);
+
+      rpc.and.resolveTo({ error: null });
+      finish({ error: null });
+      tick();
+      expect(dismissals().map((args) => args.p_dismissed)).toEqual([true, false]);
+    }));
+
+    it('brings someone back if hiding them could not be saved', async () => {
+      respondWith([ivy]);
+      create();
+      await store.load();
+      rpc.and.resolveTo({ error: { message: 'offline' } });
+
+      store.hide(ivy);
+      await new Promise((resolve) => setTimeout(resolve));
+
+      expect(store.results()).toEqual([ivy]);
+      expect(open.calls.mostRecent().args[0]).toBe("Couldn't hide ivy");
+    });
   });
 });

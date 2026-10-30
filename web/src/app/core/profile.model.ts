@@ -32,6 +32,12 @@ export interface Profile extends Omit<NewProfile, 'vetting_answers'> {
   status: ProfileStatus;
 }
 
+/** A profile as members see it (`search_profiles()`): the age, never the birth date or status. */
+export interface Member extends Omit<Profile, 'status' | 'birth_year' | 'birth_month'> {
+  /** Null if they left their birthday out (it's optional). */
+  age: number | null;
+}
+
 /** Search filters as saved with `set_search_filters` (see docs/database.md). */
 export interface SavedSearchFilters {
   looking_for: string[];

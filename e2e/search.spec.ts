@@ -1,15 +1,86 @@
+import { randomUUID } from 'node:crypto';
 import { expect, Page, test } from '@playwright/test';
-import { profileOf, signIn, signInAs, userIdOf } from './support/admin';
+import {
+  createMember,
+  jpeg,
+  profileOf,
+  signIn,
+  signInAs,
+  uploadPhoto,
+  userIdOf,
+} from './support/admin';
 
-// MOCK: search shows the made-up members in web/src/app/features/main/search/mock-members.ts
-// (12 of them), so these counts come from there.
+const MAYA = {
+  name: 'Maya',
+  tagline: 'Supper clubs, long tables, longer conversations',
+  bio: 'I host a monthly supper club.\n\nI like people who ask a second question.',
+  gender: ['Woman'],
+  birth_year: 1991,
+  birth_month: 4,
+  looking_for: ['polyamory', 'friends'],
+};
+const IFE = {
+  name: 'Ife',
+  gender: ['Non-binary'],
+  birth_year: 1988,
+  birth_month: 11,
+  looking_for: ['relationship-anarchy', 'friends'],
+};
+const DEVI = {
+  name: 'Devi',
+  gender: ['Woman'],
+  birth_year: 1983,
+  birth_month: 7,
+  looking_for: ['open-relationship', 'Slow dating'],
+};
+const TOBY = {
+  name: 'Toby',
+  gender: ['Man'],
+  birth_year: 1979,
+  birth_month: 12,
+  looking_for: ['exploring', 'monogamy'],
+};
+const NOUR = {
+  name: 'Nour',
+  gender: ['Man', 'Gender questioning'],
+  birth_year: 1994,
+  birth_month: 3,
+  looking_for: ['polyamory', 'play-partners'],
+};
+const SAM = {
+  name: 'Sam',
+  gender: ['Agender', 'Neutrois'],
+  birth_year: 1999,
+  birth_month: 8,
+  looking_for: ['friends', 'Solo poly'],
+};
+const ALEX = {
+  name: 'Alex',
+  gender: ['Non-binary'],
+  looking_for: ['relationship-anarchy', 'play-partners'],
+};
+
+/**
+ * Signs in as a member who can find exactly these people: all of them live in a place of this
+ * test's own, so other tests and what's left in the database don't show up.
+ */
+async function searchAmong(page: Page, members: Record<string, unknown>[]) {
+  const location = `Testville ${randomUUID()}`;
+  const created = await Promise.all(members.map((fields) => createMember({ location, ...fields })));
+  const email = await signInAs(page, 'active', { location });
+  return { email, location, ids: created.map(({ id }) => id) };
+}
 
 const tile = (page: Page, name: string) =>
   page.locator('app-profile-grid').getByRole('link', { name: new RegExp(`^${name}\\b`) });
 
+/** Whether the image has really loaded, rather than failing to. */
+const loaded = (image: ReturnType<Page['locator']>) =>
+  image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0);
+
 test('filters narrow the grid as options are switched', async ({ page }) => {
-  await signInAs(page, 'active');
-  await expect(page.getByText('12 people found')).toBeVisible();
+  await searchAmong(page, [MAYA, IFE, DEVI, TOBY, NOUR, SAM, ALEX]);
+  await expect(page.getByText('7 people found')).toBeVisible();
 
   await page.getByRole('button', { name: 'Gender, any' }).click();
   const sheet = page.locator('mat-bottom-sheet-container');
@@ -19,11 +90,11 @@ test('filters narrow the grid as options are switched', async ({ page }) => {
   await man.click();
   await expect(man).toHaveAttribute('aria-selected', 'true');
   await sheet.getByRole('option', { name: 'Non-binary' }).click();
-  // Live, behind the sheet: Toby, Nour and Jules are men; Ife, Priya and Alex non-binary.
-  await expect(page.getByText('6 people found')).toBeVisible();
+  // Live, behind the sheet: Toby and Nour are men; Ife and Alex non-binary.
+  await expect(page.getByText('4 people found')).toBeVisible();
   await onlyShowMe.click();
   await expect(onlyShowMe).toHaveAttribute('aria-checked', 'true');
-  await sheet.getByRole('button', { name: 'Show 6 people' }).click();
+  await sheet.getByRole('button', { name: 'Show 4 people' }).click();
   await expect(sheet).toBeHidden();
 
   const genderPill = page.getByRole('button', { name: 'Gender, Non-binary, Man' });
@@ -31,7 +102,7 @@ test('filters narrow the grid as options are switched', async ({ page }) => {
   await expect(tile(page, 'Toby')).toBeVisible();
   await expect(tile(page, 'Maya')).toBeHidden();
 
-  // Across fields, people must match both: of those six, only Ife is looking for friends.
+  // Across fields, people must match both: of those four, only Ife is looking for friends.
   await page.getByRole('button', { name: 'Looking for, any' }).click();
   await sheet.getByRole('option', { name: 'Friends' }).click();
   await expect(sheet.getByRole('button', { name: 'Show 1 person' })).toBeVisible();
@@ -87,7 +158,8 @@ test('filters narrow the grid as options are switched', async ({ page }) => {
 });
 
 test('the age range applies while its thumb is still being dragged', async ({ page }) => {
-  await signInAs(page, 'active');
+  await searchAmong(page, [MAYA, TOBY]);
+  await expect(page.getByText('2 people found')).toBeVisible();
   await page.getByRole('button', { name: 'Age, any' }).click();
   const sheet = page.locator('mat-bottom-sheet-container');
   await expect(sheet.getByText('Any age')).toBeVisible();
@@ -104,11 +176,11 @@ test('the age range applies while its thumb is still being dragged', async ({ pa
   const y = knob.y + knob.height / 2;
   await page.mouse.move(knob.x + knob.width / 2, y);
   await page.mouse.down();
-  // To about 38, below Toby, Devi and Jules.
+  // To about 38, below Toby.
   await page.mouse.move(knob.x + knob.width / 2 - 250, y, { steps: 10 });
 
   await expect(sheet.getByText(/^18 to 3\d years old$/)).toBeVisible();
-  await expect(page.getByText('12 people found')).toBeHidden();
+  await expect(page.getByText('2 people found')).toBeHidden();
   await page.mouse.up();
 });
 
@@ -117,26 +189,56 @@ test('the end of the grid asks to invite people, with a link to copy', async ({
   context,
 }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-  await signInAs(page, 'active');
+  await searchAmong(page, []);
 
+  await expect(page.getByText('0 people found')).toBeVisible();
   await expect(page.getByText("That's everyone for now")).toBeVisible();
   await expect(page.getByText(/^http:\/\/localhost:4200\/\?invite=[0-9a-f]{8}$/)).toBeVisible();
   await page.getByRole('button', { name: 'Copy link' }).click();
   await expect(page.getByRole('button', { name: 'Link copied' })).toBeVisible();
 });
 
-test('a profile opens over the grid, and can be hidden and brought back', async ({ page }) => {
-  await signInAs(page, 'active');
+test('shows the members of the same place, newest first', async ({ page }) => {
+  await createMember({ ...DEVI, location: 'Elsewhere' });
+  await searchAmong(page, [
+    { ...MAYA, age_verified_at: '2026-10-01T00:00:00Z' },
+    { ...TOBY, age_verified_at: '2026-10-03T00:00:00Z' },
+    { ...SAM, age_verified_at: '2026-10-02T00:00:00Z' },
+  ]);
+
+  await expect(page.locator('app-profile-grid .name')).toHaveText(['Toby', 'Sam', 'Maya']);
+});
+
+test('a profile opens over the grid with its photos, and can be hidden and brought back', async ({
+  page,
+}) => {
+  const photos = [randomUUID(), randomUUID(), randomUUID()];
+  const {
+    ids: [id],
+  } = await searchAmong(page, [{ ...MAYA, photos }]);
+  const image = await jpeg(page, '#c83897');
+  for (const photo of photos) {
+    await uploadPhoto(`${id}/${photo}/thumb.jpg`, image);
+    await uploadPhoto(`${id}/${photo}/full.jpg`, image);
+  }
+  // Uploaded after the page first loaded search.
+  await page.reload();
+
+  await expect.poll(() => loaded(tile(page, 'Maya').locator('img'))).toBe(true);
 
   await tile(page, 'Maya').click();
-  await page.waitForURL('**/app/profiles/mock-maya');
+  await page.waitForURL(`**/app/profiles/${id}`);
   await expect(page.getByRole('heading', { name: 'Maya', level: 1 })).toBeVisible();
   // Under the profile, Search stays the current tab, so the nav's pill doesn't move.
   await expect(
     page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Search' }),
   ).toHaveAttribute('aria-current', 'page');
-  await expect(page.getByRole('img', { name: 'Photo 1 of 3' })).toBeVisible();
+  await expect(page.getByText(/^\d+ years old$/)).toBeVisible();
   await expect(page.getByText('I host a monthly supper club')).toBeVisible();
+  // The full-size photos, of someone else: every one has really loaded.
+  for (const name of ['Photo 1 of 3', 'Photo 2 of 3', 'Photo 3 of 3']) {
+    await expect.poll(() => loaded(page.getByRole('img', { name }))).toBe(true);
+  }
 
   // Reaching out isn't built yet.
   await page.getByRole('button', { name: 'Reach out' }).click();
@@ -146,17 +248,33 @@ test('a profile opens over the grid, and can be hidden and brought back', async 
   await page.waitForURL((url) => url.pathname === '/app');
   await expect(page.getByText("Maya won't show up again")).toBeVisible();
   await expect(tile(page, 'Maya')).toBeHidden();
-  await expect(page.getByText('11 people found')).toBeVisible();
+  await expect(page.getByText('0 people found')).toBeVisible();
 
   await page.getByRole('button', { name: 'Undo' }).click();
   await expect(tile(page, 'Maya')).toBeVisible();
-  await expect(page.getByText('12 people found')).toBeVisible();
+  await expect(page.getByText('1 person found')).toBeVisible();
 });
 
-test('a tile swiped left is hidden, and a short swipe neither hides nor opens it', async ({
+test('a profile opens by its URL, unless the member may not see it', async ({ page }) => {
+  const {
+    ids: [id],
+  } = await searchAmong(page, [MAYA]);
+
+  await page.goto(`/app/profiles/${id}`);
+  await expect(page.getByRole('heading', { name: 'Maya', level: 1 })).toBeVisible();
+
+  const { id: elsewhere } = await createMember({ ...DEVI, location: 'Elsewhere' });
+  await page.goto(`/app/profiles/${elsewhere}`);
+  await expect(page.getByText("This profile isn't available.")).toBeVisible();
+});
+
+test('a tile swiped left is hidden for good, and a short swipe neither hides nor opens it', async ({
   page,
 }) => {
-  await signInAs(page, 'active');
+  await searchAmong(page, [
+    { ...MAYA, age_verified_at: '2026-10-01T00:00:00Z' },
+    { ...TOBY, age_verified_at: '2026-10-02T00:00:00Z' },
+  ]);
   // The newest member, so the first tile, in view.
   const toby = tile(page, 'Toby');
   await expect(toby).toBeVisible();
@@ -172,16 +290,45 @@ test('a tile swiped left is hidden, and a short swipe neither hides nor opens it
 
   await swipe(40);
   await expect(page).toHaveURL('/app');
-  await expect(page.getByText('12 people found')).toBeVisible();
+  await expect(page.getByText('2 people found')).toBeVisible();
 
+  const dismissed = page.waitForResponse('**/rest/v1/rpc/set_dismissed');
   await swipe(120);
   await expect(page.getByText("Toby won't show up again")).toBeVisible();
   await expect(toby).toBeHidden();
   await expect(page).toHaveURL('/app');
+
+  await dismissed;
+  await page.reload();
+  await expect(page.getByText('1 person found')).toBeVisible();
+  await expect(toby).toBeHidden();
+});
+
+test('someone who could not be hidden comes back', async ({ page }) => {
+  await searchAmong(page, [MAYA]);
+  await page.route('**/rest/v1/rpc/set_dismissed', (route) => route.abort());
+
+  await tile(page, 'Maya').click();
+  await page.getByRole('button', { name: 'Hide profile' }).click();
+
+  await expect(page.getByText("Couldn't hide Maya")).toBeVisible();
+  await expect(tile(page, 'Maya')).toBeVisible();
+});
+
+test('search can be tried again when it fails to load', async ({ page }) => {
+  const search = '**/rest/v1/rpc/search_profiles';
+  await page.route(search, (route) => route.abort());
+  await searchAmong(page, [MAYA]);
+
+  await expect(page.getByText('Something went wrong loading search.')).toBeVisible();
+
+  await page.unroute(search);
+  await page.getByRole('button', { name: 'Try again' }).click();
+  await expect(tile(page, 'Maya')).toBeVisible();
 });
 
 test('the filters stay while visiting another tab', async ({ page }) => {
-  await signInAs(page, 'active');
+  await searchAmong(page, [SAM, TOBY]);
 
   await page.getByRole('button', { name: 'Gender, any' }).click();
   await page.locator('mat-bottom-sheet-container').getByRole('option', { name: 'Agender' }).click();
@@ -197,7 +344,7 @@ test('the filters stay while visiting another tab', async ({ page }) => {
 test('the filters and the switch are saved on the profile and survive signing out', async ({
   page,
 }) => {
-  const email = await signInAs(page, 'active');
+  const { email } = await searchAmong(page, [SAM, TOBY]);
   const saved = async () => {
     const profile = await profileOf(await userIdOf(email));
     return { filters: profile.search_filters, hide: profile.hide_by_gender };
@@ -236,7 +383,7 @@ test('the filters and the switch are saved on the profile and survive signing ou
 });
 
 test('filters that could not be saved can be retried', async ({ page }) => {
-  const email = await signInAs(page, 'active');
+  const { email } = await searchAmong(page, [SAM, TOBY]);
   const rpc = '**/rest/v1/rpc/set_search_filters';
   await page.route(rpc, (route) => route.abort());
 

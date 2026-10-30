@@ -3,8 +3,7 @@ import { Component, computed, ElementRef, inject, input, signal, viewChild } fro
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, firstValueFrom } from 'rxjs';
-import { Profile } from '../../core/profile.model';
-import { ageFrom } from '../../core/age';
+import { Member } from '../../core/profile.model';
 import { lookingForLabel } from '../../features/onboarding/onboarding-options';
 import { photoTransitionName } from './profile-transition';
 
@@ -26,7 +25,7 @@ export class ProfileViewComponent {
   private readonly location = inject(Location);
   private readonly route = inject(ActivatedRoute);
 
-  readonly profile = input.required<Profile>();
+  readonly profile = input.required<Member>();
   /** URLs for `profile.photos`, in the same order; null for one not (yet) available. */
   readonly photoUrls = input<(string | null)[]>([]);
   /** The back button's accessible name, e.g. "Back to applications". */
@@ -37,10 +36,6 @@ export class ProfileViewComponent {
   readonly photoIndex = signal(0);
 
   readonly transitionName = computed(() => photoTransitionName(this.profile().id));
-  readonly age = computed(() => {
-    const { birth_month, birth_year } = this.profile();
-    return ageFrom(`${birth_month ?? ''}`, `${birth_year ?? ''}`);
-  });
   readonly aboutParagraphs = computed(() =>
     this.profile()
       .bio.split(/\n\s*\n/)

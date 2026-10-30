@@ -73,6 +73,19 @@ export async function photoObject(
   return { ok: response.ok, bytes: Buffer.from(await response.arrayBuffer()) };
 }
 
+/** A plain JPEG of the given colour, made in the browser. */
+export async function jpeg(page: Page, colour: string): Promise<Buffer> {
+  const base64 = await page.evaluate(async (colour) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 600;
+    const context = canvas.getContext('2d')!;
+    context.fillStyle = colour;
+    context.fillRect(0, 0, 600, 600);
+    return canvas.toDataURL('image/jpeg').split(',')[1];
+  }, colour);
+  return Buffer.from(base64, 'base64');
+}
+
 /** Uploads a JPEG into the private `photos` bucket with the service role. */
 export async function uploadPhoto(path: string, jpeg: Buffer) {
   const response = await fetch(`${API_URL}/storage/v1/object/photos/${path}`, {
@@ -87,25 +100,36 @@ export async function uploadPhoto(path: string, jpeg: Buffer) {
   if (!response.ok) throw new Error(`Uploading ${path} failed: ${await response.text()}`);
 }
 
-/**
- * Creates an applicant without going through onboarding: a user who accepted the terms, with a
- * profile in `vetting` made of the given fields (`name` at least).
- */
-export async function createApplicant(
+/** A user who accepted the terms, with a profile of the given fields (`name` at least). */
+async function createProfile(
   fields: Record<string, unknown>,
 ): Promise<{ id: string; email: string }> {
-  const email = uniqueEmail('applicant');
+  const email = uniqueEmail('profile');
   const user = await api('/auth/v1/admin/users', { email, email_confirm: true });
   await api('/rest/v1/terms_acceptances', { user_id: user.id, version: 1 });
   await api('/rest/v1/profiles', {
     id: user.id,
-    status: 'vetting',
     pronouns: 'she/her',
-    bio: 'About the applicant',
+    bio: 'About them',
     location: 'London',
     ...fields,
   });
   return { id: user.id, email };
+}
+
+/** Creates an applicant without going through onboarding: a profile in `vetting`. */
+export function createApplicant(fields: Record<string, unknown>) {
+  return createProfile({ status: 'vetting', ...fields });
+}
+
+/** Creates a live member without going through vetting and the age check. */
+export function createMember(fields: Record<string, unknown>) {
+  return createProfile({ status: 'active', age_verified_at: new Date(), ...fields });
+}
+
+interface UserOptions {
+  acceptedTerms?: boolean;
+  location?: string;
 }
 
 /**
@@ -118,7 +142,7 @@ export async function createApplicant(
 export async function signInAs(
   page: Page,
   status: ProfileStatus | null,
-  options: { acceptedTerms?: boolean } = {},
+  options: UserOptions = {},
 ): Promise<string> {
   const email = await createUser(status, options);
   await signIn(page, email);
@@ -131,7 +155,7 @@ export async function signInAs(
  */
 export async function createUser(
   status: ProfileStatus | null,
-  { acceptedTerms = true } = {},
+  { acceptedTerms = true, location = 'London' }: UserOptions = {},
 ): Promise<string> {
   const email = uniqueEmail('shell');
   const user = await api('/auth/v1/admin/users', {
@@ -153,7 +177,7 @@ export async function createUser(
       name: 'E2E User',
       pronouns: 'they/them',
       bio: 'About the E2E user',
-      location: 'London',
+      location,
     });
   }
 

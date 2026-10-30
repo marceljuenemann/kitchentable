@@ -39,7 +39,7 @@
       </div>
     </div>
   </app-profile-view>
-} @else {
+} @else if (member() === null) {
   <div class="gone">
     <p>This profile isn't available.</p>
     <a mat-flat-button routerLink="/app">Back to search</a>

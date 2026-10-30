@@ -108,6 +108,14 @@ main {
   }
 }
 
+.message {
+  margin: 8px 0 16px;
+}
+
+mat-spinner {
+  margin: 24px auto;
+}
+
 .everyone {
   --invite-link-background: var(--kt-raised);
   margin-top: 16px;
