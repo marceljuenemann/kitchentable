@@ -77,6 +77,8 @@
       </ul>
     }
 
+    <ng-content select="[profileIntro]" />
+
     <section class="fade-in about" aria-label="About me">
       @for (paragraph of aboutParagraphs(); track $index) {
         <p>{{ paragraph }}</p>

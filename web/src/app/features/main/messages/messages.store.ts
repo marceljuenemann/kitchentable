@@ -34,6 +34,19 @@ export class MessagesStore {
       .filter(({ status }) => status !== 'pending')
       .sort(newestFirst),
   );
+  /** Intros others sent the viewer, for the Connections tab. */
+  readonly requests = computed(() =>
+    this.conversations()
+      .filter(
+        ({ status, initiatedByMe, declined }) =>
+          status === 'pending' && !initiatedByMe && !declined,
+      )
+      .sort(newestFirst),
+  );
+  /** The requests that have arrived since the viewer last opened the Connections tab. */
+  readonly newRequests = computed(
+    () => this.requests().filter(({ lastReadAt }) => lastReadAt === null).length,
+  );
   readonly totalUnread = computed(() =>
     this.conversations()
       .filter(({ status }) => status !== 'pending')
@@ -46,6 +59,26 @@ export class MessagesStore {
 
   markRead(id: string) {
     this.update(id, (conversation) => ({ ...conversation, lastReadAt: new Date().toISOString() }));
+  }
+
+  /** Opening the Connections tab counts as having seen every request in it. */
+  markRequestsSeen() {
+    this.requests()
+      .filter(({ lastReadAt }) => lastReadAt === null)
+      .forEach(({ person }) => this.markRead(person.id));
+  }
+
+  accept(id: string) {
+    this.update(id, (conversation) => ({
+      ...conversation,
+      status: 'accepted',
+      lastReadAt: new Date().toISOString(),
+    }));
+  }
+
+  /** Undoable, so nothing should reach the server before the snackbar has gone. */
+  setDeclined(id: string, declined: boolean) {
+    this.update(id, (conversation) => ({ ...conversation, declined }));
   }
 
   draft(id: string): string {

@@ -24,7 +24,7 @@ interface Tab {
   providers: [MessagesStore],
 })
 export class MainComponent {
-  readonly unreadMessages = inject(MessagesStore).totalUnread;
+  private readonly messages = inject(MessagesStore);
 
   readonly tabs: Tab[] = [
     {
@@ -82,6 +82,13 @@ export class MainComponent {
 
   constructor() {
     afterNextRender(() => setTimeout(() => this.animated.set(true)));
+  }
+
+  /** What the tab's badge counts. */
+  unreadOn(tab: Tab): number {
+    if (tab.path === '/app/connections') return this.messages.newRequests();
+    if (tab.path === '/app/messages') return this.messages.totalUnread();
+    return 0;
   }
 
   private currentPath(): string {

@@ -9,16 +9,16 @@ test('the bottom nav switches between the tabs', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Search' })).toBeVisible();
   await expect(nav.getByRole('link', { name: 'Search' })).toHaveAttribute('aria-current', 'page');
 
-  for (const [label, path] of [
+  for (const [label, path, heading = label] of [
     ['Your profile', '/app/profile'],
-    ['Connections', '/app/connections'],
+    ['Connections', '/app/connections', 'Introductions'],
     ['Messages', '/app/messages'],
     ['Community', '/app/community'],
     ['Search', '/app'],
   ]) {
     await nav.getByRole('link', { name: label }).click();
     await expect(page).toHaveURL(path);
-    await expect(page.getByRole('heading', { name: label })).toBeVisible();
+    await expect(page.getByRole('heading', { name: heading })).toBeVisible();
     await expect(nav.getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
     await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
   }

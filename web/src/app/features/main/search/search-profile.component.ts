@@ -15,6 +15,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { PhotoStorageService } from '../../../core/photo-storage.service';
 import { Member } from '../../../core/profile.model';
+import { HeartComponent } from '../../../shared/heart/heart.component';
+import { HideIconComponent } from '../../../shared/hide-icon/hide-icon.component';
 import { CLOSE_ANIMATION_MS } from '../../../shared/profile-view/profile-transition';
 import { ProfileViewComponent } from '../../../shared/profile-view/profile-view.component';
 import { SearchStore } from './search.store';
@@ -23,7 +25,7 @@ import { SearchStore } from './search.store';
 @Component({
   selector: 'app-search-profile',
   standalone: true,
-  imports: [MatButtonModule, RouterLink, ProfileViewComponent],
+  imports: [HeartComponent, HideIconComponent, MatButtonModule, RouterLink, ProfileViewComponent],
   templateUrl: './search-profile.component.html',
   styleUrl: './search-profile.component.scss',
 })

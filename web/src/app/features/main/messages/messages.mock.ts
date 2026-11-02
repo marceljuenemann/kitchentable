@@ -211,6 +211,75 @@ export function mockConversations(empty = false): Conversation[] {
       ],
     },
     {
+      // Requests for the Connections tab: the two new ones show in the bottom nav's badge.
+      person: {
+        ...member('maya', 'Maya', 'she/her', [
+          'polyamory',
+          'friends',
+          'exploring',
+          'open-relationship',
+        ]),
+        tagline: 'Hosts a monthly supper club, likes a long table',
+        bio: "I host a monthly supper club: twelve people, one long table, no phones out. It started as a way to feed friends after a bad year and turned into the best part of my month.\n\nI have a partner of six years who you'd probably meet at the table eventually. Slow is good. I would rather cook with someone twice than message for a fortnight.",
+        gender: ['Woman'],
+        sexuality: ['Queer'],
+        age: 34,
+      },
+      photoUrl: '/mock/maya.jpg',
+      isTeam: false,
+      status: 'pending',
+      initiatedByMe: false,
+      lookingFor: ['polyamory', 'friends', 'exploring', 'open-relationship'],
+      lastReadAt: null,
+      messages: thread('maya', [
+        [
+          'them',
+          "Hi! You said the best evenings are the ones where nobody checks the time, and that's more or less why I started a supper club. There's a seat at the table this month if you fancy it, no pressure at all. What would you bring?",
+          3 * HOUR,
+        ],
+      ]),
+    },
+    {
+      person: {
+        ...member('sami', 'Sami', 'he/him', ['relationship-anarchy', 'friends', 'casual']),
+        tagline: 'Two partners, one allotment, endless tomatoes',
+        bio: 'Two partners, one allotment, and more tomatoes than any household needs by August. I am usually the person who brings the surplus to the pub.\n\nI am not looking to add a third to anything. I am looking for people whose company I want on a Tuesday.',
+        gender: ['Man'],
+        sexuality: ['Bisexual'],
+        age: 41,
+      },
+      photoUrl: '/mock/sami.jpg',
+      isTeam: false,
+      status: 'pending',
+      initiatedByMe: false,
+      lookingFor: ['relationship-anarchy', 'friends', 'casual'],
+      lastReadAt: null,
+      messages: thread('sami', [
+        [
+          'them',
+          "Hello. I don't usually write first, but your bit about wanting people for the ordinary days stopped me scrolling. Most of mine involve soil.\n\nWould you like to come and be unimpressed by my allotment some time?",
+          26 * HOUR,
+        ],
+      ]),
+    },
+    {
+      person: {
+        ...member('ellie', 'Ellie', 'she/they', ['friends', 'exploring']),
+        tagline: 'Sunday swims, bookshop shifts, firm views on biscuits',
+        bio: 'Bookshop shifts most weekdays, Sunday swims at the lido whatever the temperature. I will talk about either at length.\n\nNew to organised dating, not new to non-monogamy.',
+        gender: ['Non-binary', 'Woman'],
+        sexuality: ['Pansexual'],
+        age: 38,
+      },
+      photoUrl: '/mock/ellie.jpg',
+      isTeam: false,
+      status: 'pending',
+      initiatedByMe: false,
+      lookingFor: ['friends', 'exploring'],
+      lastReadAt: seen(DAY),
+      messages: thread('ellie', [['them', 'Fellow Sunday swimmer? Say hi!', 2 * DAY]]),
+    },
+    {
       // Not listed: an intro nobody has answered yet.
       person: member('priya', 'Priya', 'she/they', ['polyamory']),
       photoUrl: null,

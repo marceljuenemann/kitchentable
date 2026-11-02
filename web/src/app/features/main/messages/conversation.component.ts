@@ -18,13 +18,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { map } from 'rxjs';
 import { photoTransitionName } from '../../../shared/profile-view/profile-transition';
-import { lookingForLabel } from '../../onboarding/onboarding-options';
 import { AvatarComponent } from './avatar.component';
 import {
   ConversationSheetComponent,
   ConversationSheetData,
   ConversationSheetResult,
 } from './conversation-sheet.component';
+import { IntroCardComponent } from './intro-card.component';
 import { clockTime, shortDate } from './message-time';
 import { ChatMessage, firstUnread } from './messages.model';
 import { MessagesStore } from './messages.store';
@@ -40,7 +40,14 @@ const UNREAD_LINE_GAP_PX = 8;
 @Component({
   selector: 'app-conversation',
   standalone: true,
-  imports: [AvatarComponent, MatButtonModule, MatIconModule, RouterLink, RouterOutlet],
+  imports: [
+    AvatarComponent,
+    IntroCardComponent,
+    MatButtonModule,
+    MatIconModule,
+    RouterLink,
+    RouterOutlet,
+  ],
   templateUrl: './conversation.component.html',
   styleUrl: './conversation.component.scss',
 })
@@ -72,9 +79,6 @@ export class ConversationComponent {
   });
   /** Changes only with something new at the end, so a retry doesn't scroll someone reading. */
   private readonly latestItem = computed(() => this.items().at(-1)?.key);
-  readonly lookingFor = computed(() =>
-    (this.conversation()?.lookingFor ?? []).map(lookingForLabel),
-  );
   /**
    * Set during the navigation, so the avatar gives up the morph's name before the browser
    * captures the new page: names must be unique, and the profile's photo has it then.

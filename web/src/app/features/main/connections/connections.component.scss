@@ -1,0 +1,75 @@
+// Scrolls itself, like search and Messages. Under the bottom nav (z-index 10), except while a
+// profile shows.
+:host {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  background: var(--kt-bg);
+  color: var(--kt-ink);
+  font-family: var(--kt-font-sans);
+
+  &.covering {
+    z-index: 20;
+  }
+}
+
+.page {
+  max-width: var(--kt-page-width);
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 0 16px 104px;
+}
+
+h1 {
+  margin: 0;
+  padding: 24px 8px 0;
+  font-family: var(--kt-font-display);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--kt-violet);
+}
+
+.hint {
+  margin: 4px 8px 16px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--kt-muted);
+}
+
+.requests {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// The shell's side padding, which the tiles don't use.
+.no-requests {
+  padding: 0 8px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 48px;
+  text-align: center;
+
+  h2 {
+    margin: 20px 0 0;
+    font-family: var(--kt-font-display);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--kt-violet);
+  }
+
+  p {
+    max-width: 300px;
+    margin: 8px 0 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--kt-muted);
+  }
+}

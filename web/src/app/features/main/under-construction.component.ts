@@ -22,7 +22,7 @@ import { ActivatedRoute } from '@angular/router';
     h1 {
       margin: 38px 0 0;
       font-family: var(--kt-font-display);
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 700;
       line-height: 1.2;
       color: var(--kt-violet);

@@ -26,8 +26,16 @@ export interface Conversation {
   lookingFor: string[];
   /** The viewer's read watermark (`connection_secrets.last_read_at`). */
   lastReadAt: string | null;
+  /** The viewer declined the intro (`connection_secrets.declined_at`). */
+  declined?: boolean;
   /** Oldest first. In a member's conversation, the first one is the intro. */
   messages: ChatMessage[];
+}
+
+/** What a member's intro says: their first message. */
+export function introText({ messages }: Conversation): string {
+  const content = messages[0]?.content;
+  return content?.type === 'text' ? content.text : '';
 }
 
 export function lastMessage(conversation: Conversation): ChatMessage | undefined {

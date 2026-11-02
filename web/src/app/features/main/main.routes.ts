@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { PROFILE_ROUTE_DATA } from '../../shared/profile-view/profile-transition';
 import { ConnectionsComponent } from './connections/connections.component';
+import { RequestProfileComponent } from './connections/request-profile.component';
 import { ConversationProfileComponent } from './messages/conversation-profile.component';
 import { ConversationComponent } from './messages/conversation.component';
 import { MessagesComponent } from './messages/messages.component';
@@ -28,7 +29,11 @@ export const MAIN_ROUTES: Routes = [
     ],
   },
   { path: 'profile', component: ProfileTabComponent, data: { title: 'Your profile' } },
-  { path: 'connections', component: ConnectionsComponent },
+  {
+    path: 'connections',
+    component: ConnectionsComponent,
+    children: [{ path: ':id', component: RequestProfileComponent, data: PROFILE_ROUTE_DATA }],
+  },
   {
     path: 'messages',
     component: MessagesComponent,

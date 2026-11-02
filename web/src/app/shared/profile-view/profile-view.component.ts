@@ -11,7 +11,8 @@ import { photoTransitionName } from './profile-transition';
  * A profile as members see it (prototype/browse): a full-width photo carousel, then the name,
  * pronouns, age and location, gender and sexuality chips, the About me text and Looking for. Covers the
  * screen over the grid it was opened from, as the child route of that grid. Anything placed
- * inside it (say, the admin's vetting box) goes below the profile.
+ * inside it (say, the admin's vetting box) goes below the profile, or above About me with the
+ * attribute `profileIntro` (say, the introduction someone sent you).
  */
 @Component({
   selector: 'app-profile-view',

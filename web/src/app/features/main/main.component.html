@@ -4,7 +4,7 @@
   <!-- The active tab's pill, one for all tabs, so it can slide from one to the next. -->
   <span class="indicator" aria-hidden="true"><span></span></span>
   @for (tab of tabs; track tab.path) {
-    @let unread = tab.path === '/app/messages' ? unreadMessages() : 0;
+    @let unread = unreadOn(tab);
     <a
       [routerLink]="tab.path"
       [class.active]="tab === currentTab()"

@@ -49,29 +49,14 @@
       @for (item of items(); track item.key) {
         @switch (item.kind) {
           @case ('intro') {
-            <article class="intro">
-              <p class="intro-title">
-                <svg viewBox="-40 -48 80 80" width="16" height="16" aria-hidden="true">
-                  <path
-                    fill="#E3AF47"
-                    d="M0 26C-22 8-38-4-38-20c0-13 10-22 21-22 8 0 14 5 17 11 3-6 9-11 17-11 11 0 21 9 21 22C38-4 22 8 0 26Z"
-                  />
-                </svg>
-                <span>{{
-                  item.message.mine ? 'Your introduction' : person.name + '’s introduction'
-                }}</span>
-                <time>{{ shortDate(item.message.createdAt) }}</time>
-              </p>
-              <p class="intro-text" [textContent]="textOf(item.message)"></p>
-              @if (lookingFor().length > 0) {
-                <p class="intro-label">Connecting on</p>
-                <ul class="chips">
-                  @for (value of lookingFor(); track value) {
-                    <li>{{ value }}</li>
-                  }
-                </ul>
-              }
-            </article>
+            <!-- What the conversation started with stays at the top of it. -->
+            <app-intro-card
+              [title]="item.message.mine ? 'Your introduction' : person.name + '’s introduction'"
+              [date]="item.message.createdAt"
+              [text]="textOf(item.message)"
+              [lookingFor]="conversation.lookingFor"
+              [mine]="item.message.mine"
+            />
           }
           @case ('connected') {
             <p class="event">You're connected</p>

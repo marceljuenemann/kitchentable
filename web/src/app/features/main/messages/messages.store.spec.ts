@@ -76,6 +76,60 @@ describe('MessagesStore', () => {
     expect(lastMessage(store.conversation('rowan')!)?.delivery).toBeUndefined();
   });
 
+  it('lists requests sent to the viewer, not the ones they sent', () => {
+    const ids = store.requests().map(({ person }) => person.id);
+
+    expect(ids).toEqual(['maya', 'sami', 'ellie']);
+  });
+
+  it('counts requests as new until the tab is opened', () => {
+    expect(store.newRequests()).toBe(2);
+
+    store.markRequestsSeen();
+
+    expect(store.newRequests()).toBe(0);
+    expect(store.requests().length).toBe(3);
+  });
+
+  it('leaves requests that were already seen alone', () => {
+    const seenAt = store.conversation('ellie')?.lastReadAt;
+    spyOn(store, 'markRead').and.callThrough();
+
+    store.markRequestsSeen();
+
+    expect(store.markRead).toHaveBeenCalledTimes(2);
+    expect(store.markRead).not.toHaveBeenCalledWith('ellie');
+    expect(store.conversation('ellie')?.lastReadAt).toBe(seenAt);
+  });
+
+  it('keeps requests out of the messages list and its unread count', () => {
+    const before = store.totalUnread();
+
+    store.markRequestsSeen();
+
+    expect(store.totalUnread()).toBe(before);
+    expect(store.conversationList().map(({ person }) => person.id)).not.toContain('maya');
+  });
+
+  it('turns an accepted request into a read conversation', () => {
+    const before = store.totalUnread();
+
+    store.accept('maya');
+
+    expect(store.requests().map(({ person }) => person.id)).not.toContain('maya');
+    expect(store.conversationList().map(({ person }) => person.id)).toContain('maya');
+    expect(store.totalUnread()).toBe(before);
+  });
+
+  it('takes a declined request off the list, and puts it back on undo', () => {
+    store.setDeclined('maya', true);
+    expect(store.requests().map(({ person }) => person.id)).not.toContain('maya');
+    expect(store.newRequests()).toBe(1);
+
+    store.setDeclined('maya', false);
+    expect(store.requests().map(({ person }) => person.id)).toContain('maya');
+  });
+
   it('keeps a draft per conversation', () => {
     store.saveDraft('noor', 'Hello Noor');
     store.saveDraft('rowan', 'Hello Rowan');

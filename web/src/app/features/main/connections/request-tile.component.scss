@@ -1,0 +1,104 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+// The photo on the left, the height of the card; the name, intro and chips on the right.
+a {
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid var(--kt-cream);
+  border-radius: 20px;
+  background: var(--kt-cream-soft);
+  box-shadow: var(--kt-shadow-soft);
+  color: var(--kt-ink);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    outline: 2px solid var(--kt-violet);
+    outline-offset: 2px;
+  }
+}
+
+.photo {
+  position: relative;
+  min-height: 168px;
+  overflow: hidden;
+  background: var(--kt-violet-container);
+
+  // Tall and narrow: faces sit in the upper part of a square photo.
+  img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 30%;
+  }
+}
+
+.body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px 14px;
+}
+
+h2 {
+  margin: 0;
+  font-family: var(--kt-font-display);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--kt-violet);
+}
+
+.pronouns {
+  margin-left: 2px;
+  font-family: var(--kt-font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--kt-muted);
+}
+
+// In italics and in quotes, as their own words. The closing quote only shows if it all fits.
+.text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  margin: 6px 0 0;
+  overflow: hidden;
+  font-size: 14.5px;
+  font-style: italic;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+// The colours of the chips on an intro card, a size smaller, at the bottom of the card.
+ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: auto 0 0;
+  padding: 8px 0 0;
+  list-style: none;
+}
+
+// On one line even in a narrow column: a pill of two lines looks broken.
+li {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: var(--kt-violet);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--kt-raised);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
