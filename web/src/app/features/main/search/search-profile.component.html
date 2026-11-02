@@ -10,12 +10,21 @@
             Hide profile
           </span>
         </button>
-        <button class="reach-out" mat-flat-button type="button" (click)="reachOut()">
+        <button
+          class="reach-out"
+          mat-flat-button
+          type="button"
+          [disabled]="introsRemaining() === 0"
+          (click)="reachOut(member)"
+        >
           <span class="label">
             <app-heart />
             Reach out
           </span>
         </button>
+        @if (introsRemaining() === 0) {
+          <p class="no-intros">No introductions left for today</p>
+        }
       </div>
     </div>
   </app-profile-view>

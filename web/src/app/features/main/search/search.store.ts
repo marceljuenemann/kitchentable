@@ -14,6 +14,10 @@ const SAVE_DELAY_MS = 300;
 /** Well within the hour that signed photo URLs last, so tiles shown again still load. */
 const RELOAD_AFTER_MS = 30 * 60 * 1000;
 
+/** The daily limit in `send_intro`. */
+const INTROS_PER_DAY = 3;
+const MOCK_SEND_MS = 700;
+
 /** The age slider's ends. The top one means "and older". */
 export const AGE_MIN = 18;
 export const AGE_MAX = 70;
@@ -152,6 +156,10 @@ export class SearchStore {
   readonly hiddenIds = signal<ReadonlySet<string>>(new Set());
   /** The member showing over the grid, if any. */
   readonly openId = signal<string | null>(null);
+  /** Introductions the viewer can still send today. Mock: `/app?noIntros` shows having none. */
+  readonly introsRemaining = signal(
+    new URLSearchParams(location.search).has('noIntros') ? 0 : INTROS_PER_DAY,
+  );
 
   readonly results = computed(() => {
     const filters = this.filters();
@@ -247,6 +255,22 @@ export class SearchStore {
       })
       .onAction()
       .subscribe(() => this.setDismissed(member, false));
+  }
+
+  /** Mock, to become `send_intro`: nothing reaches the backend yet. */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- until it's real
+  async sendIntro(member: Member, lookingFor: string[], text: string): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, MOCK_SEND_MS));
+    this.introsRemaining.update((remaining) => remaining - 1);
+  }
+
+  /** Takes someone off the grid once reached out to, as `search_profiles()` will from now on. */
+  showIntroSent(member: Member) {
+    this.setHidden(member.id, true);
+    this.snackBar.open(`Introduction sent to ${member.name}`, undefined, {
+      duration: 4000,
+      panelClass: 'kt-snackbar',
+    });
   }
 
   /** Changes the grid straight away; a failure to save puts it back. */

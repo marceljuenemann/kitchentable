@@ -240,10 +240,6 @@ test('a profile opens over the grid with its photos, and can be hidden and broug
     await expect.poll(() => loaded(page.getByRole('img', { name }))).toBe(true);
   }
 
-  // Reaching out isn't built yet.
-  await page.getByRole('button', { name: 'Reach out' }).click();
-  await expect(page.getByText("Reaching out isn't ready yet")).toBeVisible();
-
   await page.getByRole('button', { name: 'Hide profile' }).click();
   await page.waitForURL((url) => url.pathname === '/app');
   await expect(page.getByText("Maya won't show up again")).toBeVisible();
@@ -253,6 +249,51 @@ test('a profile opens over the grid with its photos, and can be hidden and broug
   await page.getByRole('button', { name: 'Undo' }).click();
   await expect(tile(page, 'Maya')).toBeVisible();
   await expect(page.getByText('1 person found')).toBeVisible();
+});
+
+// Sending is mocked in SearchStore for now, so this only covers the UI.
+test('reaching out takes what to connect on and a message', async ({ page }) => {
+  await searchAmong(page, [MAYA, IFE]);
+
+  await tile(page, 'Maya').click();
+  await page.getByRole('button', { name: 'Reach out' }).click();
+
+  const sheet = page.locator('mat-bottom-sheet-container');
+  await expect(sheet.getByRole('heading', { name: 'Introduce yourself' })).toBeVisible();
+  await expect(sheet.getByText('3 introductions left for today')).toBeVisible();
+  await expect(sheet.getByRole('textbox')).toHaveAttribute('placeholder', /connect with Maya$/);
+  // Only what Maya is looking for.
+  await expect(sheet.getByRole('option')).toHaveText(['Polyamory', 'Friends']);
+  await expect(sheet.getByRole('button', { name: 'Select what to connect on' })).toBeDisabled();
+  await sheet.getByRole('option', { name: 'Friends' }).click();
+  await expect(sheet.getByRole('button', { name: 'Write your message' })).toBeDisabled();
+  await sheet.getByRole('textbox').fill('Your supper club sounds lovely.');
+
+  // A tap outside the sheet doesn't lose what was written.
+  await page.mouse.click(10, 10);
+  await expect(sheet).toBeHidden();
+  await page.getByRole('button', { name: 'Reach out' }).click();
+  await expect(sheet.getByRole('textbox')).toHaveValue('Your supper club sounds lovely.');
+
+  await sheet.getByRole('button', { name: 'Send introduction' }).click();
+  await page.waitForURL((url) => url.pathname === '/app');
+  await expect(page.getByText('Introduction sent to Maya')).toBeVisible();
+  await expect(tile(page, 'Maya')).toBeHidden();
+  await expect(page.getByText('1 person found')).toBeVisible();
+
+  await tile(page, 'Ife').click();
+  await page.getByRole('button', { name: 'Reach out' }).click();
+  await expect(sheet.getByText('2 introductions left for today')).toBeVisible();
+});
+
+test('Reach out is disabled with no intros left', async ({ page }) => {
+  const {
+    ids: [id],
+  } = await searchAmong(page, [MAYA]);
+
+  await page.goto(`/app/profiles/${id}?noIntros`);
+  await expect(page.getByRole('button', { name: 'Reach out' })).toBeDisabled();
+  await expect(page.getByText('No introductions left for today')).toBeVisible();
 });
 
 test('members can sign the photos they are shown, but not list anyone else’s', async ({ page }) => {

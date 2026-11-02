@@ -7,10 +7,11 @@ import {
   signal,
   untracked,
   viewChild,
+  ViewContainerRef,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { PhotoStorageService } from '../../../core/photo-storage.service';
@@ -19,6 +20,7 @@ import { HeartComponent } from '../../../shared/heart/heart.component';
 import { HideIconComponent } from '../../../shared/hide-icon/hide-icon.component';
 import { CLOSE_ANIMATION_MS } from '../../../shared/profile-view/profile-transition';
 import { ProfileViewComponent } from '../../../shared/profile-view/profile-view.component';
+import { ReachOutSheetComponent } from './reach-out-sheet.component';
 import { SearchStore } from './search.store';
 
 /** Someone's profile over the search grid, with Reach out and Hide. */
@@ -33,7 +35,8 @@ export class SearchProfileComponent {
   private readonly store = inject(SearchStore);
   private readonly photos = inject(PhotoStorageService);
   private readonly route = inject(ActivatedRoute);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly bottomSheet = inject(MatBottomSheet);
+  private readonly viewContainerRef = inject(ViewContainerRef);
 
   private readonly view = viewChild(ProfileViewComponent);
   private readonly id = toSignal(this.route.paramMap.pipe(map((params) => params.get('id'))), {
@@ -56,6 +59,7 @@ export class SearchProfileComponent {
     if (full?.id === member.id) return full.urls;
     return [this.store.thumbs().get(member.id) ?? null];
   });
+  readonly introsRemaining = this.store.introsRemaining;
 
   constructor() {
     // Set during the navigation (not in an effect), so the tile gives up the morph's name
@@ -73,18 +77,29 @@ export class SearchProfileComponent {
   }
 
   /** The accessible alternative to swiping a tile away. */
-  async hide(member: Member) {
-    // Back to the grid first, so the photo morphs back into its tile, then the tile goes.
-    await this.view()?.close();
-    setTimeout(() => this.store.hide(member), CLOSE_ANIMATION_MS);
+  hide(member: Member) {
+    void this.closeThen(() => this.store.hide(member));
   }
 
-  // Introductions aren't built yet.
-  reachOut() {
-    this.snackBar.open("Reaching out isn't ready yet. Thanks for testing!", undefined, {
-      duration: 4000,
-      panelClass: 'kt-snackbar',
-    });
+  reachOut(member: Member) {
+    this.bottomSheet
+      .open<ReachOutSheetComponent, Member, boolean>(ReachOutSheetComponent, {
+        data: member,
+        panelClass: ['kt-bottom-sheet', 'kt-bottom-sheet-inner-scroll'],
+        autoFocus: 'dialog',
+        // So the sheet gets this route's SearchStore.
+        viewContainerRef: this.viewContainerRef,
+      })
+      .afterDismissed()
+      .subscribe((sent) => {
+        if (sent) void this.closeThen(() => this.store.showIntroSent(member));
+      });
+  }
+
+  /** Back to the grid first, so the photo morphs back into its tile, then the tile goes. */
+  private async closeThen(takeOffGrid: () => void) {
+    await this.view()?.close();
+    setTimeout(takeOffGrid, CLOSE_ANIMATION_MS);
   }
 
   private async loadFullPhotos({ id, photos }: Member) {

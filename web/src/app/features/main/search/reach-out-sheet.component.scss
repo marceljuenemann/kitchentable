@@ -1,0 +1,82 @@
+// Opened with `kt-bottom-sheet-inner-scroll` (see styles.scss): only the middle scrolls, so the
+// button stays in reach while the message gets long.
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-top: 12px;
+  font-family: var(--kt-font-sans);
+  // Not the bottom sheet's (Material's body text tracking).
+  letter-spacing: normal;
+}
+
+.grab-handle {
+  flex: none;
+  align-self: center;
+  width: 44px;
+  height: 5px;
+  margin-bottom: 14px;
+  border-radius: 99px;
+  background: var(--kt-outline-soft);
+}
+
+h2 {
+  flex: none;
+  margin: 0;
+  padding: 0 20px;
+  font-family: var(--kt-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--kt-violet);
+}
+
+// The padding is here rather than on the host, so the scrollbar sits by the sheet's edge.
+.body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 20px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kt-input) transparent;
+}
+
+// Like the field's own label below it.
+.label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kt-muted);
+}
+
+mat-chip-listbox {
+  margin-top: 6px;
+}
+
+// Room for the label sitting on the field's border.
+mat-form-field {
+  --mat-form-field-outlined-container-shape: 14px;
+  flex: none;
+  margin-top: 20px;
+}
+
+.error {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--mat-sys-error);
+}
+
+.actions {
+  flex: none;
+  padding: 4px 20px 20px;
+  text-align: center;
+
+  button {
+    --mat-button-filled-container-height: 52px;
+    --mat-button-filled-label-text-size: 16.5px;
+    width: 100%;
+  }
+}

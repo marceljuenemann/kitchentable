@@ -397,5 +397,28 @@ describe('SearchStore', () => {
       expect(store.results()).toEqual([ivy]);
       expect(open.calls.mostRecent().args[0]).toBe("Couldn't hide ivy");
     });
+
+    it('uses up an intro for each one sent', fakeAsync(() => {
+      create();
+      expect(store.introsRemaining()).toBe(3);
+
+      store.sendIntro(ivy, ['polyamory'], 'Hello');
+      tick(1000);
+      expect(store.introsRemaining()).toBe(2);
+    }));
+
+    it('takes someone off the grid once reached out to, with no undo', async () => {
+      respondWith([ivy]);
+      create();
+      await store.load();
+
+      store.showIntroSent(ivy);
+
+      expect(store.results()).toEqual([]);
+      expect(open.calls.mostRecent().args.slice(0, 2)).toEqual([
+        'Introduction sent to ivy',
+        undefined,
+      ]);
+    });
   });
 });

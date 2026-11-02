@@ -9,6 +9,29 @@
   --mat-button-outlined-horizontal-padding: 12px;
 }
 
+// Two columns rather than one per child, so the note can take a row of its own.
+.kt-profile-bar {
+  grid-auto-flow: row;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 6px;
+}
+
+// Under both buttons, so the bar is this much taller than usual.
+.no-intros {
+  grid-column: 1 / -1;
+  height: 18px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  color: var(--kt-muted);
+}
+
+.kt-profile-actions:has(.no-intros) {
+  margin-bottom: 24px;
+}
+
 // White, like the back button.
 .hide {
   --mat-button-outlined-outline-color: var(--kt-outline-soft);

@@ -1,0 +1,45 @@
+<div class="grab-handle" aria-hidden="true"></div>
+<h2>Introduce yourself</h2>
+
+<div class="body">
+  <p class="label">Select what you want to connect on</p>
+  <mat-chip-listbox
+    class="kt-chips primary"
+    multiple
+    aria-label="Select what you want to connect on"
+    [value]="picked()"
+    (change)="setPicked($event.value)"
+  >
+    @for (option of options; track option.value) {
+      <mat-chip-option [value]="option.value">{{ option.label }}</mat-chip-option>
+    }
+  </mat-chip-listbox>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+    <mat-label>Your message</mat-label>
+    <textarea
+      matInput
+      rows="5"
+      placeholder="Introduce yourself and say why you want to connect with {{ member.name }}"
+      [attr.maxlength]="maxLength"
+      [value]="text()"
+      (input)="setText($any($event.target).value)"
+    ></textarea>
+    @if (showCount()) {
+      <mat-hint align="end">{{ text().length }} / {{ maxLength }}</mat-hint>
+    }
+  </mat-form-field>
+
+  @if (failed()) {
+    <p class="error" role="alert">
+      We couldn't send your introduction. Check your connection and try again.
+    </p>
+  }
+</div>
+
+<div class="actions">
+  <button mat-flat-button type="button" [disabled]="!canSend()" (click)="send()">
+    {{ buttonLabel() }}
+  </button>
+  <p class="kt-fine-print">{{ introsLeft() }}</p>
+</div>
