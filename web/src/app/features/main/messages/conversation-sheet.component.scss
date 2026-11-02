@@ -1,0 +1,81 @@
+.sheet {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 20px 24px;
+  font-family: var(--kt-font-sans);
+  // Not the bottom sheet's (Material's body text tracking).
+  letter-spacing: normal;
+}
+
+.grab-handle {
+  align-self: center;
+  width: 44px;
+  height: 5px;
+  margin-bottom: 14px;
+  border-radius: 99px;
+  background: var(--kt-outline-soft);
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-family: var(--kt-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--kt-violet);
+}
+
+p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--kt-ink);
+}
+
+.row {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--kt-ink);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  mat-icon {
+    color: var(--kt-violet);
+  }
+
+  &.danger,
+  &.danger mat-icon {
+    color: var(--kt-magenta);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--kt-violet);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 20px;
+
+  button {
+    --mat-button-filled-container-height: 52px;
+    --mat-button-outlined-container-height: 52px;
+    --mat-button-outlined-label-text-color: var(--kt-violet);
+  }
+}
+
+.end {
+  --mat-button-filled-container-color: var(--kt-magenta);
+}

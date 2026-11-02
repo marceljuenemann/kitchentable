@@ -387,6 +387,46 @@ mat-checkbox {
   }
 }
 
+// The bar at the bottom of someone's profile, with one button or several of the same size. Goes
+// inside `app-profile-view`: a `.kt-profile-actions` holding a `.kt-profile-bar`.
+//
+// The first holds the bar's room at the end of the page: its height (border, padding, button),
+// plus 14px after the content to match the space above the buttons, less the profile view's 48px
+// of bottom padding.
+.kt-profile-actions {
+  height: calc(1px + 14px + 52px + max(20px, env(safe-area-inset-bottom)) + 14px - 48px);
+}
+
+// Fixed like the bottom nav, across the page width, over the profile.
+.kt-profile-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 1;
+  transform: translateX(-50%);
+  width: min(var(--kt-page-width), 100%);
+  box-sizing: border-box;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 12px;
+  padding: 14px 20px max(20px, env(safe-area-inset-bottom));
+  background: color-mix(in oklch, var(--kt-raised) 96%, transparent);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--kt-outline-soft);
+  animation: kt-fade-in 0.2s 0.2s ease-out both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes kt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
 // Opening and closing a profile (shared/profile-view/profile-transition.ts): the photo morphs
 // between tile and profile, and the rest of the page cross-fades.
 ::view-transition-group(*) {

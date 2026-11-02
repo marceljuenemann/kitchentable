@@ -1,8 +1,8 @@
 @if (member(); as member) {
   <app-profile-view [profile]="member" [photoUrls]="photoUrls()" backLabel="Back to search">
     <!-- Holds the bar's room at the end of the page; the bar itself stays at the bottom. -->
-    <div class="actions">
-      <div class="bar">
+    <div class="kt-profile-actions">
+      <div class="kt-profile-bar">
         <!-- Also the accessible alternative to swiping a tile away. -->
         <button class="hide" mat-stroked-button type="button" (click)="hide(member)">
           <span class="label">

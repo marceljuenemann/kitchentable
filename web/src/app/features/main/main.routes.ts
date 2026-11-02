@@ -1,6 +1,9 @@
 import { Routes } from '@angular/router';
 import { PROFILE_ROUTE_DATA } from '../../shared/profile-view/profile-transition';
 import { ConnectionsComponent } from './connections/connections.component';
+import { ConversationProfileComponent } from './messages/conversation-profile.component';
+import { ConversationComponent } from './messages/conversation.component';
+import { MessagesComponent } from './messages/messages.component';
 import { ProfileTabComponent } from './profile-tab/profile-tab.component';
 import { SearchProfileComponent } from './search/search-profile.component';
 import { SearchComponent } from './search/search.component';
@@ -26,7 +29,22 @@ export const MAIN_ROUTES: Routes = [
   },
   { path: 'profile', component: ProfileTabComponent, data: { title: 'Your profile' } },
   { path: 'connections', component: ConnectionsComponent },
-  { path: 'messages', component: UnderConstructionComponent, data: { title: 'Messages' } },
+  {
+    path: 'messages',
+    component: MessagesComponent,
+    children: [
+      { path: 'profiles/:id', component: ConversationProfileComponent, data: PROFILE_ROUTE_DATA },
+      // Where a profile opened by its URL goes back to, or it would count as a conversation's id.
+      { path: 'profiles', pathMatch: 'full', redirectTo: '' },
+      {
+        path: ':id',
+        component: ConversationComponent,
+        children: [
+          { path: 'profile', component: ConversationProfileComponent, data: PROFILE_ROUTE_DATA },
+        ],
+      },
+    ],
+  },
   { path: 'community', component: UnderConstructionComponent, data: { title: 'Community' } },
   { path: '**', redirectTo: '' },
 ];

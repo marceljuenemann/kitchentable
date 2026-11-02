@@ -1,0 +1,13 @@
+<div class="page">
+  <h1>Messages</h1>
+
+  @for (conversation of store.conversationList(); track conversation.person.id) {
+    <app-conversation-row
+      [conversation]="conversation"
+      [morphs]="conversation.person.id === morphId() && !overlayOpen()"
+      (openingProfile)="morphId.set(conversation.person.id)"
+    />
+  }
+</div>
+
+<router-outlet (activate)="overlayOpen.set(true)" (deactivate)="overlayOpen.set(false)" />

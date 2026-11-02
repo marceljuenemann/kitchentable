@@ -121,7 +121,7 @@ No separate id: a connection is identified by its two users, so messages and the
 
 #### Conversations with the admins
 
-Every member has an `accepted` connection with each admin (one for now), so they can message the admins for feedback, questions or reports, and the admins can write to them, like any connection: the lists, read state and emails need no exceptions. The admin is the initiator and `looking_for` is empty. It can't be ended (`end_connection` refuses). `get_connected_profiles()` marks the admin with `is_admin`, which the app uses for what's different about this conversation (pinned, no "end"). Admin accounts are separate and have no other conversations, so an admin's Messages tab is the inbox.
+Every member has an `accepted` connection with each admin (one for now), so they can message the admins for feedback, questions or reports, and the admins can write to them, like any connection: the lists, read state and emails need no exceptions. The admin is the initiator and `looking_for` is empty. It can't be ended (`end_connection` refuses). `get_connected_profiles()` marks the admin with `is_admin`, which the app uses for what's different about this conversation (no intro, no "end"); in the list it sorts with the others. The admins mean to welcome each new member with a personal message, written by hand, so it usually isn't empty, but the app doesn't rely on that. Admin accounts are separate and have no other conversations, so an admin's Messages tab is the inbox.
 
 - **Created when a profile goes live:** the `connect_new_member_with_admins` trigger (status from `approved` to `active`, so activating by hand in Studio connects them too) calls `connect_with_admins(member_id)`, which also creates both `connection_secrets` rows. The migration that added it connected the members who were already live.
 - **A new admin** isn't connected with existing members automatically: see [Admins](#admins).
@@ -140,6 +140,8 @@ Every member has an `accepted` connection with each admin (one for now), so they
 | `updated_at`               | `timestamptz` | Set by a trigger, for replication.                                                                                                                                           |
 
 **Read state without read receipts:** a message is unread for its recipient if it was sent after their `last_read_at`, so the user's own messages never count (or they've never opened the conversation), unless they declined the intro. An intro is just the first message, so new intros are unread the same way (they get their own email, though: see [Member emails](#member-emails-planned)). Opening a conversation moves the watermark: one write, however many messages there were. The sender never sees it, because it's in the reader's own row. A read flag on each message would have to be hidden from the sender by column, and the recipient would be updating rows someone else wrote.
+
+**Accepted intros:** accepting adds no message, so the app also counts an `accepted` connection as unread if it has messages and the user's `last_read_at` is null. That's how the initiator finds out: `last_read_at` is only set by `mark_read`, and they can't open the conversation before it's accepted. For the recipient the intro is already read, because opening it moved their watermark. The conversation with the admins starts accepted and never opened too, which is why it needs messages to count.
 
 **Mutual reveals** (an idea for later, such as both saying they're ready for a date, shown only once both have) follow the same pattern: each person's answer is a column in their own row, and the function that sets it checks the other person's row. Once both have answered, it writes the result into `connections`, where both can see it. Until then, neither can tell what the other said.
 
@@ -236,7 +238,7 @@ A pg_cron job runs every 10 minutes and calls `send_email` for each email that i
 | Kind     | Says                                                           | About                                                                                                        | Timestamp             |
 | -------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------- |
 | intro    | "Someone wants to connect with you <3", and links to the app   | `pending` connections where the user is the recipient, not declined and not yet opened (`last_read_at` null) | `intros_emailed_at`   |
-| messages | "You have new messages on Kitchen Table", and links to the app | unread messages in `accepted` connections                                                                    | `messages_emailed_at` |
+| messages | "You have new messages on Kitchen Table", and links to the app | unread messages and [accepted intros](#connection_secrets) in `accepted` connections                         | `messages_emailed_at` |
 
 One email of each kind covers all connections. An email of a kind is due when:
 

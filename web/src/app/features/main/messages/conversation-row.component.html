@@ -1,0 +1,32 @@
+@let person = conversation().person;
+@let isTeam = conversation().isTeam;
+<div class="row" [class.unread]="unread() > 0" [class.ended]="conversation().status === 'ended'">
+  <!-- The team has no profile, so its logo is just more of the link to the conversation. -->
+  <a
+    class="photo"
+    [routerLink]="isTeam ? conversationLink() : ['/app/messages/profiles', person.id]"
+    [attr.aria-label]="isTeam ? null : 'View ' + person.name + '’s profile'"
+    [attr.aria-hidden]="isTeam ? true : null"
+    [attr.tabindex]="isTeam ? -1 : null"
+    (click)="openingProfile.emit()"
+  >
+    <app-avatar
+      [name]="person.name"
+      [photoUrl]="conversation().photoUrl"
+      [team]="isTeam"
+      [transitionName]="transitionName()"
+    />
+  </a>
+  <a class="text" [routerLink]="conversationLink()">
+    <span class="line">
+      <span class="name">{{ person.name }}</span>
+      <span class="time">{{ time() }}</span>
+    </span>
+    <span class="line">
+      <span class="preview">{{ preview() }}</span>
+      @if (unread() > 0) {
+        <span class="count"> {{ unread() }}<span class="kt-visually-hidden"> unread</span> </span>
+      }
+    </span>
+  </a>
+</div>
