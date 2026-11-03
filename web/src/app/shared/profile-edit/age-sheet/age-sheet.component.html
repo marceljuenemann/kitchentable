@@ -1,7 +1,10 @@
 <div class="kt-sheet">
   <div class="kt-grab-handle" aria-hidden="true"></div>
 
-  <h2 class="kt-sheet-title">When were you born?</h2>
+  <div class="title-row">
+    <h2 class="kt-sheet-title">When were you born?</h2>
+    <button mat-button type="button" (click)="clear()">Clear</button>
+  </div>
   <p class="help">To protect your privacy, we only ask for your month and year of birth.</p>
 
   <div class="selects">

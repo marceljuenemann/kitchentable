@@ -20,7 +20,7 @@
       (change)="onChange($event.value)"
     >
       @for (option of options(); track option) {
-        <mat-chip-option [value]="option">{{ option }}</mat-chip-option>
+        <mat-chip-option [value]="option">{{ label(option) }}</mat-chip-option>
       }
     </mat-chip-listbox>
 
@@ -34,6 +34,8 @@
   </div>
 
   @if (data.multi) {
-    <button mat-flat-button class="done" type="button" (click)="done()">Done</button>
+    <button mat-flat-button class="done" type="button" [disabled]="!canFinish()" (click)="done()">
+      {{ canFinish() ? 'Done' : 'Pick at least one' }}
+    </button>
   }
 </div>

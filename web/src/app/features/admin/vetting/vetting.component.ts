@@ -3,10 +3,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { RouterOutlet } from '@angular/router';
 import { FooterComponent } from '../../../shared/footer/footer.component';
 import { HeaderComponent } from '../../../shared/header/header.component';
-import {
-  ProfileGridComponent,
-  ProfileTile,
-} from '../../../shared/profile-grid/profile-grid.component';
+import { ProfileGridComponent } from '../../../shared/profile-grid/profile-grid.component';
+import { ProfileTile } from '../../../shared/profile-grid/profile-tile.component';
 import { VettingStore } from './vetting.store';
 
 /** The applications waiting for review, as a grid; one opens over it as a child route. */

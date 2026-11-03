@@ -515,27 +515,6 @@ mat-checkbox {
   }
 }
 
-// A gold note about something unfinished or out of the ordinary ("Still under construction").
-// Put a `mat-icon` and a `span` in it.
-.kt-notice {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin: 0;
-  padding: 14px 16px;
-  border: 1px solid color-mix(in oklch, var(--kt-gold) 35%, transparent);
-  border-radius: 14px;
-  background: var(--kt-gold-container);
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--kt-ink);
-
-  mat-icon {
-    flex: none;
-    color: var(--kt-gold);
-  }
-}
-
 // Applied via `panelClass` on MatSnackBar.open(): dark and rounded, above the main app's bottom
 // nav (and the Reach out bar on a profile), across the page's content like the cards.
 .kt-snackbar {

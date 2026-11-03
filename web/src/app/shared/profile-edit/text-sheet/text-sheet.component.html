@@ -1,0 +1,61 @@
+<div class="kt-sheet">
+  <div class="kt-grab-handle" aria-hidden="true"></div>
+
+  <h2 class="kt-sheet-title">{{ data.title }}</h2>
+  @if (data.help) {
+    <p class="help">{{ data.help }}</p>
+  }
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    @if (data.multiline) {
+      <textarea
+        matInput
+        class="kt-scroller"
+        rows="9"
+        [attr.aria-label]="data.title"
+        [attr.maxlength]="data.maxLength ?? null"
+        [placeholder]="data.placeholder"
+        [value]="value()"
+        (input)="value.set($any($event.target).value)"
+      ></textarea>
+    } @else {
+      <input
+        matInput
+        [attr.aria-label]="data.title"
+        [attr.autocomplete]="data.autocomplete ?? null"
+        [attr.maxlength]="data.maxLength ?? null"
+        [placeholder]="data.placeholder"
+        [value]="value()"
+        (input)="value.set($any($event.target).value)"
+        (keydown.enter)="save()"
+      />
+    }
+    <!-- One hint per block: a block with several elements isn't projected into the hint slot. -->
+    @if (missing() > 0) {
+      <mat-hint class="short">{{ data.minLength }} characters minimum</mat-hint>
+    }
+    @if (data.minLength) {
+      <mat-hint align="end" [class.short]="missing() > 0">
+        @if (missing() > 0) {
+          {{ length() }} / {{ data.minLength }}
+        } @else {
+          {{ length() }} characters
+        }
+      </mat-hint>
+    }
+    @if (data.maxLength) {
+      <mat-hint align="end">{{ left() }} left</mat-hint>
+    }
+  </mat-form-field>
+
+  @if (previewTile(); as tile) {
+    <div class="preview">
+      <h3 class="kt-label">This is how you show up in search:</h3>
+      <app-profile-tile [tile]="tile" />
+    </div>
+  }
+
+  <button mat-flat-button class="done" type="button" [disabled]="!canSave()" (click)="save()">
+    Done
+  </button>
+</div>

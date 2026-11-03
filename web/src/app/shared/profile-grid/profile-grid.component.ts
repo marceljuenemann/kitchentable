@@ -1,15 +1,7 @@
 import { Component, ElementRef, inject, input, linkedSignal, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { photoTransitionName } from '../profile-view/profile-transition';
-
-/** What a tile shows. */
-export interface ProfileTile {
-  id: string;
-  name: string;
-  tagline: string;
-  /** The main photo's thumbnail, or null for none (or not loaded yet). */
-  photoUrl: string | null;
-}
+import { ProfileTile, ProfileTileComponent } from './profile-tile.component';
 
 /** How far left a tile must be dragged to hide it, and how far it can go. */
 const HIDE_THRESHOLD_PX = 76;
@@ -28,7 +20,7 @@ const SLIDE_OUT_MS = 180;
 @Component({
   selector: 'app-profile-grid',
   standalone: true,
-  imports: [RouterLink],
+  imports: [ProfileTileComponent, RouterLink],
   templateUrl: './profile-grid.component.html',
   styleUrl: './profile-grid.component.scss',
 })

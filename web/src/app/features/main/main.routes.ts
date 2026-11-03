@@ -6,6 +6,8 @@ import { RequestProfileComponent } from './connections/request-profile.component
 import { ConversationProfileComponent } from './messages/conversation-profile.component';
 import { ConversationComponent } from './messages/conversation.component';
 import { MessagesComponent } from './messages/messages.component';
+import { MyProfileStore } from './profile-tab/my-profile.store';
+import { ProfilePreviewComponent } from './profile-tab/profile-preview.component';
 import { ProfileTabComponent } from './profile-tab/profile-tab.component';
 import { SearchProfileComponent } from './search/search-profile.component';
 import { SearchComponent } from './search/search.component';
@@ -28,7 +30,12 @@ export const MAIN_ROUTES: Routes = [
       { path: 'profiles/:id', component: SearchProfileComponent, data: PROFILE_ROUTE_DATA },
     ],
   },
-  { path: 'profile', component: ProfileTabComponent, data: { title: 'Your profile' } },
+  {
+    path: 'profile',
+    component: ProfileTabComponent,
+    providers: [MyProfileStore],
+    children: [{ path: 'preview', component: ProfilePreviewComponent, data: PROFILE_ROUTE_DATA }],
+  },
   {
     path: 'connections',
     component: ConnectionsComponent,

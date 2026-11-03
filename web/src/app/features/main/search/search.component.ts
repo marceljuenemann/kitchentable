@@ -3,10 +3,8 @@ import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterOutlet } from '@angular/router';
 import { InviteLinkComponent } from '../../../shared/invite-link/invite-link.component';
-import {
-  ProfileGridComponent,
-  ProfileTile,
-} from '../../../shared/profile-grid/profile-grid.component';
+import { ProfileGridComponent } from '../../../shared/profile-grid/profile-grid.component';
+import { ProfileTile } from '../../../shared/profile-grid/profile-tile.component';
 import { FilterField, FilterSheetComponent } from './filter-sheet.component';
 import {
   AGE_MAX,

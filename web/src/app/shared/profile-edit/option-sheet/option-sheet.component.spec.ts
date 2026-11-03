@@ -105,6 +105,45 @@ describe('OptionSheetComponent', () => {
     });
   });
 
+  describe('with ids for values, like Looking for', () => {
+    const labels: Record<string, string> = { friends: 'Friends', casual: 'Casual' };
+
+    beforeEach(() =>
+      create({
+        options: ['friends', 'casual'],
+        required: true,
+        label: (value) => labels[value] ?? value,
+        valueFor: (text) =>
+          Object.keys(labels).find((id) => labels[id].toLowerCase() === text.toLowerCase()) ?? text,
+      }),
+    );
+
+    it('shows the labels and closes with the ids', () => {
+      click('Casual');
+      component.done();
+
+      expect(dismiss).toHaveBeenCalledOnceWith(['casual']);
+    });
+
+    it('treats typing an option’s label as a duplicate, and stores anything else as typed', () => {
+      expect(component.isDuplicate('friends')).toBeTrue();
+      expect(component.isDuplicate('FRIENDS')).toBeTrue();
+
+      component.addCustom('Running buddies');
+
+      expect(component.selected()).toEqual(['Running buddies']);
+    });
+
+    it('needs at least one picked before Done', () => {
+      component.done();
+      expect(dismiss).not.toHaveBeenCalled();
+
+      click('Friends');
+      component.done();
+      expect(dismiss).toHaveBeenCalledOnceWith(['friends']);
+    });
+  });
+
   describe('single-select', () => {
     it('closes as soon as an option is picked', () => {
       create({ multi: false });

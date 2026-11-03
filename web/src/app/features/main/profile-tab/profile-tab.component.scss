@@ -1,9 +1,67 @@
+// Scrolls itself, like search: the router scrolls the window to the top on every navigation,
+// which would lose the page's place when the preview closes. Under the bottom nav (z-index 10),
+// except while the preview shows.
 :host {
-  display: block;
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  background: var(--kt-bg);
+  color: var(--kt-ink);
+  font-family: var(--kt-font-sans);
+
+  &.covering {
+    z-index: 20;
+  }
+}
+
+// The shell's column, with room for the bottom nav.
+.page {
+  max-width: var(--kt-page-width);
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 24px 24px 104px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  .kt-tab-title {
+    margin: 0;
+  }
+}
+
+// Material pulls a leading icon 8px into the padding (M3), which leaves the content off-centre.
+.preview {
+  --mat-button-outlined-icon-offset: 0;
+}
+
+h2.kt-label {
+  margin: 28px 0 0;
+}
+
+.hint {
+  margin: 4px 0 12px;
+  font-size: 14px;
+  color: var(--kt-muted);
+}
+
+.kt-field-rows {
+  margin-top: 10px;
+}
+
+// About me is long: its first lines are enough to recognise it.
+.kt-field-row .value.long {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .account {
-  margin-top: 28px;
+  margin-top: 32px;
 
   b {
     color: var(--kt-ink);

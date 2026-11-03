@@ -1,13 +1,58 @@
-<app-under-construction />
+<div class="page">
+  <div class="title-row">
+    <h1 class="kt-tab-title">Your profile</h1>
+    <a mat-stroked-button class="preview" routerLink="preview">
+      <mat-icon>visibility</mat-icon>
+      Preview
+    </a>
+  </div>
 
-<mat-card class="kt-card account" appearance="outlined">
-  <h2>Account</h2>
-  @if (session(); as session) {
-    <p>
-      Signed in as <b>{{ session.user.email }}</b>
-    </p>
+  @if (store.profile(); as profile) {
+    <h2 class="kt-label">Photos</h2>
+    <p class="hint">Drag to reorder. The first one is your main photo.</p>
+    <app-photo-grid
+      [photos]="profile.photos"
+      [remove]="removePhoto"
+      [minPhotos]="1"
+      [mainTransitionName]="mainTransitionName()"
+      (added)="addPhoto($event)"
+      (reordered)="savePhotos($event)"
+    />
+
+    @for (group of groups(); track group.title) {
+      <h2 class="kt-label">{{ group.title }}</h2>
+      <div class="kt-field-rows">
+        @for (row of group.rows; track row.field) {
+          <button
+            type="button"
+            class="kt-field-row"
+            [class.set]="row.value"
+            (click)="openRow(row.field)"
+          >
+            <span class="text">
+              <span class="kt-label">{{ row.label }}</span>
+              <span class="value" [class.long]="row.field === 'bio'">
+                {{ row.value || row.emptyText }}
+              </span>
+            </span>
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        }
+      </div>
+    }
   }
-  <button mat-stroked-button type="button" (click)="signOut()">Sign out</button>
-</mat-card>
 
-<app-legal-links />
+  <mat-card class="kt-card account" appearance="outlined">
+    <h2>Account</h2>
+    @if (session(); as session) {
+      <p>
+        Signed in as <b>{{ session.user.email }}</b>
+      </p>
+    }
+    <button mat-stroked-button type="button" (click)="signOut()">Sign out</button>
+  </mat-card>
+
+  <app-legal-links />
+</div>
+
+<router-outlet (activate)="previewOpen.set(true)" (deactivate)="previewOpen.set(false)" />

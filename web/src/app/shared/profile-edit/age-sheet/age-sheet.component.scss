@@ -1,3 +1,9 @@
+.title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
 .help {
   margin: 4px 0 0;
   font-size: 14px;

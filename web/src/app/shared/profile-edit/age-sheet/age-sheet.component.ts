@@ -51,6 +51,12 @@ export class AgeSheetComponent {
   readonly year = signal(this.data.birthYear);
   readonly age = computed(() => ageFrom(this.month(), this.year()));
 
+  /** The birthday is optional: without one, the profile shows no age. */
+  clear() {
+    this.month.set('');
+    this.year.set('');
+  }
+
   done() {
     this.ref.dismiss({ birthMonth: this.month(), birthYear: this.year() });
   }

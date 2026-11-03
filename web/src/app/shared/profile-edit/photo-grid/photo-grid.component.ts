@@ -42,6 +42,10 @@ export class PhotoGridComponent {
    * caller. If it throws, the grid says the photo couldn't be removed.
    */
   readonly remove = input.required<(id: string) => Promise<void>>();
+  /** Photos can't be removed once there are only this many (a live profile needs one). */
+  readonly minPhotos = input(0);
+  /** The main photo's `view-transition-name`, for opening the profile with a morph. */
+  readonly mainTransitionName = input<string | null>(null);
   /** A photo has been uploaded: add it at the end. */
   readonly added = output<string>();
   /** The photos in their new order, after one was dragged. */
@@ -60,6 +64,7 @@ export class PhotoGridComponent {
     }),
   );
 
+  readonly canRemove = computed(() => this.photos().length > this.minPhotos());
   readonly busy = signal(false);
   readonly error = signal<string | null>(null);
 

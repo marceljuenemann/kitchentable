@@ -15,21 +15,28 @@
 <div class="grid" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="reorder($event)">
   @for (photo of slots(); track photo ? photo.id : 'empty-' + $index) {
     @if (photo) {
-      <div class="tile filled" cdkDrag [cdkDragStartDelay]="{ touch: 200, mouse: 0 }">
+      <div
+        class="tile filled"
+        cdkDrag
+        [cdkDragStartDelay]="{ touch: 200, mouse: 0 }"
+        [style.view-transition-name]="$index === 0 ? mainTransitionName() : null"
+      >
         @if (photo.url) {
           <img [src]="photo.url" [alt]="'Photo ' + ($index + 1)" />
         } @else {
           <mat-spinner class="loading" diameter="24" />
         }
         <span class="badge">Main</span>
-        <button
-          class="remove"
-          type="button"
-          [attr.aria-label]="'Remove photo ' + ($index + 1)"
-          (click)="onRemove(photo.id)"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
+        @if (canRemove()) {
+          <button
+            class="remove"
+            type="button"
+            [attr.aria-label]="'Remove photo ' + ($index + 1)"
+            (click)="onRemove(photo.id)"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        }
       </div>
     } @else {
       <button class="tile empty" type="button" [disabled]="busy()" (click)="picker.click()">
