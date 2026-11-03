@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { PROFILE_ROUTE_DATA } from '../../shared/profile-view/profile-transition';
+import { CommunityComponent } from './community/community.component';
 import { ConnectionsComponent } from './connections/connections.component';
 import { RequestProfileComponent } from './connections/request-profile.component';
 import { ConversationProfileComponent } from './messages/conversation-profile.component';
@@ -9,7 +10,6 @@ import { ProfileTabComponent } from './profile-tab/profile-tab.component';
 import { SearchProfileComponent } from './search/search-profile.component';
 import { SearchComponent } from './search/search.component';
 import { SearchStore } from './search/search.store';
-import { UnderConstructionComponent } from './under-construction.component';
 
 /**
  * The main app's tabs, children of `/app`. They show only when the shell shows the main app
@@ -50,6 +50,6 @@ export const MAIN_ROUTES: Routes = [
       },
     ],
   },
-  { path: 'community', component: UnderConstructionComponent, data: { title: 'Community' } },
+  { path: 'community', component: CommunityComponent },
   { path: '**', redirectTo: '' },
 ];

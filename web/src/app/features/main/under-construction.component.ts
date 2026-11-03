@@ -8,7 +8,7 @@ import { ActivatedRoute } from '@angular/router';
   standalone: true,
   imports: [MatIconModule],
   template: `
-    <h1>{{ title }}</h1>
+    <h1 class="kt-tab-title">{{ title }}</h1>
     <p class="kt-notice">
       <mat-icon aria-hidden="true">construction</mat-icon>
       <span>Still under construction. Thank you for being an early tester!</span>
@@ -17,15 +17,6 @@ import { ActivatedRoute } from '@angular/router';
   styles: `
     :host {
       display: block;
-    }
-
-    h1 {
-      margin: 38px 0 0;
-      font-family: var(--kt-font-display);
-      font-size: 28px;
-      font-weight: 700;
-      line-height: 1.2;
-      color: var(--kt-violet);
     }
 
     .kt-notice {

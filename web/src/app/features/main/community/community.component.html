@@ -1,0 +1,85 @@
+<app-header />
+<!-- For screen readers: the bottom nav says which tab this is for everyone else. -->
+<h1 class="kt-visually-hidden">Community</h1>
+
+@if (team(); as team) {
+  <mat-card class="kt-card" appearance="outlined">
+    <h2>How do you like Kitchen Table?</h2>
+    @if (moreSent()) {
+      <p>
+        Thank you! Your feedback is in your
+        <a [routerLink]="['/app/messages', team.person.id]">conversation with the team</a>, where
+        we'll reply if there's anything to say.
+      </p>
+    } @else {
+      <div class="moods" role="group" aria-label="How do you like Kitchen Table?">
+        @for (option of moods; track option.label) {
+          <button
+            type="button"
+            [class.chosen]="option === mood()"
+            [attr.aria-pressed]="option === mood()"
+            [attr.aria-label]="option.label"
+            (click)="sendMood(option)"
+          >
+            {{ option.emoji }}
+          </button>
+        }
+      </div>
+      @if (mood()) {
+        <p class="thanks" role="status">Thanks! Anything you'd like to add?</p>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+          <mat-label>Tell us more</mat-label>
+          <textarea
+            matInput
+            rows="4"
+            placeholder="What's working, what isn't, what's missing?"
+            [attr.maxlength]="maxLength"
+            [value]="more()"
+            (input)="more.set($any($event.target).value)"
+          ></textarea>
+        </mat-form-field>
+        <button mat-flat-button type="button" [disabled]="!more().trim()" (click)="sendMore()">
+          Send
+        </button>
+      }
+    }
+  </mat-card>
+}
+
+<mat-card class="kt-card" appearance="outlined">
+  <h2>Invite friends</h2>
+  <p>Know someone who'd be a good fit? Help Kitchen Table grow by inviting them with your link:</p>
+  <app-invite-link />
+</mat-card>
+
+<mat-card class="kt-card" appearance="outlined">
+  <h2>Get involved</h2>
+  <p>Join our WhatsApp group to talk about what we build next and try things out early.</p>
+  <a mat-flat-button [href]="whatsappLink" target="_blank" rel="noopener noreferrer">
+    Join the WhatsApp group
+  </a>
+</mat-card>
+
+@if (team(); as team) {
+  <mat-card class="kt-card" appearance="outlined">
+    <h2>Report a problem</h2>
+    <p>Someone making you uncomfortable, or something not working? Tell the team.</p>
+    <a mat-stroked-button [routerLink]="['/app/messages', team.person.id]">Message the team</a>
+  </mat-card>
+}
+
+<mat-card class="kt-card" appearance="outlined">
+  <h2>Open source code</h2>
+  <p>
+    Our code is public on GitHub. If you have a GitHub account, feel free to file bugs and features
+    requests there. Issues are public too, so leave out anything personal.
+  </p>
+  <a
+    mat-stroked-button
+    href="https://github.com/marceljuenemann/kitchentable/"
+    target="_blank"
+    rel="noopener"
+  >
+    Code on GitHub
+  </a>
+</mat-card>

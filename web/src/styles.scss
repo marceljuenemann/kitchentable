@@ -202,10 +202,16 @@ mat-form-field {
   --mat-form-field-outlined-input-text-placeholder-color: var(--kt-outline);
 }
 
-// A slim, soft scrollbar in text areas instead of the browser's default one.
+// A slim, soft scrollbar instead of the browser's default one, for anything that scrolls on its
+// own: pages that scroll themselves rather than the window, sheets, text areas. On phones it's
+// the usual overlay that only shows while scrolling; on desktop it shows how long the page is.
+.kt-scroller,
 mat-form-field textarea {
   scrollbar-width: thin;
   scrollbar-color: var(--kt-input) transparent;
+}
+
+mat-form-field textarea {
   padding-right: 4px;
 }
 
@@ -402,6 +408,16 @@ mat-checkbox {
       transform: translateX(18px);
     }
   }
+}
+
+// The title of a main app tab that sits in the shell's column, such as "Your profile".
+.kt-tab-title {
+  margin: 38px 0 0;
+  font-family: var(--kt-font-display);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--kt-violet);
 }
 
 // For screen readers only, like a tab's `h1` when the bottom nav already shows which tab it is.
