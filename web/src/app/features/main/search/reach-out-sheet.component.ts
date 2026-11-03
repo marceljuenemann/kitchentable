@@ -4,10 +4,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { ConnectionsStore, INTRO_LIMIT_CODE } from '../../../core/connections/connections.store';
 import { Member } from '../../../core/profile.model';
 import { UserStorage } from '../../../core/user-storage';
 import { lookingForLabel } from '../../onboarding/onboarding-options';
-import { SearchStore } from './search.store';
 
 /** Only checked here: `check_message_content()` allows any message 2000 characters. */
 const MAX_LENGTH = 750;
@@ -21,7 +21,8 @@ interface IntroDraft {
 
 /**
  * Writing an introduction: what to connect on, from what they're looking for, and a message.
- * Dismissed with `true` once it's sent. Uses the SearchStore of the search route it's opened from.
+ * Dismissed with `true` once it's sent. Opened with the profile's view container, for the main
+ * app's ConnectionsStore.
  */
 @Component({
   selector: 'app-reach-out-sheet',
@@ -33,7 +34,7 @@ interface IntroDraft {
 export class ReachOutSheetComponent {
   private readonly ref =
     inject<MatBottomSheetRef<ReachOutSheetComponent, boolean>>(MatBottomSheetRef);
-  private readonly store = inject(SearchStore);
+  private readonly store = inject(ConnectionsStore);
   private readonly storage = inject(UserStorage);
   readonly member = inject<Member>(MAT_BOTTOM_SHEET_DATA);
 
@@ -48,7 +49,8 @@ export class ReachOutSheetComponent {
   readonly picked = signal(this.initialPicks());
   readonly text = signal(this.draft?.text ?? '');
   readonly sending = signal(false);
-  readonly failed = signal(false);
+  /** Why the last try failed: the daily limit, or anything else. */
+  readonly failed = signal<'limit' | 'error' | null>(null);
   readonly showCount = computed(() => this.text().length >= SHOW_COUNT_FROM);
 
   /** What's still missing, so the disabled button says why. */
@@ -59,7 +61,8 @@ export class ReachOutSheetComponent {
   });
   /** It only opens with some left: the profile says so when there are none. */
   readonly introsLeft = computed(() => {
-    const remaining = this.store.introsRemaining();
+    const remaining = this.store.introsLeftToday();
+    if (remaining === null) return '';
     return remaining === 1
       ? '1 introduction left for today'
       : `${remaining} introductions left for today`;
@@ -81,7 +84,7 @@ export class ReachOutSheetComponent {
   async send() {
     if (!this.canSend()) return;
     this.sending.set(true);
-    this.failed.set(false);
+    this.failed.set(null);
     // Closing now would lose track of an introduction that's on its way.
     this.ref.disableClose = true;
     try {
@@ -91,7 +94,8 @@ export class ReachOutSheetComponent {
       this.ref.dismiss(true);
     } catch (error) {
       console.warn('Could not send the introduction', error);
-      this.failed.set(true);
+      const limit = (error as { code?: string }).code === INTRO_LIMIT_CODE;
+      this.failed.set(limit ? 'limit' : 'error');
       this.sending.set(false);
       this.ref.disableClose = false;
     }

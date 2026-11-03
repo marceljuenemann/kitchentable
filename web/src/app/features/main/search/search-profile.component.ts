@@ -14,6 +14,7 @@ import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
+import { ConnectionsStore } from '../../../core/connections/connections.store';
 import { PhotoStorageService } from '../../../core/photo-storage.service';
 import { Member } from '../../../core/profile.model';
 import { HeartComponent } from '../../../shared/heart/heart.component';
@@ -59,7 +60,7 @@ export class SearchProfileComponent {
     if (full?.id === member.id) return full.urls;
     return [this.store.thumbs().get(member.id) ?? null];
   });
-  readonly introsRemaining = this.store.introsRemaining;
+  readonly introsRemaining = inject(ConnectionsStore).introsLeftToday;
 
   constructor() {
     // Set during the navigation (not in an effect), so the tile gives up the morph's name
@@ -87,7 +88,7 @@ export class SearchProfileComponent {
         data: member,
         panelClass: ['kt-bottom-sheet', 'kt-bottom-sheet-inner-scroll'],
         autoFocus: 'dialog',
-        // So the sheet gets this route's SearchStore.
+        // So the sheet gets the main app's ConnectionsStore.
         viewContainerRef: this.viewContainerRef,
       })
       .afterDismissed()

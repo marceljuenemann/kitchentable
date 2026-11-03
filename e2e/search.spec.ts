@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { expect, Page, test } from '@playwright/test';
 import {
+  createIntro,
   createMember,
   jpeg,
   profileOf,
@@ -288,10 +289,17 @@ test('reaching out takes what to connect on and a message', async ({ page }) => 
 
 test('Reach out is disabled with no intros left', async ({ page }) => {
   const {
+    email,
     ids: [id],
   } = await searchAmong(page, [MAYA]);
+  // Today's three, to people elsewhere.
+  const me = await userIdOf(email);
+  for (const name of ['Ann', 'Bea', 'Cy']) {
+    const { id: other } = await createMember({ name, location: `Elsewhere ${randomUUID()}` });
+    await createIntro(me, other, `Hello ${name}`);
+  }
 
-  await page.goto(`/app/profiles/${id}?noIntros`);
+  await page.goto(`/app/profiles/${id}`);
   await expect(page.getByRole('button', { name: 'Reach out' })).toBeDisabled();
   await expect(page.getByText('No introductions left for today')).toBeVisible();
 });

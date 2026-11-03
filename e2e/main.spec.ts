@@ -11,7 +11,8 @@ test('the bottom nav switches between the tabs', async ({ page }) => {
 
   for (const [label, path, heading = label] of [
     ['Your profile', '/app/profile'],
-    ['Connections', '/app/connections', 'Introductions'],
+    // A new member has none, so the empty state.
+    ['Connections', '/app/connections', 'No introductions'],
     ['Messages', '/app/messages'],
     ['Community', '/app/community'],
     ['Search', '/app'],
@@ -22,6 +23,13 @@ test('the bottom nav switches between the tabs', async ({ page }) => {
     await expect(nav.getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
     await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
   }
+});
+
+test("an admin's profile tab says it's the admin account", async ({ page }) => {
+  await signInAs(page, 'admin');
+  const nav = page.getByRole('navigation', { name: 'Main' });
+
+  await expect(nav.getByRole('link', { name: 'Your profile, admin account' })).toBeVisible();
 });
 
 test('a tab opens directly by its URL, and an unknown one falls back to Search', async ({

@@ -16,19 +16,22 @@ export function injectRequestActions() {
   const snackBar = inject(MatSnackBar);
 
   return {
-    accept({ person }: Conversation, options: { replaceUrl?: boolean } = {}) {
-      store.accept(person.id);
-      return router.navigate(['/app/messages', person.id], options);
+    /** Whether it worked; if not, the store has said so. */
+    async accept(conversation: Conversation, options: { replaceUrl?: boolean } = {}) {
+      if (!(await store.accept(conversation))) return false;
+      return router.navigate(['/app/messages', conversation.person.id], options);
     },
-    hide({ person }: Conversation) {
-      store.setDeclined(person.id, true);
-      snackBar
-        .open(`Hidden. ${person.name} won't be told`, 'Undo', {
-          duration: 4000,
-          panelClass: 'kt-snackbar',
-        })
-        .onAction()
-        .subscribe(() => store.setDeclined(person.id, false));
+    hide(conversation: Conversation) {
+      const { person } = conversation;
+      store.setHidden(person.id, true);
+      const snack = snackBar.open(`Hidden. ${person.name} won't be told`, 'Undo', {
+        duration: 4000,
+        panelClass: 'kt-snackbar',
+      });
+      snack.afterDismissed().subscribe(({ dismissedByAction }) => {
+        if (dismissedByAction) store.setHidden(person.id, false);
+        else void store.decline(conversation);
+      });
     },
   };
 }

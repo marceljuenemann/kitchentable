@@ -19,10 +19,12 @@
       <mat-icon aria-hidden="true">person</mat-icon>
       View profile
     </button>
-    <button class="row" type="button" (click)="choose('report')">
-      <mat-icon aria-hidden="true">flag</mat-icon>
-      Report a problem
-    </button>
+    @if (data.canReport) {
+      <button class="row" type="button" (click)="choose('report')">
+        <mat-icon aria-hidden="true">flag</mat-icon>
+        Report a problem
+      </button>
+    }
     @if (data.canEnd) {
       <button class="row danger" type="button" (click)="confirmingEnd.set(true)">
         <mat-icon aria-hidden="true">link_off</mat-icon>

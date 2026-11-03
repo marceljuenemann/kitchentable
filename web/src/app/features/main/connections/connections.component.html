@@ -12,7 +12,7 @@
         />
       }
     </div>
-  } @else {
+  } @else if (store.ready()) {
     <div class="no-requests">
       <app-header />
       <!-- For screen readers: the bottom nav says which tab this is for everyone else. -->

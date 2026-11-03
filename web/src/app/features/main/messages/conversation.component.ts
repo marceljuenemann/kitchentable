@@ -71,13 +71,23 @@ export class ConversationComponent {
 
   readonly maxLength = MAX_LENGTH;
   readonly conversation = computed(() => this.store.conversation(this.id()));
+  /** Whether it's there yet: opened by its URL, it comes once the store is ready. */
+  private readonly available = computed(() => !!this.conversation());
+  /** The latest message from the other person, which is read if it comes while this is open. */
+  private readonly latestFromThem = computed(
+    () =>
+      this.conversation()
+        ?.messages.filter(({ mine }) => !mine)
+        .at(-1)?.id,
+  );
+  readonly ready = this.store.ready;
   /** The first message that was unread on opening. Opening marks it read, so this keeps it. */
   private readonly unreadFromId = signal<string | null>(null);
   readonly items = computed(() => {
     const conversation = this.conversation();
     return conversation ? threadItems(conversation, new Date(), this.unreadFromId()) : [];
   });
-  /** Changes only with something new at the end, so a retry doesn't scroll someone reading. */
+  /** Changes only with something new at the end, so a message being sent doesn't scroll anyone. */
   private readonly latestItem = computed(() => this.items().at(-1)?.key);
   /**
    * Set during the navigation, so the avatar gives up the morph's name before the browser
@@ -98,6 +108,7 @@ export class ConversationComponent {
   constructor() {
     effect(() => {
       const id = this.id();
+      if (!this.available()) return;
       untracked(() => {
         const conversation = this.store.conversation(id);
         if (!id || !conversation) return;
@@ -107,6 +118,16 @@ export class ConversationComponent {
         this.draft.set(this.store.draft(id));
       });
     });
+    // Messages that come while it's open are read, unless the page is hidden (a locked phone),
+    // and then they are once it shows again.
+    effect(() => {
+      if (this.latestFromThem()) untracked(() => this.markReadIfVisible());
+    });
+    const onVisibilityChange = () => this.markReadIfVisible();
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    this.destroyRef.onDestroy(() =>
+      document.removeEventListener('visibilitychange', onVisibilityChange),
+    );
     afterRenderEffect(() => {
       this.latestItem();
       untracked(() => this.settle());
@@ -145,11 +166,6 @@ export class ConversationComponent {
     }
   }
 
-  retry(message: ChatMessage) {
-    const id = this.id();
-    if (id) this.store.retry(id, message.id);
-  }
-
   textOf(message: ChatMessage): string {
     return message.content.type === 'text' ? message.content.text : '';
   }
@@ -161,7 +177,11 @@ export class ConversationComponent {
       .open<ConversationSheetComponent, ConversationSheetData, ConversationSheetResult>(
         ConversationSheetComponent,
         {
-          data: { name: conversation.person.name, canEnd: conversation.status === 'accepted' },
+          data: {
+            name: conversation.person.name,
+            canEnd: conversation.status === 'accepted' && !conversation.withAdmins,
+            canReport: !!this.store.team(),
+          },
           panelClass: 'kt-bottom-sheet',
           autoFocus: 'dialog',
         },
@@ -173,9 +193,14 @@ export class ConversationComponent {
         } else if (result === 'report') {
           this.router.navigate(['/app/messages', this.store.team()?.person.id]);
         } else if (result === 'end') {
-          this.store.end(conversation.person.id);
+          void this.store.end(conversation.person.id);
         }
       });
+  }
+
+  private markReadIfVisible() {
+    const id = this.id();
+    if (id && this.available() && document.visibilityState === 'visible') this.store.markRead(id);
   }
 
   /** Back through the history, so the phone's back gesture and this button agree. */

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal, untracked } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ConnectionsStore } from '../../../core/connections/connections.store';
 import { HeaderComponent } from '../../../shared/header/header.component';
@@ -29,7 +29,12 @@ export class ConnectionsComponent {
   readonly morphId = signal<string | null>(null);
 
   constructor() {
-    this.store.markRequestsSeen();
+    this.store.loadIfStale();
+    // Also the ones that arrive while the tab is open.
+    effect(() => {
+      this.store.requests();
+      untracked(() => this.store.markRequestsSeen());
+    });
   }
 
   /** While the profile shows, the tile gives up the name to the profile's photo. */

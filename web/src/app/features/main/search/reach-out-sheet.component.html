@@ -30,7 +30,11 @@
     }
   </mat-form-field>
 
-  @if (failed()) {
+  @if (failed() === 'limit') {
+    <p class="error" role="alert">
+      You've sent all your introductions for today. Your message is saved here for tomorrow.
+    </p>
+  } @else if (failed()) {
     <p class="error" role="alert">
       We couldn't send your introduction. Check your connection and try again.
     </p>

@@ -370,7 +370,7 @@ mat-checkbox {
 }
 
 // Applied via `panelClass` on MatSnackBar.open(): dark and rounded, above the main app's bottom
-// nav (and the Reach out bar on a profile).
+// nav (and the Reach out bar on a profile), across the page's content like the cards.
 .kt-snackbar {
   --mat-snack-bar-container-color: var(--kt-ink);
   --mat-snack-bar-container-shape: 14px;
@@ -379,13 +379,28 @@ mat-checkbox {
   --mat-snack-bar-supporting-text-size: 14px;
   --mat-snack-bar-button-color: oklch(0.86 0.07 90);
   margin: 0 16px 96px !important;
-  max-width: calc(var(--kt-page-width) - 32px) !important;
+  width: calc(min(100vw, var(--kt-page-width)) - 32px);
+  max-width: none !important;
   box-shadow: var(--kt-shadow-lift);
   border-radius: 14px;
+  // Its overlay pane takes up the margin too, which covers the bottom nav: only the snackbar
+  // itself takes clicks.
+  pointer-events: auto;
+
+  // Material's own width limits (344px to 672px) would keep it from the content's edges.
+  .mat-mdc-snackbar-surface {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
 
   .mat-mdc-button {
     font-weight: 800;
   }
+}
+
+.cdk-overlay-pane:has(> .kt-snackbar) {
+  pointer-events: none;
 }
 
 // The bar at the bottom of someone's profile, with one button or several of the same size. Goes

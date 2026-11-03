@@ -88,10 +88,7 @@
                 [textContent]="textOf(message)"
               ></p>
               @if (message.delivery === 'failed') {
-                <p class="status failed" role="alert">
-                  Not sent ·
-                  <button type="button" (click)="retry(message)">Try again</button>
-                </p>
+                <p class="status failed" role="alert">Not sent</p>
               } @else if (message.delivery === 'sending') {
                 <p class="status">Sending…</p>
               } @else if (item.endsGroup) {
@@ -134,7 +131,7 @@
     }
   </div>
   <router-outlet (activate)="profileOpen.set(true)" (deactivate)="profileOpen.set(false)" />
-} @else {
+} @else if (ready()) {
   <div class="gone">
     <p>This conversation isn't available.</p>
     <a mat-flat-button routerLink="/app/messages">Back to messages</a>

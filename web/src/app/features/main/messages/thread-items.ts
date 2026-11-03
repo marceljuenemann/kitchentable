@@ -37,7 +37,7 @@ export function threadItems(
   now = new Date(),
   unreadFromId: string | null = null,
 ): ThreadItem[] {
-  const intro = conversation.isTeam ? undefined : conversation.messages[0];
+  const intro = conversation.withAdmins ? undefined : conversation.messages[0];
   const messages = intro ? conversation.messages.slice(1) : conversation.messages;
   const items: ThreadItem[] = [];
 

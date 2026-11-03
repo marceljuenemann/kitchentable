@@ -398,15 +398,6 @@ describe('SearchStore', () => {
       expect(open.calls.mostRecent().args[0]).toBe("Couldn't hide ivy");
     });
 
-    it('uses up an intro for each one sent', fakeAsync(() => {
-      create();
-      expect(store.introsRemaining()).toBe(3);
-
-      store.sendIntro(ivy, ['polyamory'], 'Hello');
-      tick(1000);
-      expect(store.introsRemaining()).toBe(2);
-    }));
-
     it('takes someone off the grid once reached out to, with no undo', async () => {
       respondWith([ivy]);
       create();

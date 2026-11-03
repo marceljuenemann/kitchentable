@@ -12,7 +12,14 @@ describe('injectSignOut', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: UserStorage, useValue: { onSignOut: () => calls.push('clear storage') } },
-        { provide: AuthService, useValue: { signOut: async () => calls.push('end session') } },
+        {
+          provide: AuthService,
+          useValue: {
+            // Also removes this user's local database, which doesn't exist here.
+            session: () => ({ user: { id: 'sign-out-spec' } }),
+            signOut: async () => calls.push('end session'),
+          },
+        },
         { provide: Router, useValue: { navigateByUrl: async (url: string) => calls.push(url) } },
       ],
     });

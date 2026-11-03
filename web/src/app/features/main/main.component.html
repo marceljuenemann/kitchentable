@@ -1,6 +1,6 @@
 <router-outlet />
 
-<nav aria-label="Main" [class.animated]="animated()">
+<nav aria-label="Main" [class.animated]="animated()" [class.admin]="isAdmin()">
   <!-- The active tab's pill, one for all tabs, so it can slide from one to the next. -->
   <span class="indicator" aria-hidden="true"><span></span></span>
   @for (tab of tabs; track tab.path) {
@@ -9,7 +9,7 @@
       [routerLink]="tab.path"
       [class.active]="tab === currentTab()"
       [attr.aria-current]="tab === currentTab() ? 'page' : null"
-      [attr.aria-label]="unread > 0 ? tab.label + ', ' + unread + ' unread' : tab.label"
+      [attr.aria-label]="labelOf(tab, unread)"
     >
       <span class="pill">
         @if (unread > 0) {

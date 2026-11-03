@@ -1,7 +1,7 @@
-import { Component, inject, viewChild } from '@angular/core';
+import { Component, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { introText } from '../../../core/connections/connections.model';
+import { Conversation, introText } from '../../../core/connections/connections.model';
 import { ConnectionsStore } from '../../../core/connections/connections.store';
 import { HeartComponent } from '../../../shared/heart/heart.component';
 import { HideIconComponent } from '../../../shared/hide-icon/hide-icon.component';
@@ -23,7 +23,7 @@ import { injectRequestActions } from './request-actions';
     RouterLink,
   ],
   template: `
-    @if (conversation; as conversation) {
+    @if (conversation(); as conversation) {
       <app-profile-view
         [profile]="conversation.person"
         [photoUrls]="[conversation.photoUrl]"
@@ -45,16 +45,16 @@ import { injectRequestActions } from './request-actions';
                 Hide profile
               </span>
             </button>
-            <button mat-flat-button type="button" (click)="accept()">
+            <button mat-flat-button type="button" [disabled]="connecting()" (click)="accept()">
               <span class="label">
                 <app-heart />
-                Connect
+                {{ connecting() ? 'Connecting…' : 'Connect' }}
               </span>
             </button>
           </div>
         </div>
       </app-profile-view>
-    } @else {
+    } @else if (conversation() === null) {
       <div class="gone">
         <p>This introduction isn't available.</p>
         <a mat-flat-button routerLink="/app/connections">Back to introductions</a>
@@ -117,20 +117,39 @@ export class RequestProfileComponent {
   private readonly view = viewChild(ProfileViewComponent);
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id');
 
-  /** Not reactive: it has to stay while the page leaves, after accepting or hiding. */
-  readonly conversation = this.store.requests().find(({ person }) => person.id === this.id);
+  /**
+   * Undefined until the store is ready (opened by its URL), null if there's no such request. Set
+   * once, not kept in step: it has to stay while the page leaves, after accepting or hiding.
+   */
+  readonly conversation = signal<Conversation | null | undefined>(undefined);
+  readonly connecting = signal(false);
   readonly introText = introText;
 
+  constructor() {
+    effect(() => {
+      if (!this.store.ready()) return;
+      untracked(() => {
+        if (this.conversation() !== undefined) return;
+        const request = this.store.requests().find(({ person }) => person.id === this.id);
+        this.conversation.set(request ?? null);
+      });
+    });
+  }
+
   /** Replaces the profile in the history, so back from the conversation goes to the cards. */
-  accept() {
+  async accept() {
+    const conversation = this.conversation();
+    if (!conversation) return;
     const replaceUrl = !!this.router.lastSuccessfulNavigation()?.previousNavigation;
-    if (this.conversation) this.actions.accept(this.conversation, { replaceUrl });
+    this.connecting.set(true);
+    await this.actions.accept(conversation, { replaceUrl });
+    this.connecting.set(false);
   }
 
   /** Back to the cards first, so the photo morphs back into its card, then the card goes. */
   async hide() {
     await this.view()?.close();
-    const conversation = this.conversation;
+    const conversation = this.conversation();
     if (conversation) setTimeout(() => this.actions.hide(conversation), CLOSE_ANIMATION_MS);
   }
 }

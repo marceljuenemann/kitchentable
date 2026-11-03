@@ -1,18 +1,130 @@
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { createRxDatabase, RxDatabase } from 'rxdb';
+import { getRxStorageMemory } from 'rxdb/plugins/storage-memory';
+import { AuthService } from '../auth/auth.service';
+import { PhotoStorageService } from '../photo-storage.service';
+import { SupabaseService } from '../supabase.service';
 import { UserStorage } from '../user-storage';
-import { lastMessage } from './connections.model';
-import { ConnectionsStore } from './connections.store';
+import { COLLECTIONS, ConnectionsCollections, ConnectionsDb } from './connections-db';
+import { ConnectedProfile, ConnectionRow, MessageRow, SecretRow } from './connections.model';
+import { ConnectionsStore, OPEN_CONNECTIONS_DB } from './connections.store';
+
+const ME = 'me';
+const NOW = new Date().toISOString();
+
+function profile(id: string, isAdmin = false): ConnectedProfile {
+  return {
+    id,
+    name: id,
+    pronouns: '',
+    tagline: '',
+    bio: '',
+    location: 'London',
+    gender: [],
+    sexuality: [],
+    looking_for: [],
+    photos: [],
+    age: null,
+    is_admin: isAdmin,
+  };
+}
+
+function connection(fields: Partial<ConnectionRow>): ConnectionRow {
+  return {
+    initiator_id: 'ivy',
+    recipient_id: ME,
+    status: 'accepted',
+    looking_for: ['friends'],
+    created_at: NOW,
+    updated_at: NOW,
+    ...fields,
+  };
+}
+
+function secret(other: string, fields: Partial<SecretRow> = {}): SecretRow {
+  return {
+    user_id: ME,
+    other_user_id: other,
+    dismissed_at: null,
+    declined_at: null,
+    last_read_at: null,
+    updated_at: NOW,
+    ...fields,
+  };
+}
+
+function message(id: string, from: string, to: string): MessageRow {
+  return {
+    id,
+    sender_id: from,
+    recipient_id: to,
+    content: { type: 'text', text: id },
+    created_at: NOW,
+    updated_at: NOW,
+  };
+}
+
+/** Checks after each round of timers and effects, until it holds (or fails after a while). */
+async function until(check: () => boolean, what: string) {
+  for (let i = 0; i < 200; i++) {
+    TestBed.tick();
+    if (check()) return;
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  fail(`Timed out waiting until ${what}`);
+}
+
+/** Lets pending work finish, for checking that something did *not* happen. */
+async function settle() {
+  for (let i = 0; i < 10; i++) {
+    TestBed.tick();
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+}
+
+let databases = 0;
 
 describe('ConnectionsStore', () => {
-  let store: ConnectionsStore;
+  let rxdb: RxDatabase<ConnectionsCollections>;
+  let collections: ConnectionsCollections;
+  let finishSync: () => void;
+  let pull: jasmine.Spy;
+  let rpc: jasmine.Spy;
+  let open: jasmine.Spy;
+  /** What `get_connected_profiles()` returns. */
+  let profiles: ConnectedProfile[];
   let stored: Map<string, unknown>;
 
-  beforeEach(() => {
-    jasmine.clock().install();
-    stored = new Map();
+  /** The local database as the sync leaves it, without the sync. */
+  async function seed(rows: {
+    connections?: ConnectionRow[];
+    secrets?: SecretRow[];
+    messages?: MessageRow[];
+  }) {
+    await collections.connections.bulkInsert(
+      (rows.connections ?? []).map((row) => ({
+        ...row,
+        id: `${row.initiator_id}|${row.recipient_id}`,
+      })),
+    );
+    await collections.secrets.bulkInsert(
+      (rows.secrets ?? []).map((row) => ({ ...row, id: `${row.user_id}|${row.other_user_id}` })),
+    );
+    await collections.messages.bulkInsert(rows.messages ?? []);
+  }
+
+  function create(): ConnectionsStore {
     TestBed.configureTestingModule({
       providers: [
         ConnectionsStore,
+        { provide: OPEN_CONNECTIONS_DB, useValue: open },
+        { provide: SupabaseService, useValue: { client: { rpc } } },
+        { provide: AuthService, useValue: { session: () => ({ user: { id: ME } }) } },
+        {
+          provide: PhotoStorageService,
+          useValue: { signedUrls: async (refs: unknown[]) => refs.map(() => 'https://photo') },
+        },
         {
           provide: UserStorage,
           useValue: {
@@ -21,144 +133,242 @@ describe('ConnectionsStore', () => {
             remove: (key: string) => stored.delete(key),
           },
         },
+        { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) },
       ],
     });
-    store = TestBed.inject(ConnectionsStore);
+    return TestBed.inject(ConnectionsStore);
+  }
+
+  const profileLoads = () =>
+    rpc.calls.allArgs().filter(([name]) => name === 'get_connected_profiles').length;
+  const snackBar = () => TestBed.inject(MatSnackBar).open as jasmine.Spy;
+
+  beforeEach(async () => {
+    rxdb = await createRxDatabase<ConnectionsCollections>({
+      name: `connections-store-spec-${databases++}`,
+      storage: getRxStorageMemory(),
+      multiInstance: false,
+    });
+    collections = await rxdb.addCollections(COLLECTIONS);
+    const synced = new Promise<void>((resolve) => (finishSync = resolve));
+    pull = jasmine.createSpy('pull');
+    const db: ConnectionsDb = {
+      collections,
+      initialSync: () => synced,
+      pull,
+      // The test closes the database itself, after the store has gone.
+      close: () => Promise.resolve(),
+    };
+    open = jasmine.createSpy('openConnectionsDb').and.resolveTo(db);
+    profiles = [profile('ivy'), profile('kim'), profile('team', true)];
+    rpc = jasmine
+      .createSpy('rpc')
+      .and.callFake(async (name: string) =>
+        name === 'get_connected_profiles' ? { data: profiles, error: null } : { error: null },
+      );
+    stored = new Map();
+    spyOn(console, 'warn');
   });
 
-  afterEach(() => jasmine.clock().uninstall());
-
-  it('lists the team with the others, and leaves out pending intros', () => {
-    const ids = store.conversationList().map(({ person }) => person.id);
-
-    expect(ids).toContain('team');
-    expect(ids).not.toContain('priya');
+  afterEach(async () => {
+    TestBed.resetTestingModule();
+    await rxdb.close();
   });
 
-  it('counts a newly accepted intro as unread until it’s opened', () => {
-    const before = store.totalUnread();
-
-    store.markRead('tomasz');
-
-    expect(store.totalUnread()).toBe(before - 1);
+  it('opens the signed-in user’s database', async () => {
+    create();
+    await until(() => open.calls.count() > 0, 'it opens');
+    expect(open.calls.mostRecent().args[1]).toBe(ME);
   });
 
-  it('sorts conversations by their latest message', () => {
-    const times = store.conversationList().map((item) => lastMessage(item)?.createdAt ?? '');
+  it('isn’t ready until the first sync, so empty lists aren’t shown too early', async () => {
+    const store = create();
+    await settle();
+    expect(store.ready()).toBeFalse();
+    expect(store.introsLeftToday()).toBeNull();
 
-    expect(times).toEqual([...times].sort().reverse());
+    finishSync();
+    await until(() => store.ready(), 'ready');
+    expect(store.requests()).toEqual([]);
+    expect(store.introsLeftToday()).toBe(3);
   });
 
-  it('marks a conversation read, which lowers the total', () => {
-    const before = store.totalUnread();
-
-    store.markRead('noor');
-
-    expect(store.totalUnread()).toBeLessThan(before);
+  it('is ready without its own sync when another tab has synced the data', async () => {
+    await seed({ connections: [connection({})] });
+    const store = create();
+    await until(() => store.ready(), 'ready');
+    expect(store.conversationList().map(({ person }) => person.id)).toEqual(['ivy']);
   });
 
-  it('shows a message straight away and clears its state once delivered', () => {
-    store.send('noor', 'Hello');
-    expect(lastMessage(store.conversation('noor')!)?.delivery).toBe('sending');
+  it('builds the lists from the local data and the profiles', async () => {
+    await seed({
+      connections: [
+        connection({ initiator_id: 'team', looking_for: [] }),
+        connection({ initiator_id: 'ivy' }),
+        connection({ initiator_id: 'kim', status: 'pending' }),
+        connection({ initiator_id: ME, recipient_id: 'lea', status: 'pending' }),
+      ],
+      messages: [message('welcome', 'team', ME), message('intro', 'kim', ME)],
+    });
+    profiles.push(profile('lea'));
+    const store = create();
+    await until(() => store.ready(), 'ready');
 
-    jasmine.clock().tick(1000);
-
-    expect(lastMessage(store.conversation('noor')!)?.delivery).toBeUndefined();
-  });
-
-  it('retries a failed message', () => {
-    const failed = lastMessage(store.conversation('rowan')!)!;
-    expect(failed.delivery).toBe('failed');
-
-    store.retry('rowan', failed.id);
-    jasmine.clock().tick(1000);
-
-    expect(lastMessage(store.conversation('rowan')!)?.delivery).toBeUndefined();
-  });
-
-  it('lists requests sent to the viewer, not the ones they sent', () => {
-    const ids = store.requests().map(({ person }) => person.id);
-
-    expect(ids).toEqual(['maya', 'sami', 'ellie']);
-  });
-
-  it('counts requests as new until the tab is opened', () => {
-    expect(store.newRequests()).toBe(2);
-
-    store.markRequestsSeen();
-
-    expect(store.newRequests()).toBe(0);
-    expect(store.requests().length).toBe(3);
-  });
-
-  it('leaves requests that were already seen alone', () => {
-    const seenAt = store.conversation('ellie')?.lastReadAt;
-    spyOn(store, 'markRead').and.callThrough();
-
-    store.markRequestsSeen();
-
-    expect(store.markRead).toHaveBeenCalledTimes(2);
-    expect(store.markRead).not.toHaveBeenCalledWith('ellie');
-    expect(store.conversation('ellie')?.lastReadAt).toBe(seenAt);
-  });
-
-  it('keeps requests out of the messages list and its unread count', () => {
-    const before = store.totalUnread();
-
-    store.markRequestsSeen();
-
-    expect(store.totalUnread()).toBe(before);
-    expect(store.conversationList().map(({ person }) => person.id)).not.toContain('maya');
-  });
-
-  it('turns an accepted request into a read conversation', () => {
-    const before = store.totalUnread();
-
-    store.accept('maya');
-
-    expect(store.requests().map(({ person }) => person.id)).not.toContain('maya');
-    expect(store.conversationList().map(({ person }) => person.id)).toContain('maya');
-    expect(store.totalUnread()).toBe(before);
-  });
-
-  it('takes a declined request off the list, and puts it back on undo', () => {
-    store.setDeclined('maya', true);
-    expect(store.requests().map(({ person }) => person.id)).not.toContain('maya');
+    expect(store.team()?.person.id).toBe('team');
+    expect(store.conversationList().map(({ person }) => person.id)).toEqual(
+      jasmine.arrayWithExactContents(['team', 'ivy']),
+    );
+    // Only intros others sent, not the viewer's own.
+    expect(store.requests().map(({ person }) => person.id)).toEqual(['kim']);
     expect(store.newRequests()).toBe(1);
-
-    store.setDeclined('maya', false);
-    expect(store.requests().map(({ person }) => person.id)).toContain('maya');
+    expect(store.totalUnread()).toBe(1);
   });
 
-  it('keeps a draft per conversation', () => {
-    store.saveDraft('noor', 'Hello Noor');
-    store.saveDraft('rowan', 'Hello Rowan');
+  it('asks for a missing profile once, even if the server doesn’t know them', async () => {
+    // A connection with someone whose account is gone: get_connected_profiles() leaves them out.
+    await seed({ connections: [connection({}), connection({ initiator_id: 'ghost' })] });
+    const store = create();
+    await until(() => store.ready(), 'ready');
+    await settle();
+    expect(profileLoads()).toBe(1);
 
-    expect(store.draft('noor')).toBe('Hello Noor');
-    expect(store.draft('rowan')).toBe('Hello Rowan');
-    expect(store.draft('tomasz')).toBe('');
+    // Someone new does get a load.
+    profiles.push(profile('lea'));
+    await seed({ connections: [connection({ initiator_id: 'lea', status: 'pending' })] });
+    await until(() => store.requests().length === 1, 'lea’s request shows');
+    await settle();
+    expect(profileLoads()).toBe(2);
   });
 
-  it('forgets a draft that is emptied, or only whitespace', () => {
-    store.saveDraft('noor', 'Hello');
-    store.saveDraft('noor', '  \n');
+  it('hides a request at once, and declines it only when asked', async () => {
+    await seed({
+      connections: [connection({ initiator_id: 'kim', status: 'pending' })],
+      messages: [message('intro', 'kim', ME)],
+    });
+    const store = create();
+    await until(() => store.requests().length === 1, 'the request shows');
+    const [request] = store.requests();
 
-    expect(stored.size).toBe(0);
+    store.setHidden('kim', true);
+    expect(store.requests()).toEqual([]);
+    store.setHidden('kim', false);
+    expect(store.requests().length).toBe(1);
+    expect(rpc).not.toHaveBeenCalledWith('decline_intro', jasmine.anything());
+
+    store.setHidden('kim', true);
+    await store.decline(request);
+    expect(rpc).toHaveBeenCalledWith('decline_intro', { p_initiator_id: 'kim' });
+    expect(pull).toHaveBeenCalled();
+    expect(store.requests()).toEqual([]);
   });
 
-  it('forgets the draft of a connection that ends', () => {
-    store.saveDraft('noor', 'Hello');
+  it('puts a request back when declining fails', async () => {
+    await seed({ connections: [connection({ initiator_id: 'kim', status: 'pending' })] });
+    rpc.and.callFake(async (name: string) =>
+      name === 'get_connected_profiles'
+        ? { data: profiles, error: null }
+        : { error: { message: 'offline' } },
+    );
+    const store = create();
+    await until(() => store.requests().length === 1, 'the request shows');
+    const [request] = store.requests();
 
-    store.end('noor');
+    store.setHidden('kim', true);
+    await store.decline(request);
 
-    expect(store.draft('noor')).toBe('');
+    expect(store.requests().length).toBe(1);
+    expect(snackBar()).toHaveBeenCalledWith("Couldn't hide kim", undefined, jasmine.anything());
   });
 
-  it('ends a connection with a message saying so', () => {
-    store.end('noor');
+  it('accepts an intro and waits until the accepted connection has synced', async () => {
+    const pending = connection({ initiator_id: 'kim', status: 'pending' });
+    await seed({ connections: [pending] });
+    rpc.and.callFake(async (name: string) => {
+      if (name === 'get_connected_profiles') return { data: profiles, error: null };
+      // The sync bringing the server's change a moment later.
+      setTimeout(async () => {
+        const doc = await collections.connections.findOne(`kim|${ME}`).exec();
+        await doc?.incrementalPatch({ status: 'accepted' });
+      }, 20);
+      return { error: null };
+    });
+    const store = create();
+    await until(() => store.requests().length === 1, 'the request shows');
 
-    const conversation = store.conversation('noor')!;
-    expect(conversation.status).toBe('ended');
-    expect(lastMessage(conversation)?.content).toEqual({ type: 'ended' });
+    expect(await store.accept(store.requests()[0])).toBeTrue();
+    expect(rpc).toHaveBeenCalledWith('accept_intro', { p_initiator_id: 'kim' });
+    expect(store.conversation('kim')?.status).toBe('accepted');
+  });
+
+  it('says so when accepting fails', async () => {
+    await seed({ connections: [connection({ initiator_id: 'kim', status: 'pending' })] });
+    rpc.and.callFake(async (name: string) =>
+      name === 'get_connected_profiles'
+        ? { data: profiles, error: null }
+        : { error: { message: 'offline' } },
+    );
+    const store = create();
+    await until(() => store.requests().length === 1, 'the request shows');
+
+    expect(await store.accept(store.requests()[0])).toBeFalse();
+    expect(snackBar()).toHaveBeenCalled();
+    expect(store.conversation('kim')?.status).toBe('pending');
+  });
+
+  it('shows a sent message straight away, as sending until the server’s copy arrives', async () => {
+    await seed({ connections: [connection({})] });
+    const store = create();
+    await until(() => store.ready(), 'ready');
+
+    store.send('ivy', 'Hello!');
+    await until(() => store.conversation('ivy')?.messages.length === 1, 'the message shows');
+    const [sent] = store.conversation('ivy')!.messages;
+    expect(sent.content).toEqual({ type: 'text', text: 'Hello!' });
+    expect(sent.delivery).toBe('sending');
+
+    // The pull brings the server's copy, which has an `updated_at`.
+    const doc = await collections.messages.findOne(sent.id).exec();
+    await doc?.incrementalPatch({ updated_at: new Date().toISOString() });
+    await until(
+      () => store.conversation('ivy')?.messages[0].delivery === undefined,
+      'it shows as sent',
+    );
+  });
+
+  it('marks a conversation read locally, for the sync to push', async () => {
+    await seed({
+      connections: [connection({})],
+      secrets: [secret('ivy')],
+      messages: [message('hi', 'ivy', ME)],
+    });
+    const store = create();
+    await until(() => store.totalUnread() === 1, 'the message is unread');
+
+    store.markRead('ivy');
+    await until(() => store.totalUnread() === 0, 'it is read');
+    const doc = await collections.secrets.findOne(`${ME}|ivy`).exec();
+    expect(doc?.last_read_at).not.toBeNull();
+  });
+
+  it('counts the intros the viewer sent today', async () => {
+    await seed({
+      connections: [
+        connection({ initiator_id: ME, recipient_id: 'ivy', status: 'pending' }),
+        connection({ initiator_id: ME, recipient_id: 'kim', status: 'pending' }),
+      ],
+    });
+    const store = create();
+    await until(() => store.introsLeftToday() !== null, 'the count is known');
+    expect(store.introsLeftToday()).toBe(1);
+  });
+
+  it('keeps a draft per conversation, and forgets an empty one', () => {
+    const store = create();
+    store.saveDraft('ivy', 'Half a thought');
+    expect(store.draft('ivy')).toBe('Half a thought');
+    expect(store.draft('kim')).toBe('');
+
+    store.saveDraft('ivy', '  ');
+    expect(store.draft('ivy')).toBe('');
   });
 });

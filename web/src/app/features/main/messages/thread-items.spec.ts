@@ -24,6 +24,7 @@ function conversation(fields: Partial<Conversation>): Conversation {
     person: { id: 'them', name: 'Noor' } as Member,
     photoUrl: null,
     isTeam: false,
+    withAdmins: false,
     status: 'accepted',
     initiatedByMe: true,
     lookingFor: ['friends'],
@@ -55,7 +56,20 @@ describe('threadItems', () => {
 
   it('has no intro in the conversation with the team', () => {
     const items = threadItems(
-      conversation({ isTeam: true, messages: [message('hello', true, at(2, 9))] }),
+      conversation({
+        isTeam: true,
+        withAdmins: true,
+        messages: [message('hello', true, at(2, 9))],
+      }),
+      NOW,
+    );
+
+    expect(kinds(items)).toEqual(['day', 'message']);
+  });
+
+  it('has no intro in an admin’s conversation with a member either', () => {
+    const items = threadItems(
+      conversation({ withAdmins: true, messages: [message('welcome', true, at(2, 9))] }),
       NOW,
     );
 
@@ -167,7 +181,13 @@ describe('unreadCount', () => {
   });
 
   it('doesn’t count the team’s conversation before anyone has written', () => {
-    expect(unreadCount(conversation({ isTeam: true }))).toBe(0);
+    expect(unreadCount(conversation({ isTeam: true, withAdmins: true }))).toBe(0);
+  });
+
+  it('doesn’t count an admin’s own welcome as unread', () => {
+    const messages = [message('welcome', true, at(1, 9))];
+
+    expect(unreadCount(conversation({ withAdmins: true, messages }))).toBe(0);
   });
 });
 
@@ -201,6 +221,12 @@ describe('previewOf', () => {
   });
 
   it('invites a first message to the team', () => {
-    expect(previewOf(conversation({ isTeam: true }))).toContain('Write to us');
+    expect(previewOf(conversation({ isTeam: true, withAdmins: true }))).toContain('Write to us');
+  });
+
+  it('shows an admin’s first message as it is, since it isn’t an intro', () => {
+    const messages = [message('Welcome!', true, at(1, 9))];
+
+    expect(previewOf(conversation({ withAdmins: true, messages }))).toBe('You: Welcome!');
   });
 });

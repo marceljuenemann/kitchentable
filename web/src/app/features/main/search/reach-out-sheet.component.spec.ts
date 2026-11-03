@@ -1,10 +1,10 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import { ConnectionsStore } from '../../../core/connections/connections.store';
 import { Member } from '../../../core/profile.model';
 import { UserStorage } from '../../../core/user-storage';
 import { ReachOutSheetComponent } from './reach-out-sheet.component';
-import { SearchStore } from './search.store';
 
 describe('ReachOutSheetComponent', () => {
   const member = {
@@ -14,7 +14,7 @@ describe('ReachOutSheetComponent', () => {
   } as Member;
   let storage: Map<string, unknown>;
   let sendIntro: jasmine.Spy;
-  const introsRemaining = signal(3);
+  const introsLeftToday = signal<number | null>(3);
   let ref: { dismiss: jasmine.Spy; disableClose: boolean | undefined };
 
   function create(data: Partial<Member> = {}) {
@@ -23,7 +23,7 @@ describe('ReachOutSheetComponent', () => {
       providers: [
         { provide: MAT_BOTTOM_SHEET_DATA, useValue: { ...member, ...data } },
         { provide: MatBottomSheetRef, useValue: ref },
-        { provide: SearchStore, useValue: { sendIntro, introsRemaining } },
+        { provide: ConnectionsStore, useValue: { sendIntro, introsLeftToday } },
         {
           provide: UserStorage,
           useValue: {
@@ -71,12 +71,14 @@ describe('ReachOutSheetComponent', () => {
     expect(sheet.canSend()).toBeFalse();
   });
 
-  it('says how many introductions are left', () => {
+  it('says how many introductions are left, once that is known', () => {
     const sheet = create();
-    introsRemaining.set(3);
+    introsLeftToday.set(3);
     expect(sheet.introsLeft()).toBe('3 introductions left for today');
-    introsRemaining.set(1);
+    introsLeftToday.set(1);
     expect(sheet.introsLeft()).toBe('1 introduction left for today');
+    introsLeftToday.set(null);
+    expect(sheet.introsLeft()).toBe('');
   });
 
   it('shows the count once the message nears the limit', () => {
@@ -141,10 +143,22 @@ describe('ReachOutSheetComponent', () => {
 
     await sheet.send();
 
-    expect(sheet.failed()).toBeTrue();
+    expect(sheet.failed()).toBe('error');
     expect(ref.dismiss).not.toHaveBeenCalled();
     expect(ref.disableClose).toBeFalse();
     expect(sheet.canSend()).toBeTrue();
+    expect(storage.has('intro.draft.ivy')).toBeTrue();
+  });
+
+  it('tells the daily limit apart from other failures', async () => {
+    sendIntro.and.rejectWith({ code: '54000', message: 'You can send 3 intros a day.' });
+    const sheet = create();
+    sheet.setPicked(['polyamory']);
+    sheet.setText('Hello');
+
+    await sheet.send();
+
+    expect(sheet.failed()).toBe('limit');
     expect(storage.has('intro.draft.ivy')).toBeTrue();
   });
 });

@@ -7,8 +7,10 @@ export type ConversationSheetResult = 'profile' | 'report' | 'end';
 
 export interface ConversationSheetData {
   name: string;
-  /** Only an accepted connection can be ended (`end_connection`). */
+  /** Only an accepted connection can be ended (`end_connection`), and not one with the admins. */
   canEnd: boolean;
+  /** Reports go to the conversation with the team, which admins don't have. */
+  canReport: boolean;
 }
 
 /** What you can do about a conversation. Ending one is final, so it asks first. */

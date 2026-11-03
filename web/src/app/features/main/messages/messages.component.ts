@@ -26,4 +26,8 @@ export class MessagesComponent {
    * It gives up the name while anything shows over the list, since names must be unique.
    */
   readonly morphId = signal<string | null>(null);
+
+  constructor() {
+    this.store.loadIfStale();
+  }
 }
