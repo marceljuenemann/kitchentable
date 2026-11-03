@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { UserStorage } from '../../../core/user-storage';
-import { lastMessage } from './messages.model';
-import { MessagesStore } from './messages.store';
+import { UserStorage } from '../user-storage';
+import { lastMessage } from './connections.model';
+import { ConnectionsStore } from './connections.store';
 
-describe('MessagesStore', () => {
-  let store: MessagesStore;
+describe('ConnectionsStore', () => {
+  let store: ConnectionsStore;
   let stored: Map<string, unknown>;
 
   beforeEach(() => {
@@ -12,7 +12,7 @@ describe('MessagesStore', () => {
     stored = new Map();
     TestBed.configureTestingModule({
       providers: [
-        MessagesStore,
+        ConnectionsStore,
         {
           provide: UserStorage,
           useValue: {
@@ -23,7 +23,7 @@ describe('MessagesStore', () => {
         },
       ],
     });
-    store = TestBed.inject(MessagesStore);
+    store = TestBed.inject(ConnectionsStore);
   });
 
   afterEach(() => jasmine.clock().uninstall());

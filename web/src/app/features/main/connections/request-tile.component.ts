@@ -1,7 +1,7 @@
 import { Component, computed, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Conversation, introText } from '../../../core/connections/connections.model';
 import { lookingForLabel } from '../../onboarding/onboarding-options';
-import { Conversation, introText } from '../messages/messages.model';
 
 /** Two chips fit on a line: beyond that, the first and how many more are on the profile. */
 export function chipLabels(labels: string[]): string[] {

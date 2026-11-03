@@ -1,9 +1,14 @@
 import { Component, computed, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import {
+  Conversation,
+  lastMessage,
+  previewOf,
+  unreadCount,
+} from '../../../core/connections/connections.model';
 import { photoTransitionName } from '../../../shared/profile-view/profile-transition';
 import { AvatarComponent } from './avatar.component';
 import { listTime } from './message-time';
-import { Conversation, lastMessage, previewOf, unreadCount } from './messages.model';
 
 /** One conversation in the Messages tab: the photo opens the profile, the rest the messages. */
 @Component({

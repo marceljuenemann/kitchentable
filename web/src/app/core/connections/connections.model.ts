@@ -1,4 +1,4 @@
-import { Member } from '../../../core/profile.model';
+import { Member } from '../profile.model';
 
 /** `messages.content` (see docs/database.md). */
 export type MessageContent = { type: 'text'; text: string } | { type: 'ended' };

@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { UserStorage } from '../../../core/user-storage';
-import { mockConversations } from './messages.mock';
-import { ChatMessage, Conversation, lastMessage, unreadCount } from './messages.model';
+import { mockConversations } from '../../features/main/messages/messages.mock';
+import { UserStorage } from '../user-storage';
+import { ChatMessage, Conversation, lastMessage, unreadCount } from './connections.model';
 
 const MOCK_SEND_MS = 700;
 
@@ -17,10 +17,11 @@ function newestFirst(a: Conversation, b: Conversation): number {
 /**
  * The viewer's conversations. Mock data for now: nothing here touches the backend, and the real
  * store will read from RxDB (see "Messaging sync" in docs/database.md). `?empty` in the URL shows
- * what a brand-new member sees. Provided by the main app, because the bottom nav shows the count.
+ * what a brand-new member sees. Provided by the main app, because the bottom nav shows the count:
+ * unlike the rest of `core/`, it isn't app-wide.
  */
 @Injectable()
-export class MessagesStore {
+export class ConnectionsStore {
   private readonly storage = inject(UserStorage);
   private readonly conversations = signal(
     mockConversations(new URLSearchParams(location.search).has('empty')),

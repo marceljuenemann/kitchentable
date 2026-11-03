@@ -1,11 +1,11 @@
-import { Member } from '../../../core/profile.model';
 import {
   ChatMessage,
   Conversation,
   MessageContent,
   previewOf,
   unreadCount,
-} from './messages.model';
+} from '../../../core/connections/connections.model';
+import { Member } from '../../../core/profile.model';
 import { ThreadItem, threadItems } from './thread-items';
 
 const NOW = new Date(2026, 10, 2, 12, 0);

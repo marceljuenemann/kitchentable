@@ -1,5 +1,5 @@
 import { Member } from '../../../core/profile.model';
-import { ChatMessage, Conversation } from './messages.model';
+import { ChatMessage, Conversation } from '../../../core/connections/connections.model';
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;

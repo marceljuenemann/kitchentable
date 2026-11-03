@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ConnectionsStore } from '../../../core/connections/connections.store';
 import { ConversationRowComponent } from './conversation-row.component';
-import { MessagesStore } from './messages.store';
 
 /**
  * The Messages tab: everyone you're talking to, the team included, by latest message. A
@@ -17,7 +17,7 @@ import { MessagesStore } from './messages.store';
   host: { '[class.covering]': 'overlayOpen()' },
 })
 export class MessagesComponent {
-  readonly store = inject(MessagesStore);
+  readonly store = inject(ConnectionsStore);
   /** Whether a conversation or profile shows over the list, which raises it over the bottom nav. */
   readonly overlayOpen = signal(false);
   /**

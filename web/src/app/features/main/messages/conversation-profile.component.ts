@@ -1,8 +1,8 @@
 import { Component, computed, inject, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ConnectionsStore } from '../../../core/connections/connections.store';
 import { ProfileViewComponent } from '../../../shared/profile-view/profile-view.component';
-import { MessagesStore } from './messages.store';
 
 /**
  * The profile of someone you're talking to, over the conversation or over the list. From the list
@@ -38,7 +38,7 @@ import { MessagesStore } from './messages.store';
   `,
 })
 export class ConversationProfileComponent {
-  private readonly store = inject(MessagesStore);
+  private readonly store = inject(ConnectionsStore);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly view = viewChild(ProfileViewComponent);

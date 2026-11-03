@@ -1,8 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ConnectionsStore } from '../../../core/connections/connections.store';
 import { HeaderComponent } from '../../../shared/header/header.component';
 import { photoTransitionName } from '../../../shared/profile-view/profile-transition';
-import { MessagesStore } from '../messages/messages.store';
 import { HugPandaComponent } from './hug-panda.component';
 import { RequestTileComponent } from './request-tile.component';
 
@@ -21,7 +21,7 @@ import { RequestTileComponent } from './request-tile.component';
   host: { '[class.covering]': 'profileOpen()' },
 })
 export class ConnectionsComponent {
-  readonly store = inject(MessagesStore);
+  readonly store = inject(ConnectionsStore);
 
   /** Whether a profile shows over the tiles, which raises the page over the bottom nav. */
   readonly profileOpen = signal(false);

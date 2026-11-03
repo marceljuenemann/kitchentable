@@ -1,5 +1,5 @@
+import { ChatMessage, Conversation } from '../../../core/connections/connections.model';
 import { dayLabel, isSameDay } from './message-time';
-import { ChatMessage, Conversation } from './messages.model';
 
 const GROUP_WINDOW_MS = 5 * 60_000;
 

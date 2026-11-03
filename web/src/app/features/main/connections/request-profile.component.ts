@@ -1,13 +1,13 @@
 import { Component, inject, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { introText } from '../../../core/connections/connections.model';
+import { ConnectionsStore } from '../../../core/connections/connections.store';
 import { HeartComponent } from '../../../shared/heart/heart.component';
 import { HideIconComponent } from '../../../shared/hide-icon/hide-icon.component';
 import { CLOSE_ANIMATION_MS } from '../../../shared/profile-view/profile-transition';
 import { ProfileViewComponent } from '../../../shared/profile-view/profile-view.component';
 import { IntroCardComponent } from '../messages/intro-card.component';
-import { introText } from '../messages/messages.model';
-import { MessagesStore } from '../messages/messages.store';
 import { injectRequestActions } from './request-actions';
 
 /** The profile of someone who sent a connection request, over the cards: where to accept it. */
@@ -111,7 +111,7 @@ import { injectRequestActions } from './request-actions';
   `,
 })
 export class RequestProfileComponent {
-  private readonly store = inject(MessagesStore);
+  private readonly store = inject(ConnectionsStore);
   private readonly router = inject(Router);
   private readonly actions = injectRequestActions();
   private readonly view = viewChild(ProfileViewComponent);

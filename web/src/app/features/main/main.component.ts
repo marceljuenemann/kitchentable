@@ -2,7 +2,7 @@ import { afterNextRender, Component, computed, inject, signal } from '@angular/c
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
-import { MessagesStore } from './messages/messages.store';
+import { ConnectionsStore } from '../../core/connections/connections.store';
 
 interface Tab {
   label: string;
@@ -21,10 +21,10 @@ interface Tab {
   imports: [RouterLink, RouterOutlet],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss',
-  providers: [MessagesStore],
+  providers: [ConnectionsStore],
 })
 export class MainComponent {
-  private readonly messages = inject(MessagesStore);
+  private readonly messages = inject(ConnectionsStore);
 
   readonly tabs: Tab[] = [
     {

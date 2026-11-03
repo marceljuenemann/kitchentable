@@ -1,8 +1,8 @@
 import { inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { Conversation } from '../messages/messages.model';
-import { MessagesStore } from '../messages/messages.store';
+import { Conversation } from '../../../core/connections/connections.model';
+import { ConnectionsStore } from '../../../core/connections/connections.store';
 
 /**
  * What can be done with a connection request, on the profile so that it gets read first.
@@ -11,7 +11,7 @@ import { MessagesStore } from '../messages/messages.store';
  * only run after that.
  */
 export function injectRequestActions() {
-  const store = inject(MessagesStore);
+  const store = inject(ConnectionsStore);
   const router = inject(Router);
   const snackBar = inject(MatSnackBar);
 

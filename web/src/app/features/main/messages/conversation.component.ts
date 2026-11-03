@@ -17,6 +17,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { map } from 'rxjs';
+import { ChatMessage, firstUnread } from '../../../core/connections/connections.model';
+import { ConnectionsStore } from '../../../core/connections/connections.store';
 import { photoTransitionName } from '../../../shared/profile-view/profile-transition';
 import { AvatarComponent } from './avatar.component';
 import {
@@ -26,8 +28,6 @@ import {
 } from './conversation-sheet.component';
 import { IntroCardComponent } from './intro-card.component';
 import { clockTime, shortDate } from './message-time';
-import { ChatMessage, firstUnread } from './messages.model';
-import { MessagesStore } from './messages.store';
 import { threadItems } from './thread-items';
 
 /** `check_message_content()` allows up to this many characters. */
@@ -52,7 +52,7 @@ const UNREAD_LINE_GAP_PX = 8;
   styleUrl: './conversation.component.scss',
 })
 export class ConversationComponent {
-  private readonly store = inject(MessagesStore);
+  private readonly store = inject(ConnectionsStore);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly location = inject(Location);
