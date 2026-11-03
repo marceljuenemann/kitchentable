@@ -81,12 +81,24 @@
               [class.starts]="item.startsGroup"
               [class.ends]="item.endsGroup"
             >
-              <!-- A binding, because the box keeps whitespace, also any around an interpolation. -->
-              <p
-                class="bubble"
-                [class.failed]="message.delivery === 'failed'"
-                [textContent]="textOf(message)"
-              ></p>
+              <!--
+                Bindings, because the box keeps whitespace, also any around an interpolation.
+                Links open in a new tab and don't tell the site where they came from.
+              -->
+              <p class="bubble" [class.failed]="message.delivery === 'failed'">
+                @for (part of partsOf(message); track $index) {
+                  @if (part.href) {
+                    <a
+                      [href]="part.href"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      [textContent]="part.text"
+                    ></a>
+                  } @else {
+                    <span [textContent]="part.text"></span>
+                  }
+                }
+              </p>
               @if (message.delivery === 'failed') {
                 <p class="status failed" role="alert">Not sent</p>
               } @else if (message.delivery === 'sending') {

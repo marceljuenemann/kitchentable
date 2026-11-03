@@ -163,6 +163,13 @@ h1 {
   line-height: 1.4;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
+
+  // In the bubble's own colour, which differs for the viewer's messages.
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
 }
 
 // Corners tuck in where a bubble touches the next one of the group.

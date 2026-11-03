@@ -176,6 +176,29 @@ test('hiding an introduction can be undone, and then declines it privately', asy
     .not.toBeNull();
 });
 
+test('https links in messages open in a new tab, other text stays text', async ({
+  page,
+  browser,
+}) => {
+  const { maya, mayaPage } = await pair(page, browser, 'accepted');
+  await mayaPage.close();
+  await page.goto(`/app/messages/${maya.id}`);
+
+  const text = 'Menu: https://example.com/menu?day=sat.\nNot http://example.com though';
+  await send(page, 'Maya', text);
+  const bubble = thread(page).locator('.bubble', { hasText: 'Menu:' });
+  await expect(bubble).toBeVisible();
+  // Exactly as written: no whitespace from the template.
+  expect(await bubble.evaluate((element) => element.textContent)).toBe(text);
+
+  const links = bubble.getByRole('link');
+  await expect(links).toHaveCount(1);
+  await expect(links).toHaveText('https://example.com/menu?day=sat');
+  await expect(links).toHaveAttribute('href', 'https://example.com/menu?day=sat');
+  await expect(links).toHaveAttribute('target', '_blank');
+  await expect(links).toHaveAttribute('rel', 'noopener noreferrer');
+});
+
 test('ending a connection shows on both sides', async ({ page, browser }) => {
   const { maya, mayaPage } = await pair(page, browser, 'accepted');
   await page.goto(`/app/messages/${maya.id}`);

@@ -27,6 +27,7 @@ import {
   ConversationSheetResult,
 } from './conversation-sheet.component';
 import { IntroCardComponent } from './intro-card.component';
+import { textParts } from './message-links';
 import { clockTime, shortDate } from './message-time';
 import { threadItems } from './thread-items';
 
@@ -168,6 +169,11 @@ export class ConversationComponent {
 
   textOf(message: ChatMessage): string {
     return message.content.type === 'text' ? message.content.text : '';
+  }
+
+  /** The text with its `https://` links. */
+  partsOf(message: ChatMessage) {
+    return textParts(this.textOf(message));
   }
 
   openActions() {
