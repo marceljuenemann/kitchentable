@@ -56,13 +56,24 @@ test('a tab stays current with query parameters in the URL', async ({ page }) =>
   await expect(nav.getByRole('link', { name: 'Messages' })).toHaveAttribute('aria-current', 'page');
 });
 
-test('the profile tab has the legal documents and signs out', async ({ page }) => {
-  const email = await signInAs(page, 'active');
-  await page.goto('/app/profile');
+test('the Community tab has the legal documents', async ({ page }) => {
+  await signInAs(page, 'active');
+  await page.goto('/app/community');
 
   await page.getByRole('link', { name: 'Privacy Policy' }).click();
   const sheet = page.locator('mat-bottom-sheet-container');
   await expect(sheet.getByRole('heading', { name: 'Kitchen Table Privacy Policy' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(sheet).toBeHidden();
+});
+
+test('the profile tab has the legal documents too, and signs out', async ({ page }) => {
+  const email = await signInAs(page, 'active');
+  await page.goto('/app/profile');
+
+  await page.getByRole('link', { name: 'Terms of Use' }).click();
+  const sheet = page.locator('mat-bottom-sheet-container');
+  await expect(sheet.getByRole('heading', { name: 'Kitchen Table Terms of Use' })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(sheet).toBeHidden();
 

@@ -7,6 +7,7 @@ import { RouterLink } from '@angular/router';
 import { ConnectionsStore } from '../../../core/connections/connections.store';
 import { HeaderComponent } from '../../../shared/header/header.component';
 import { InviteLinkComponent } from '../../../shared/invite-link/invite-link.component';
+import { LegalLinksComponent } from '../../../shared/legal-links/legal-links.component';
 
 /**
  * The development WhatsApp group's invite link, base64-encoded so that it can't be read or found
@@ -32,9 +33,9 @@ export const MOODS: readonly Mood[] = [
 
 /**
  * The Community tab, for now ways to reach the team, invite people and take part in building the
- * app. Feedback
- * and reports are messages in the conversation with the team, so the team can reply there;
- * admins have no such conversation, so they don't see those cards.
+ * app, then the legal documents (the main app has no footer). Feedback and reports are messages
+ * in the conversation with the team, so the team can reply there; admins have no such
+ * conversation, so they don't see those cards.
  */
 @Component({
   selector: 'app-community',
@@ -42,6 +43,7 @@ export const MOODS: readonly Mood[] = [
   imports: [
     HeaderComponent,
     InviteLinkComponent,
+    LegalLinksComponent,
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
