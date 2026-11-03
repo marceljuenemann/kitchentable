@@ -1,8 +1,8 @@
-<div class="sheet">
-  <div class="grab-handle" aria-hidden="true"></div>
+<div class="kt-sheet">
+  <div class="kt-grab-handle" aria-hidden="true"></div>
 
   @if (confirmingEnd()) {
-    <h2>End connection with {{ name }}?</h2>
+    <h2 class="kt-sheet-title">End connection with {{ name }}?</h2>
     <p>
       You won't be able to message each other again, and this can't be undone. {{ name }} will see
       that you ended it. You'll both keep your messages.
@@ -14,7 +14,7 @@
       </button>
     </div>
   } @else {
-    <h2>{{ name }}</h2>
+    <h2 class="kt-sheet-title">{{ name }}</h2>
     <button class="row" type="button" (click)="choose('profile')">
       <mat-icon aria-hidden="true">person</mat-icon>
       View profile

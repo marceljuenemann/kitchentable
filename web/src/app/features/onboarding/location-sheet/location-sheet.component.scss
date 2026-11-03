@@ -1,25 +1,5 @@
-.location-sheet {
-  padding: 12px 20px 24px;
-  display: flex;
-  flex-direction: column;
-  font-family: var(--kt-font-sans);
-}
-
-.grab-handle {
-  align-self: center;
-  width: 44px;
-  height: 5px;
-  border-radius: 99px;
-  background: var(--kt-outline-soft);
-  margin-bottom: 16px;
-}
-
 h2 {
-  margin: 0 0 16px;
-  font-family: var(--kt-font-display);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--kt-violet);
+  margin-bottom: 16px;
 }
 
 mat-radio-group {
@@ -46,10 +26,6 @@ mat-radio-group {
     font-size: 14px;
     line-height: 1.45;
   }
-}
-
-mat-form-field {
-  --mat-form-field-outlined-container-shape: 14px;
 }
 
 .done {

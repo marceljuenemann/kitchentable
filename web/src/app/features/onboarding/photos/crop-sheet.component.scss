@@ -1,25 +1,5 @@
-.crop-sheet {
-  padding: 12px 20px 24px;
-  display: flex;
-  flex-direction: column;
-  font-family: var(--kt-font-sans);
-}
-
-.grab-handle {
-  align-self: center;
-  width: 44px;
-  height: 5px;
-  border-radius: 99px;
-  background: var(--kt-outline-soft);
-  margin-bottom: 16px;
-}
-
 h2 {
-  margin: 0 0 16px;
-  font-family: var(--kt-font-display);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--kt-violet);
+  margin-bottom: 16px;
 }
 
 // The area in which the photo is visible: the square plus a margin around it (bleeding out to the

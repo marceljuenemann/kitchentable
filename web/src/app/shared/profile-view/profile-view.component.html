@@ -86,7 +86,8 @@
     </section>
 
     <section class="fade-in looking-for" aria-labelledby="looking-for-title">
-      <h2 id="looking-for-title">Looking for</h2>
+      <!-- A small label rather than a heading: the chips speak for themselves. -->
+      <h2 class="kt-label" id="looking-for-title">Looking for</h2>
       <ul class="chips">
         @for (value of lookingFor(); track value) {
           <li class="chip">{{ value }}</li>

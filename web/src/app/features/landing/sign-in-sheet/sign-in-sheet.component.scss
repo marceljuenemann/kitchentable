@@ -1,25 +1,7 @@
-.sign-in-sheet {
-  padding: 12px 20px 24px;
-  display: flex;
-  flex-direction: column;
-  font-family: var(--kt-font-sans);
-}
-
-.grab-handle {
-  align-self: center;
-  width: 44px;
-  height: 5px;
-  border-radius: 99px;
-  background: var(--kt-outline-soft);
-  margin-bottom: 16px;
-}
-
+// Like the landing page's card headings.
 h2 {
   margin: 0 0 8px;
-  font-family: var(--kt-font-display);
   font-size: 20px;
-  font-weight: 700;
-  color: var(--kt-violet);
 }
 
 .intro {
@@ -38,7 +20,6 @@ form {
 mat-form-field {
   width: 100%;
   margin: 8px 0;
-  --mat-form-field-outlined-container-shape: 14px;
 }
 
 .error {

@@ -1,8 +1,8 @@
-<div class="sign-in-sheet">
-  <div class="grab-handle"></div>
+<div class="kt-sheet sign-in-sheet">
+  <div class="kt-grab-handle" aria-hidden="true"></div>
 
   @if (!sent()) {
-    <h2>Sign in</h2>
+    <h2 class="kt-sheet-title">Sign in</h2>
 
     <form [formGroup]="form" (ngSubmit)="submit()">
       <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
@@ -37,7 +37,7 @@
       handle your data.
     </p>
   } @else {
-    <h2>Check your email</h2>
+    <h2 class="kt-sheet-title">Check your email</h2>
     <p class="intro">
       We've sent a sign-in link to {{ form.controls.email.value }}. Open it on this device to
       continue.

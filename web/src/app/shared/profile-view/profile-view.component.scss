@@ -242,16 +242,6 @@ h1 {
   }
 }
 
-// A small label rather than a heading: the chips speak for themselves.
-h2 {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--kt-muted);
-}
-
 // The text comes in just after the photo starts moving, one part after another.
 .fade-in {
   animation: fade-in 0.2s ease-out both;

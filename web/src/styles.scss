@@ -95,6 +95,9 @@ body {
   --mat-bottom-sheet-container-background-color: var(--kt-bg-soft);
   --mat-bottom-sheet-container-shape: 32px;
   --mat-bottom-sheet-container-text-color: var(--kt-ink);
+  --mat-bottom-sheet-container-text-font: var(--kt-font-sans);
+  // Like the pages' text, rather than Material's tracking for body text.
+  --mat-bottom-sheet-container-text-tracking: normal;
   width: 100% !important;
   max-width: var(--kt-page-width) !important;
   margin: 0 auto;
@@ -123,6 +126,68 @@ body {
   overflow: hidden;
 }
 
+// A sheet's content: a `.kt-sheet` (or, in a sheet that scrolls inside, the component's own
+// padding) starting with a `.kt-grab-handle` and an `h2.kt-sheet-title`.
+.kt-sheet {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 20px 24px;
+}
+
+.kt-grab-handle {
+  flex: none;
+  align-self: center;
+  width: 44px;
+  height: 5px;
+  margin-bottom: 16px;
+  border-radius: 99px;
+  background: var(--kt-outline-soft);
+}
+
+.kt-sheet-title {
+  margin: 0;
+  font-family: var(--kt-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--kt-violet);
+}
+
+// The top of an onboarding step: a `p.kt-step-eyebrow` ("Step 1 of 4") over an
+// `h1.kt-step-title`, and maybe a `p.kt-step-subtitle`.
+.kt-step-eyebrow {
+  margin: 18px 0 0;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kt-magenta);
+}
+
+.kt-step-title {
+  margin: 6px 0 0;
+  font-family: var(--kt-font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--kt-violet);
+}
+
+.kt-step-subtitle {
+  margin: 6px 0 20px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--kt-muted);
+}
+
+// A small label in the style of a form field's, such as "Looking for" over chips.
+.kt-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kt-muted);
+}
+
 // Form field labels (Name, Email, ...) share the look of the uppercase row labels in the
 // onboarding flow. An element selector, so it also reaches fields inside overlays and sheets.
 mat-form-field mat-label {
@@ -131,8 +196,9 @@ mat-form-field mat-label {
   text-transform: uppercase;
 }
 
-// Placeholders are a lighter grey, so they can't be mistaken for entered text.
+// Rounded corners, and placeholders in a lighter grey, so they can't be mistaken for entered text.
 mat-form-field {
+  --mat-form-field-outlined-container-shape: 14px;
   --mat-form-field-outlined-input-text-placeholder-color: var(--kt-outline);
 }
 

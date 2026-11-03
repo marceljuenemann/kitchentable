@@ -1,29 +1,3 @@
-.filter-sheet {
-  display: flex;
-  flex-direction: column;
-  padding: 12px 20px 24px;
-  font-family: var(--kt-font-sans);
-  // Not the bottom sheet's (Material's body text tracking).
-  letter-spacing: normal;
-}
-
-.grab-handle {
-  align-self: center;
-  width: 44px;
-  height: 5px;
-  margin-bottom: 14px;
-  border-radius: 99px;
-  background: var(--kt-outline-soft);
-}
-
-h2 {
-  margin: 0;
-  font-family: var(--kt-font-display);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--kt-violet);
-}
-
 // The chips bring 4px of their own.
 mat-chip-listbox {
   margin-top: 2px;

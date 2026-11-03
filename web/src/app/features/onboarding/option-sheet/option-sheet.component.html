@@ -1,8 +1,8 @@
-<div class="option-sheet">
-  <div class="grab-handle"></div>
+<div class="kt-sheet">
+  <div class="kt-grab-handle" aria-hidden="true"></div>
 
   <div class="title-row">
-    <h2>{{ data.title }}</h2>
+    <h2 class="kt-sheet-title">{{ data.title }}</h2>
     @if (data.multi) {
       <button mat-button type="button" (click)="clear()">Clear</button>
     }
