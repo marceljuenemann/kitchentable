@@ -1,7 +1,6 @@
 import { Component, computed, inject, signal, ViewContainerRef } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterOutlet } from '@angular/router';
 import { InviteLinkComponent } from '../../../shared/invite-link/invite-link.component';
 import {
@@ -33,13 +32,7 @@ interface FilterPill {
 @Component({
   selector: 'app-search',
   standalone: true,
-  imports: [
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    RouterOutlet,
-    InviteLinkComponent,
-    ProfileGridComponent,
-  ],
+  imports: [MatButtonModule, RouterOutlet, InviteLinkComponent, ProfileGridComponent],
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss',
   host: {

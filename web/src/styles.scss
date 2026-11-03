@@ -348,6 +348,41 @@ mat-checkbox {
   white-space: nowrap;
 }
 
+// A page that's loading: one spinner in the middle of the screen, the same on every page (and in
+// index.html until the app has started), so going from one loading page to the next, as after
+// a sign-in link, looks like one wait. CSS rather than `mat-spinner`, because index.html only has
+// this stylesheet. Use `<div class="kt-page-loading" role="status">` with a `.kt-visually-hidden`
+// label inside.
+.kt-page-loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+
+  &::before {
+    content: '';
+    width: 32px;
+    height: 32px;
+    box-sizing: border-box;
+    border: 3px solid var(--kt-violet-container);
+    border-top-color: var(--kt-violet);
+    border-radius: 50%;
+    animation: kt-spin 0.8s linear infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation-duration: 2.4s;
+    }
+  }
+}
+
+@keyframes kt-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
 // A gold note about something unfinished or out of the ordinary ("Still under construction").
 // Put a `mat-icon` and a `span` in it.
 .kt-notice {

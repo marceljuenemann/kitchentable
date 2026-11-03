@@ -1,5 +1,4 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { SupabaseService } from '../../core/supabase.service';
@@ -7,7 +6,7 @@ import { SupabaseService } from '../../core/supabase.service';
 @Component({
   selector: 'app-callback',
   standalone: true,
-  imports: [MatProgressSpinnerModule, MatButtonModule, RouterLink],
+  imports: [MatButtonModule, RouterLink],
   templateUrl: './callback.component.html',
   styleUrl: './callback.component.scss',
 })
