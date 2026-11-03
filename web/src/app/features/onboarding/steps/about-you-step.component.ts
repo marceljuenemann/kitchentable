@@ -11,7 +11,7 @@ import {
   TAGLINE_MAX_LENGTH,
   lookingForLabel,
   lookingForValueFor,
-} from '../onboarding-options';
+} from '../../../core/profile-options';
 
 /** Onboarding step 2: tagline, about text and what the user is looking for. */
 @Component({

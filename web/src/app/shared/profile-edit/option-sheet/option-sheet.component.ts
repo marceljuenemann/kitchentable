@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
-import { AddValueFieldComponent } from '../../../shared/add-value-field/add-value-field.component';
+import { AddValueFieldComponent } from '../../add-value-field/add-value-field.component';
 
 export interface OptionSheetData {
   title: string;

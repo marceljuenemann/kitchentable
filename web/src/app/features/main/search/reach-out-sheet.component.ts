@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { ConnectionsStore, INTRO_LIMIT_CODE } from '../../../core/connections/connections.store';
 import { Member } from '../../../core/profile.model';
 import { UserStorage } from '../../../core/user-storage';
-import { lookingForLabel } from '../../onboarding/onboarding-options';
+import { lookingForLabel } from '../../../core/profile-options';
 
 /** Only checked here: `check_message_content()` allows any message 2000 characters. */
 const MAX_LENGTH = 750;

@@ -1,4 +1,4 @@
-import { LOOKING_FOR_OPTIONS, lookingForLabel, lookingForValueFor } from './onboarding-options';
+import { LOOKING_FOR_OPTIONS, lookingForLabel, lookingForValueFor } from './profile-options';
 
 describe('lookingForLabel', () => {
   it('shows the label of a standard option', () => {

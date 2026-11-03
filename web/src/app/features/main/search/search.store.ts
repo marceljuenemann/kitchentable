@@ -6,7 +6,7 @@ import { PhotoStorageService } from '../../../core/photo-storage.service';
 import { Member, MyProfile, SavedSearchFilters } from '../../../core/profile.model';
 import { ProfileService } from '../../../core/profile.service';
 import { SupabaseService } from '../../../core/supabase.service';
-import { GENDER_OPTIONS, LOOKING_FOR_OPTIONS } from '../../onboarding/onboarding-options';
+import { GENDER_OPTIONS, LOOKING_FOR_OPTIONS } from '../../../core/profile-options';
 
 /** How long the filters must stay put before they're saved, so a slider drag is one save. */
 const SAVE_DELAY_MS = 300;

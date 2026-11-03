@@ -1,6 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 import { HeartComponent } from '../../../shared/heart/heart.component';
-import { lookingForLabel } from '../../onboarding/onboarding-options';
+import { lookingForLabel } from '../../../core/profile-options';
 import { shortDate } from './message-time';
 
 /**

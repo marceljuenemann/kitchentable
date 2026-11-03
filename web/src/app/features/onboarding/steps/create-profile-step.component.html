@@ -13,9 +13,9 @@
   />
 </mat-form-field>
 
-<div class="rows">
+<div class="kt-field-rows">
   @for (row of rows(); track row.key) {
-    <button type="button" class="row" [class.set]="row.value" (click)="openRow(row.key)">
+    <button type="button" class="kt-field-row" [class.set]="row.value" (click)="openRow(row.key)">
       <span class="text">
         <span class="kt-label">
           {{ row.label }}<span class="suffix"> · {{ row.required ? 'required' : 'optional' }}</span>

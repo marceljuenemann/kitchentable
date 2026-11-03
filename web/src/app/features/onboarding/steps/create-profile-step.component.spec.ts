@@ -11,7 +11,7 @@ describe('CreateProfileStepComponent', () => {
   /** The text of the row with the given label, e.g. "Age · optional Add birthday". */
   const row = (label: string) =>
     (
-      Array.from(fixture.nativeElement.querySelectorAll('.row')).find((element) =>
+      Array.from(fixture.nativeElement.querySelectorAll('.kt-field-row')).find((element) =>
         (element as HTMLElement).textContent?.includes(label),
       ) as HTMLElement
     ).textContent!.replace(/\s+/g, ' ');

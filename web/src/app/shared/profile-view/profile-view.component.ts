@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, firstValueFrom } from 'rxjs';
 import { Member } from '../../core/profile.model';
-import { lookingForLabel } from '../../features/onboarding/onboarding-options';
+import { lookingForLabel } from '../../core/profile-options';
 import { photoTransitionName } from './profile-transition';
 
 /**
