@@ -18,7 +18,7 @@ import { RequestTileComponent } from './request-tile.component';
   imports: [HeaderComponent, HugPandaComponent, RequestTileComponent, RouterOutlet],
   templateUrl: './connections.component.html',
   styleUrl: './connections.component.scss',
-  host: { '[class.covering]': 'profileOpen()' },
+  host: { class: 'kt-scroller', '[class.covering]': 'profileOpen()' },
 })
 export class ConnectionsComponent {
   readonly store = inject(ConnectionsStore);

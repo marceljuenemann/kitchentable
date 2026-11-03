@@ -95,7 +95,6 @@ h1 {
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-width: none;
   padding: 16px;
 }
 
@@ -251,8 +250,6 @@ textarea {
   font-size: 16px;
   line-height: 1.4;
   resize: none;
-  scrollbar-width: thin;
-  scrollbar-color: var(--kt-input) transparent;
 
   &::placeholder {
     color: var(--kt-outline);

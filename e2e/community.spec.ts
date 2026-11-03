@@ -22,8 +22,8 @@ test('feedback and reports go to the conversation with the team', async ({ page 
 
   await page.getByRole('link', { name: 'conversation with the team' }).click();
   const thread = page.locator('app-conversation');
-  await expect(thread.getByText('Feedback submitted: 😐 Okay')).toBeVisible();
-  await expect(thread.getByText('Feedback submitted: 😍 Love it')).toBeVisible();
+  await expect(thread.getByText('Feedback: 😐 Okay')).toBeVisible();
+  await expect(thread.getByText('Feedback: 😍 Love it')).toBeVisible();
   await expect(thread.getByText('Feedback submitted: The panda is adorable')).toBeVisible();
 
   await page.goBack();
@@ -39,6 +39,6 @@ test('an admin sees the community links, but no feedback or reports', async ({ p
     'href',
     /^https:\/\/chat\.whatsapp\.com\//,
   );
-  await expect(page.getByRole('link', { name: 'Issues on GitHub' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Code on GitHub' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Report a problem' })).toHaveCount(0);
 });

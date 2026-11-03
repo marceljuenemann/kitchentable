@@ -34,10 +34,10 @@ describe('CommunityComponent', () => {
     const community = create().componentInstance;
     community.sendMood(MOODS[4]);
     community.sendMood(MOODS[4]);
-    expect(send).toHaveBeenCalledOnceWith('team', 'Feedback submitted: 😍 Love it');
+    expect(send).toHaveBeenCalledOnceWith('team', 'Feedback: 😍 Love it');
 
     community.sendMood(MOODS[2]);
-    expect(send).toHaveBeenCalledWith('team', 'Feedback submitted: 😐 Okay');
+    expect(send).toHaveBeenCalledWith('team', 'Feedback: 😐 Okay');
     expect(send).toHaveBeenCalledTimes(2);
     expect(community.mood()).toBe(MOODS[2]);
   });
@@ -59,6 +59,6 @@ describe('CommunityComponent', () => {
     team.set(undefined);
     const element: HTMLElement = create().nativeElement;
     const headings = [...element.querySelectorAll('h2')].map((h2) => h2.textContent);
-    expect(headings).toEqual(['Invite friends', 'Help build Kitchen Table', 'Open source']);
+    expect(headings).toEqual(['Invite friends', 'Get involved', 'Open source code']);
   });
 });

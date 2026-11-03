@@ -50,6 +50,7 @@ export const MOODS: readonly Mood[] = [
   ],
   templateUrl: './community.component.html',
   styleUrl: './community.component.scss',
+  host: { class: 'kt-scroller' },
 })
 export class CommunityComponent {
   private readonly store = inject(ConnectionsStore);

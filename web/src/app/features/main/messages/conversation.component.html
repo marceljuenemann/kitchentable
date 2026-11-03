@@ -38,7 +38,7 @@
       }
     </header>
 
-    <div class="scroller" #scroller>
+    <div class="scroller kt-scroller" #scroller>
       @if (conversation.isTeam) {
         <p class="team-note">
           Talk directly to the team that runs Kitchen Table. Ask us anything, tell us what you
@@ -121,6 +121,7 @@
           <form (submit)="$event.preventDefault(); send()">
             <textarea
               #input
+              class="kt-scroller"
               rows="1"
               [attr.maxlength]="maxLength"
               [attr.aria-label]="'Message to ' + person.name"

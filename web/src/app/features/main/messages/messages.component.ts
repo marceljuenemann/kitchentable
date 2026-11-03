@@ -14,7 +14,7 @@ import { ConversationRowComponent } from './conversation-row.component';
   imports: [ConversationRowComponent, RouterOutlet],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
-  host: { '[class.covering]': 'overlayOpen()' },
+  host: { class: 'kt-scroller', '[class.covering]': 'overlayOpen()' },
 })
 export class MessagesComponent {
   readonly store = inject(ConnectionsStore);

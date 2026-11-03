@@ -20,6 +20,7 @@ import { photoTransitionName } from './profile-transition';
   imports: [MatIconModule],
   templateUrl: './profile-view.component.html',
   styleUrl: './profile-view.component.scss',
+  host: { class: 'kt-scroller' },
 })
 export class ProfileViewComponent {
   private readonly router = inject(Router);

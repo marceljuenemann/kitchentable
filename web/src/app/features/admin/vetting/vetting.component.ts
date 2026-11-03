@@ -16,6 +16,7 @@ import { VettingStore } from './vetting.store';
   imports: [MatButtonModule, RouterOutlet, FooterComponent, HeaderComponent, ProfileGridComponent],
   templateUrl: './vetting.component.html',
   styleUrl: './vetting.component.scss',
+  host: { class: 'kt-scroller' },
 })
 export class VettingComponent {
   readonly store = inject(VettingStore);

@@ -1,5 +1,19 @@
+// Scrolls itself, like the other tabs, rather than the window. Under the bottom nav (z-index 10).
 :host {
-  display: block;
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  background: var(--kt-bg);
+  color: var(--kt-ink);
+  font-family: var(--kt-font-sans);
+}
+
+// The shell's column, with room for the bottom nav.
+.page {
+  max-width: var(--kt-page-width);
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 0 24px 104px;
 }
 
 .kt-card {

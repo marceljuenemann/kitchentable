@@ -36,6 +36,7 @@ interface FilterPill {
   templateUrl: './search.component.html',
   styleUrl: './search.component.scss',
   host: {
+    class: 'kt-scroller',
     // Over the bottom nav while a profile shows: the page is its own stacking context (it's
     // fixed), so the profile's z-index only counts within it.
     '[class.covering]': 'store.openId() !== null',
