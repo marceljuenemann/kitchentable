@@ -63,9 +63,10 @@ test('an admin reviews an application and approves it', async ({ page }) => {
 
   // The applicant is emailed a link to the next step, without personal data.
   const email = await getLatestEmail(applicant.email);
-  expect(email.subject).toBe("You're approved!");
+  expect(email.subject).toBe("You're in! Welcome to Kitchen Table");
   expect(firstLink(email.html)).toBe('http://localhost:4200/app');
-  expect(email.text).toContain('Open the app: http://localhost:4200/app');
+  expect(email.text).toContain('Finish joining: http://localhost:4200/app');
+  expect(email.text).toContain('See you there');
   expect(email.html).not.toContain(applicant.name);
 });
 

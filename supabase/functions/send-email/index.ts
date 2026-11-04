@@ -47,19 +47,24 @@ const TEMPLATES: Record<string, Template> = {
   },
   application_approved: {
     to: 'user',
-    subject: "You're approved!",
+    subject: "You're in! Welcome to Kitchen Table",
     category: 'member',
+    // Most applicants applied before the launch and were told they'd hear from us when we
+    // launched, so this is also the launch announcement. Tone that down once it's been a while.
     content: (siteUrl) => ({
-      preview: 'Welcome! One quick step left and your profile goes live.',
-      heading: "You're approved!",
+      preview: "Kitchen Table is live, and you're in. One quick step to go.",
+      heading: "You're in!",
       paragraphs: [
-        "Welcome to Kitchen Table! We've approved your application.",
-        "There's one quick step left before your profile goes live: a short age check, which " +
+        "Kitchen Table is live, and we've approved your application. Welcome!",
+        "There's one quick step before your profile appears: a short selfie age check, which " +
           "the UK's Online Safety Act requires.",
+        "Then you can browse the other members, send introductions to people you'd like to " +
+          "meet, and start conversations.",
       ],
       // The age check is explained on the page, with the privacy details an email can't give.
       // A "verify" button in an email looks like phishing.
-      button: { label: 'Open the app', url: `${siteUrl}/app` },
+      button: { label: 'Finish joining', url: `${siteUrl}/app` },
+      signature: ['See you there,', 'Marcel', '(Founder of Kitchen Table)'],
       footer: "You're getting this email because you applied to join Kitchen Table.",
     }),
   },

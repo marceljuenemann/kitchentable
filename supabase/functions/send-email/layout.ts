@@ -11,6 +11,8 @@ export interface EmailContent {
   heading: string;
   paragraphs: string[];
   button: { label: string; url: string };
+  /** A personal sign-off under the button, one line each (such as "See you there," and a name). */
+  signature?: string[];
   /** Small print under a line at the bottom. */
   footer: string;
 }
@@ -29,6 +31,15 @@ export function html(content: EmailContent, siteUrl: string): string {
             </tr>`,
     )
     .join('');
+  const signature = content.signature
+    ? `
+
+            <tr>
+              <td style="padding: 28px 32px 0 32px; font-family: ${TEXT_FONT}; font-size: 16px; line-height: 1.5; color: #21123f;">
+                ${content.signature.map(escape).join('<br />')}
+              </td>
+            </tr>`
+    : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -83,7 +94,7 @@ export function html(content: EmailContent, siteUrl: string): string {
                   </tr>
                 </table>
               </td>
-            </tr>
+            </tr>${signature}
 
             <tr>
               <td style="padding: 28px 32px 0 32px; font-family: ${TEXT_FONT}; font-size: 13px; line-height: 1.5; color: #5f5175;">
@@ -118,6 +129,7 @@ export function text(content: EmailContent): string {
     content.heading,
     ...content.paragraphs,
     `${content.button.label}: ${content.button.url}`,
+    ...(content.signature ? [content.signature.join('\n')] : []),
     content.footer,
   ].join('\n\n') + '\n';
 }
