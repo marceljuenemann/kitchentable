@@ -30,14 +30,16 @@ import { injectRequestActions } from './request-actions';
         [photoUrls]="photoUrls()"
         backLabel="Back to introductions"
       >
-        <div class="intro" profileIntro>
-          <app-intro-card
-            [title]="conversation.person.name + '’s introduction'"
-            [date]="conversation.messages[0].createdAt"
-            [text]="introText(conversation)"
-            [lookingFor]="conversation.lookingFor"
-          />
-        </div>
+        @if (conversation.messages[0]; as intro) {
+          <div class="intro" profileIntro>
+            <app-intro-card
+              [title]="conversation.person.name + '’s introduction'"
+              [date]="intro.createdAt"
+              [text]="introText(conversation)"
+              [lookingFor]="conversation.lookingFor"
+            />
+          </div>
+        }
         <div class="kt-profile-actions">
           <div class="kt-profile-bar">
             <button class="hide" mat-stroked-button type="button" (click)="hide()">
@@ -119,8 +121,9 @@ export class RequestProfileComponent {
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('id');
 
   /**
-   * Undefined until the store is ready (opened by its URL), null if there's no such request. Set
-   * once, not kept in step: it has to stay while the page leaves, after accepting or hiding.
+   * Undefined until the store is ready (opened by its URL), null if there's no such request. Kept
+   * in step while the request is there (its messages can sync after the connection), and kept
+   * once it goes: it has to stay while the page leaves, after accepting or hiding.
    */
   readonly conversation = signal<Conversation | null | undefined>(undefined);
   readonly photoUrls = injectProfilePhotoUrls(
@@ -133,10 +136,10 @@ export class RequestProfileComponent {
   constructor() {
     effect(() => {
       if (!this.store.ready()) return;
+      const request = this.store.requests().find(({ person }) => person.id === this.id);
       untracked(() => {
-        if (this.conversation() !== undefined) return;
-        const request = this.store.requests().find(({ person }) => person.id === this.id);
-        this.conversation.set(request ?? null);
+        if (request) this.conversation.set(request);
+        else if (this.conversation() === undefined) this.conversation.set(null);
       });
     });
   }
