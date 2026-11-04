@@ -1,0 +1,21 @@
+<div class="kt-sheet">
+  <div class="kt-grab-handle" aria-hidden="true"></div>
+
+  <h2 class="kt-sheet-title">Settings</h2>
+
+  @for (email of emails; track email.setting) {
+    <button
+      class="kt-switch-row kt-setting"
+      type="button"
+      role="switch"
+      [attr.aria-checked]="store.settings()[email.setting]"
+      (click)="toggle(email.setting)"
+    >
+      {{ email.label }}
+      <span class="kt-switch" aria-hidden="true"></span>
+    </button>
+  }
+  <p class="note">Only while you're away, and never with names or messages in them.</p>
+
+  <button mat-flat-button class="done" type="button" (click)="close()">Done</button>
+</div>

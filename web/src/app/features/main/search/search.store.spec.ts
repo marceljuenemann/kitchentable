@@ -397,5 +397,19 @@ describe('SearchStore', () => {
       expect(store.results()).toEqual([ivy]);
       expect(open.calls.mostRecent().args[0]).toBe("Couldn't hide ivy");
     });
+
+    it('takes someone off the grid once reached out to, with no undo', async () => {
+      respondWith([ivy]);
+      create();
+      await store.load();
+
+      store.showIntroSent(ivy);
+
+      expect(store.results()).toEqual([]);
+      expect(open.calls.mostRecent().args.slice(0, 2)).toEqual([
+        'Introduction sent to ivy',
+        undefined,
+      ]);
+    });
   });
 });

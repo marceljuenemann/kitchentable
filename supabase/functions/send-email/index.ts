@@ -1,6 +1,7 @@
 // Sends one of the emails below, to the admin or to a member. Called by the database (the
-// send_email() function, from triggers; see "Emails" in docs/database.md), never by clients, so
-// it checks a shared secret instead of a user's JWT (verify_jwt = false in config.toml).
+// send_email() function, from triggers and the email notifications job; see "Emails" in
+// docs/database.md), never by clients, so it checks a shared secret instead of a user's JWT
+// (verify_jwt = false in config.toml).
 //
 // The request names a template and, for member emails, the user's id: `{"template":
 // "application_approved", "user_id": "…"}`. The address is looked up here, so it never sits in
@@ -17,6 +18,10 @@ import { timingSafeEqual } from 'jsr:@std/crypto@1/timing-safe-equal';
 import { EmailContent, html, text } from './layout.ts';
 
 const FROM = { email: 'no-reply@kitchentable.dating', name: 'Kitchen Table' };
+
+const NOTIFICATIONS_FOOTER =
+  "You're getting this email as a member of Kitchen Table. To unsubscribe, change your notification settings " +
+  'in the app (on the profile page).';
 
 interface Template {
   /** Who gets it: the admin, or the user the request names. */
@@ -42,20 +47,60 @@ const TEMPLATES: Record<string, Template> = {
   },
   application_approved: {
     to: 'user',
-    subject: "You're approved!",
+    subject: "You're in! Welcome to Kitchen Table",
     category: 'member',
+    // Most applicants applied before the launch and were told they'd hear from us when we
+    // launched, so this is also the launch announcement. Tone that down once it's been a while.
     content: (siteUrl) => ({
-      preview: 'Welcome! One quick step left and your profile goes live.',
-      heading: "You're approved!",
+      preview: "Kitchen Table is live, and you're in. One quick step to go.",
+      heading: "You're in!",
       paragraphs: [
-        "Welcome to Kitchen Table! We've approved your application.",
-        "There's one quick step left before your profile goes live: a short age check, which " +
+        "Kitchen Table is live, and we've approved your application. Welcome!",
+        "There's one quick step before your profile appears: a short selfie age check, which " +
           "the UK's Online Safety Act requires.",
+        "Then you can browse the other members, send introductions to people you'd like to " +
+          "meet, and start conversations.",
       ],
       // The age check is explained on the page, with the privacy details an email can't give.
       // A "verify" button in an email looks like phishing.
-      button: { label: 'Open the app', url: `${siteUrl}/app` },
+      button: { label: 'Finish joining', url: `${siteUrl}/app` },
+      signature: ['See you there,', 'Marcel', '(Founder of Kitchen Table)'],
       footer: "You're getting this email because you applied to join Kitchen Table.",
+    }),
+  },
+  // The email notifications, from send_email_notifications(): one at a time, however many
+  // intros or messages there are (so "someone", which is true for any number), and never who
+  // from. The subjects can show on a lock screen, so they stay plain.
+  new_intros: {
+    to: 'user',
+    subject: 'Someone wants to connect with you',
+    category: 'member',
+    content: (siteUrl) => ({
+      preview: 'Read their introduction and see if you click.',
+      heading: 'Someone wants to connect',
+      paragraphs: [
+        'A member of Kitchen Table has sent you an introduction. Read what they wrote, and ' +
+          "connect if you'd like to get to know them.",
+      ],
+      button: { label: 'See your introductions', url: `${siteUrl}/app/connections` },
+      footer: NOTIFICATIONS_FOOTER,
+    }),
+  },
+  // Also sent when an intro of theirs is accepted, which shows as an unread conversation (and
+  // usually comes with a message).
+  new_messages: {
+    to: 'user',
+    subject: 'You have new messages',
+    category: 'member',
+    content: (siteUrl) => ({
+      preview: 'Someone has written to you on Kitchen Table.',
+      heading: 'You have new messages',
+      paragraphs: [
+        'Someone has written to you on Kitchen Table. Your conversations are waiting in the app.',
+        "If someone has accepted your introduction, you'll find them there too.",
+      ],
+      button: { label: 'Read your messages', url: `${siteUrl}/app/messages` },
+      footer: NOTIFICATIONS_FOOTER,
     }),
   },
 };

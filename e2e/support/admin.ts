@@ -194,3 +194,61 @@ export async function signIn(page: Page, email: string) {
   await page.goto(link.action_link);
   await page.waitForURL('**/app');
 }
+
+/**
+ * An intro from one member to another, as `send_intro` makes it (the connection, its first
+ * message and both people's secrets), without its checks. `accepted` for a connection.
+ */
+export async function createIntro(
+  fromId: string,
+  toId: string,
+  text: string,
+  status: 'pending' | 'accepted' = 'pending',
+) {
+  await api('/rest/v1/connections', {
+    initiator_id: fromId,
+    recipient_id: toId,
+    status,
+    looking_for: ['friends'],
+  });
+  await api('/rest/v1/messages', {
+    sender_id: fromId,
+    recipient_id: toId,
+    content: { type: 'text', text },
+  });
+  await api('/rest/v1/connection_secrets', [
+    { user_id: fromId, other_user_id: toId },
+    { user_id: toId, other_user_id: fromId },
+  ]);
+}
+
+/** Makes the intros and messages sent to the user look `minutes` old. */
+export async function backdateSentTo(userId: string, minutes: number) {
+  const created_at = new Date(Date.now() - minutes * 60_000).toISOString();
+  await api(`/rest/v1/connections?recipient_id=eq.${userId}`, { created_at }, 'PATCH');
+  await api(`/rest/v1/messages?recipient_id=eq.${userId}`, { created_at }, 'PATCH');
+}
+
+/**
+ * Runs the job that sends the email notifications that are due (pg_cron runs it every 10
+ * minutes), to everyone in the database.
+ */
+export async function sendEmailNotifications() {
+  await api('/rest/v1/rpc/send_email_notifications', {});
+}
+
+/** One user's `connection_secrets` row about another, read with the service role. */
+export async function secretOf(userId: string, otherId: string): Promise<Record<string, unknown>> {
+  const response = await fetch(
+    `${API_URL}/rest/v1/connection_secrets?select=*&user_id=eq.${userId}&other_user_id=eq.${otherId}`,
+    { headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}` } },
+  );
+  if (!response.ok) throw new Error(`Reading the secret failed: ${await response.text()}`);
+  const [secret] = await response.json();
+  return secret;
+}
+
+/** Changes a profile's status, as an admin would in Studio. */
+export async function setStatus(id: string, status: ProfileStatus) {
+  await api(`/rest/v1/profiles?id=eq.${id}`, { status }, 'PATCH');
+}

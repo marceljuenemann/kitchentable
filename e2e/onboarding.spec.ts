@@ -76,6 +76,12 @@ test('age is worked out from the birth month and year in the age sheet', async (
   await ageRow.click();
   await expect(page.getByRole('combobox', { name: 'Month' })).toContainText('May');
   await expect(page.getByRole('combobox', { name: 'Year' })).toContainText('2007');
+
+  // The birthday is optional, so it can be cleared again.
+  await page.getByRole('button', { name: 'Clear' }).click();
+  await expect(page.getByText('Pick a month and year.')).toBeVisible();
+  await page.getByRole('button', { name: 'Done' }).click();
+  await expect(ageRow).toContainText('Add birthday');
 });
 
 test('a custom value can be added in the option sheet', async ({ page }) => {

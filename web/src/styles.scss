@@ -66,6 +66,7 @@ body {
   --kt-raised: oklch(1 0 0);
   --kt-sunken: oklch(0.958 0.008 95);
   --kt-cream: oklch(0.955 0.032 88);
+  --kt-cream-soft: oklch(0.977 0.018 88);
   --kt-cream-strong: oklch(0.925 0.048 86);
   --kt-outline: oklch(0.55 0.03 300);
   --kt-outline-soft: oklch(0.885 0.012 95);
@@ -94,6 +95,9 @@ body {
   --mat-bottom-sheet-container-background-color: var(--kt-bg-soft);
   --mat-bottom-sheet-container-shape: 32px;
   --mat-bottom-sheet-container-text-color: var(--kt-ink);
+  --mat-bottom-sheet-container-text-font: var(--kt-font-sans);
+  // Like the pages' text, rather than Material's tracking for body text.
+  --mat-bottom-sheet-container-text-tracking: normal;
   width: 100% !important;
   max-width: var(--kt-page-width) !important;
   margin: 0 auto;
@@ -122,6 +126,68 @@ body {
   overflow: hidden;
 }
 
+// A sheet's content: a `.kt-sheet` (or, in a sheet that scrolls inside, the component's own
+// padding) starting with a `.kt-grab-handle` and an `h2.kt-sheet-title`.
+.kt-sheet {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 20px 24px;
+}
+
+.kt-grab-handle {
+  flex: none;
+  align-self: center;
+  width: 44px;
+  height: 5px;
+  margin-bottom: 16px;
+  border-radius: 99px;
+  background: var(--kt-outline-soft);
+}
+
+.kt-sheet-title {
+  margin: 0;
+  font-family: var(--kt-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--kt-violet);
+}
+
+// The top of an onboarding step: a `p.kt-step-eyebrow` ("Step 1 of 4") over an
+// `h1.kt-step-title`, and maybe a `p.kt-step-subtitle`.
+.kt-step-eyebrow {
+  margin: 18px 0 0;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kt-magenta);
+}
+
+.kt-step-title {
+  margin: 6px 0 0;
+  font-family: var(--kt-font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--kt-violet);
+}
+
+.kt-step-subtitle {
+  margin: 6px 0 20px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--kt-muted);
+}
+
+// A small label in the style of a form field's, such as "Looking for" over chips.
+.kt-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kt-muted);
+}
+
 // Form field labels (Name, Email, ...) share the look of the uppercase row labels in the
 // onboarding flow. An element selector, so it also reaches fields inside overlays and sheets.
 mat-form-field mat-label {
@@ -130,15 +196,22 @@ mat-form-field mat-label {
   text-transform: uppercase;
 }
 
-// Placeholders are a lighter grey, so they can't be mistaken for entered text.
+// Rounded corners, and placeholders in a lighter grey, so they can't be mistaken for entered text.
 mat-form-field {
+  --mat-form-field-outlined-container-shape: 14px;
   --mat-form-field-outlined-input-text-placeholder-color: var(--kt-outline);
 }
 
-// A slim, soft scrollbar in text areas instead of the browser's default one.
+// A slim, soft scrollbar instead of the browser's default one, for anything that scrolls on its
+// own: pages that scroll themselves rather than the window, sheets, text areas. On phones it's
+// the usual overlay that only shows while scrolling; on desktop it shows how long the page is.
+.kt-scroller,
 mat-form-field textarea {
   scrollbar-width: thin;
   scrollbar-color: var(--kt-input) transparent;
+}
+
+mat-form-field textarea {
   padding-right: 4px;
 }
 
@@ -337,6 +410,96 @@ mat-checkbox {
   }
 }
 
+// A switch for a setting rather than an option (such as "Include profiles with no age"): in
+// regular weight, and only the switch itself turns violet when on. With a `.kt-switch-hint` (in
+// a `span` with the label), two lines: the setting in bold, and what it does.
+.kt-switch-row.kt-setting {
+  font-weight: 400;
+
+  &[aria-checked='true'] {
+    border-color: var(--kt-outline-soft);
+    background: var(--kt-raised);
+  }
+
+  &:has(.kt-switch-hint) {
+    padding-block: 10px;
+    font-weight: 700;
+  }
+}
+
+.kt-switch-hint {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--kt-muted);
+}
+
+// A profile field that opens a sheet to edit it, such as Pronouns: a `button.kt-field-row`
+// (with `set` once it has a value) holding a `span.text` with the field's `.kt-label` (maybe
+// with a `span.suffix`, " · optional") over a `span.value`, then a `chevron_right` `mat-icon`.
+// Stack several in a `.kt-field-rows`.
+.kt-field-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kt-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--kt-outline-soft);
+  border-radius: 14px;
+  background: var(--kt-raised);
+  color: var(--kt-muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &.set {
+    background: var(--kt-violet-container);
+    border-color: var(--kt-violet);
+    color: var(--kt-ink);
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .suffix {
+    text-transform: none;
+    font-weight: 600;
+    letter-spacing: 0;
+    opacity: 0.7;
+  }
+
+  .value {
+    font-size: 15.5px;
+    line-height: 1.35;
+  }
+
+  // However long the value.
+  mat-icon {
+    flex: none;
+  }
+}
+
+// The title of a main app tab that sits in the shell's column, such as "Your profile".
+.kt-tab-title {
+  margin: 38px 0 0;
+  font-family: var(--kt-font-display);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--kt-violet);
+}
+
 // For screen readers only, like a tab's `h1` when the bottom nav already shows which tab it is.
 .kt-visually-hidden {
   position: absolute;
@@ -347,29 +510,43 @@ mat-checkbox {
   white-space: nowrap;
 }
 
-// A gold note about something unfinished or out of the ordinary ("Still under construction").
-// Put a `mat-icon` and a `span` in it.
-.kt-notice {
+// A page that's loading: one spinner in the middle of the screen, the same on every page (and in
+// index.html until the app has started), so going from one loading page to the next, as after
+// a sign-in link, looks like one wait. CSS rather than `mat-spinner`, because index.html only has
+// this stylesheet. Use `<div class="kt-page-loading" role="status">` with a `.kt-visually-hidden`
+// label inside.
+.kt-page-loading {
+  position: fixed;
+  inset: 0;
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin: 0;
-  padding: 14px 16px;
-  border: 1px solid color-mix(in oklch, var(--kt-gold) 35%, transparent);
-  border-radius: 14px;
-  background: var(--kt-gold-container);
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--kt-ink);
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 
-  mat-icon {
-    flex: none;
-    color: var(--kt-gold);
+  &::before {
+    content: '';
+    width: 32px;
+    height: 32px;
+    box-sizing: border-box;
+    border: 3px solid var(--kt-violet-container);
+    border-top-color: var(--kt-violet);
+    border-radius: 50%;
+    animation: kt-spin 0.8s linear infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation-duration: 2.4s;
+    }
+  }
+}
+
+@keyframes kt-spin {
+  to {
+    transform: rotate(1turn);
   }
 }
 
 // Applied via `panelClass` on MatSnackBar.open(): dark and rounded, above the main app's bottom
-// nav (and the Reach out bar on a profile).
+// nav (and the Reach out bar on a profile), across the page's content like the cards.
 .kt-snackbar {
   --mat-snack-bar-container-color: var(--kt-ink);
   --mat-snack-bar-container-shape: 14px;
@@ -378,12 +555,67 @@ mat-checkbox {
   --mat-snack-bar-supporting-text-size: 14px;
   --mat-snack-bar-button-color: oklch(0.86 0.07 90);
   margin: 0 16px 96px !important;
-  max-width: calc(var(--kt-page-width) - 32px) !important;
+  width: calc(min(100vw, var(--kt-page-width)) - 32px);
+  max-width: none !important;
   box-shadow: var(--kt-shadow-lift);
   border-radius: 14px;
+  // Its overlay pane takes up the margin too, which covers the bottom nav: only the snackbar
+  // itself takes clicks.
+  pointer-events: auto;
+
+  // Material's own width limits (344px to 672px) would keep it from the content's edges.
+  .mat-mdc-snackbar-surface {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
 
   .mat-mdc-button {
     font-weight: 800;
+  }
+}
+
+.cdk-overlay-pane:has(> .kt-snackbar) {
+  pointer-events: none;
+}
+
+// The bar at the bottom of someone's profile, with one button or several of the same size. Goes
+// inside `app-profile-view`: a `.kt-profile-actions` holding a `.kt-profile-bar`.
+//
+// The first holds the bar's room at the end of the page: its height (border, padding, button),
+// plus 14px after the content to match the space above the buttons, less the profile view's 48px
+// of bottom padding.
+.kt-profile-actions {
+  height: calc(1px + 14px + 52px + max(20px, env(safe-area-inset-bottom)) + 14px - 48px);
+}
+
+// Fixed like the bottom nav, across the page width, over the profile.
+.kt-profile-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 1;
+  transform: translateX(-50%);
+  width: min(var(--kt-page-width), 100%);
+  box-sizing: border-box;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 12px;
+  padding: 14px 20px max(20px, env(safe-area-inset-bottom));
+  background: color-mix(in oklch, var(--kt-raised) 96%, transparent);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--kt-outline-soft);
+  animation: kt-fade-in 0.2s 0.2s ease-out both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes kt-fade-in {
+  from {
+    opacity: 0;
   }
 }
 
@@ -397,6 +629,14 @@ mat-checkbox {
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 0.18s;
+}
+
+// Cropped rather than stretched, for a photo that isn't square where it starts from.
+::view-transition-old(*),
+::view-transition-new(*) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 @media (prefers-reduced-motion: reduce) {

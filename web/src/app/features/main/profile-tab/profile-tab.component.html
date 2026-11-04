@@ -1,22 +1,61 @@
-<app-under-construction />
-
-<mat-card class="kt-card account" appearance="outlined">
-  <h2>Account</h2>
-  @if (session(); as session) {
-    <p>
-      Signed in as <b>{{ session.user.email }}</b>
-    </p>
-  }
-  <button mat-stroked-button type="button" (click)="signOut()">Sign out</button>
-</mat-card>
-
-<ul class="links">
-  <li><a href="/about/terms" (click)="openPolicy($event, 'terms')">Terms of Use</a></li>
-  <li><a href="/about/privacy" (click)="openPolicy($event, 'privacy')">Privacy Policy</a></li>
-  <li><a href="mailto:hello@kitchentable.dating">Contact us</a></li>
-  <li>
-    <a href="https://github.com/marceljuenemann/kitchentable" target="_blank" rel="noopener">
-      Source code on GitHub
+<div class="page">
+  <div class="title-row">
+    <h1 class="kt-tab-title">Your profile</h1>
+    <a mat-stroked-button class="preview" routerLink="preview">
+      <mat-icon>visibility</mat-icon>
+      Preview
     </a>
-  </li>
-</ul>
+  </div>
+
+  @if (store.profile(); as profile) {
+    <h2 class="kt-label">Photos</h2>
+    <p class="hint">Drag to reorder. The first one is your main photo.</p>
+    <app-photo-grid
+      [photos]="profile.photos"
+      [remove]="removePhoto"
+      [minPhotos]="1"
+      [mainTransitionName]="mainTransitionName()"
+      (added)="addPhoto($event)"
+      (reordered)="savePhotos($event)"
+    />
+
+    @for (group of groups(); track group.title) {
+      <h2 class="kt-label">{{ group.title }}</h2>
+      <div class="kt-field-rows">
+        @for (row of group.rows; track row.field) {
+          <button
+            type="button"
+            class="kt-field-row"
+            [class.set]="row.value"
+            (click)="openRow(row.field)"
+          >
+            <span class="text">
+              <span class="kt-label">{{ row.label }}</span>
+              <span class="value" [class.long]="row.field === 'bio'">
+                {{ row.value || row.emptyText }}
+              </span>
+            </span>
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        }
+      </div>
+    }
+  }
+
+  <mat-card class="kt-card account" appearance="outlined">
+    <h2>Account</h2>
+    @if (session(); as session) {
+      <p>
+        Signed in as <b>{{ session.user.email }}</b>
+      </p>
+    }
+    <div class="actions">
+      <button mat-stroked-button type="button" (click)="openSettings()">Settings</button>
+      <button mat-stroked-button type="button" (click)="signOut()">Sign out</button>
+    </div>
+  </mat-card>
+
+  <app-legal-links />
+</div>
+
+<router-outlet (activate)="previewOpen.set(true)" (deactivate)="previewOpen.set(false)" />

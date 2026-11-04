@@ -1,7 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProfileService, ProfileState } from '../../core/profile.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
@@ -21,7 +20,6 @@ import { TermsComponent } from '../terms/terms.component';
   standalone: true,
   imports: [
     MatButtonModule,
-    MatProgressSpinnerModule,
     FooterComponent,
     HeaderComponent,
     AgeVerificationComponent,

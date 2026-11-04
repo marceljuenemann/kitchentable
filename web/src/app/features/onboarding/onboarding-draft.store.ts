@@ -1,7 +1,7 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { NewProfile } from '../../core/profile.model';
 import { UserStorage } from '../../core/user-storage';
-import { MAX_PHOTOS } from './onboarding-options';
+import { MAX_PHOTOS } from '../../core/profile-options';
 
 export const ONBOARDING_STEPS = 4;
 

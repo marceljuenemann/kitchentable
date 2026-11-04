@@ -1,0 +1,316 @@
+// Covers the list, within the part of the screen a phone's keyboard leaves free: the component
+// sets `top` and `height` from the visual viewport once that changes.
+:host {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100dvh;
+  background: var(--kt-bg);
+  color: var(--kt-ink);
+  font-family: var(--kt-font-sans);
+}
+
+.thread {
+  height: 100%;
+  max-width: var(--kt-page-width);
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  background: var(--kt-raised);
+  border-bottom: 1px solid var(--kt-outline-soft);
+}
+
+.round {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--kt-violet);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    outline: 2px solid var(--kt-violet);
+  }
+}
+
+.who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    outline: 2px solid var(--kt-violet);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+}
+
+.names {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--kt-font-display);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--kt-violet);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pronouns {
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: var(--kt-muted);
+}
+
+.scroller {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px;
+}
+
+.team-note {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--kt-cream-strong);
+  border-radius: 20px;
+  background: var(--kt-cream);
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.event {
+  margin: 18px 0 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--kt-muted);
+  text-align: center;
+}
+
+.unread-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--kt-violet);
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid var(--kt-outline-soft);
+  }
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 2px;
+
+  p {
+    margin: 0;
+  }
+
+  &.starts {
+    margin-top: 10px;
+  }
+
+  &.mine {
+    align-items: flex-end;
+  }
+}
+
+.bubble {
+  max-width: 80%;
+  box-sizing: border-box;
+  padding: 9px 14px;
+  border-radius: 18px;
+  background: var(--kt-sunken);
+  font-size: 15.5px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+
+  // In the bubble's own colour, which differs for the viewer's messages.
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+// Corners tuck in where a bubble touches the next one of the group.
+.message:not(.mine) {
+  &:not(.starts) .bubble {
+    border-top-left-radius: 6px;
+  }
+
+  &:not(.ends) .bubble {
+    border-bottom-left-radius: 6px;
+  }
+}
+
+.mine {
+  .bubble {
+    background: var(--kt-violet);
+    color: var(--kt-raised);
+  }
+
+  &:not(.starts) .bubble {
+    border-top-right-radius: 6px;
+  }
+
+  &:not(.ends) .bubble {
+    border-bottom-right-radius: 6px;
+  }
+
+  .bubble.failed {
+    background: var(--kt-magenta-container);
+    color: var(--kt-ink);
+  }
+}
+
+.status {
+  margin-top: 3px;
+  padding: 0 4px;
+  font-size: 12px;
+  color: var(--kt-muted);
+
+  &.failed {
+    font-weight: 700;
+    color: var(--kt-magenta);
+  }
+}
+
+.composer {
+  flex: none;
+  padding: 8px 12px max(10px, env(safe-area-inset-bottom));
+  background: var(--kt-raised);
+  border-top: 1px solid var(--kt-outline-soft);
+}
+
+.count {
+  margin: 0 8px 4px;
+  font-size: 12px;
+  color: var(--kt-muted);
+  text-align: right;
+}
+
+form {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+textarea {
+  flex: 1;
+  min-width: 0;
+  max-height: 132px;
+  box-sizing: border-box;
+  padding: 10px 16px;
+  border: 1.5px solid var(--kt-outline-soft);
+  border-radius: 22px;
+  outline: none;
+  background: var(--kt-bg-soft);
+  color: var(--kt-ink);
+  // 16px, or iOS zooms in on focus.
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.4;
+  resize: none;
+
+  &::placeholder {
+    color: var(--kt-outline);
+  }
+
+  &:focus {
+    border-color: var(--kt-violet);
+  }
+}
+
+.send {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--kt-violet);
+  color: var(--kt-raised);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+
+  &:disabled {
+    background: var(--kt-outline-soft);
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--kt-violet);
+    outline-offset: 2px;
+  }
+}
+
+.closed {
+  flex: none;
+  margin: 0;
+  padding: 14px 24px max(16px, env(safe-area-inset-bottom));
+  background: var(--kt-raised);
+  border-top: 1px solid var(--kt-outline-soft);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--kt-muted);
+  text-align: center;
+}
+
+.gone {
+  padding: 64px 24px;
+  text-align: center;
+
+  p {
+    margin: 0 0 20px;
+    font-size: 16px;
+  }
+}

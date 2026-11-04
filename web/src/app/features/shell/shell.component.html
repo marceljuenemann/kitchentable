@@ -1,7 +1,9 @@
 <div class="shell">
   @switch (view()) {
     @case ('loading') {
-      <mat-spinner diameter="32" />
+      <div class="kt-page-loading" role="status">
+        <span class="kt-visually-hidden">Loading…</span>
+      </div>
     }
     @case ('error') {
       <app-header />

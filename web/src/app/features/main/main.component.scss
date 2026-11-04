@@ -18,6 +18,12 @@ nav {
   background: color-mix(in oklch, var(--kt-raised) 96%, transparent);
   backdrop-filter: blur(10px);
   border-top: 1px solid var(--kt-outline-soft);
+
+  // For an admin, so it's clear which account this is.
+  &.admin {
+    background: color-mix(in oklch, var(--kt-cream) 96%, transparent);
+    border-top-color: var(--kt-cream-strong);
+  }
 }
 
 // Behind the links, the size of one tab, moved to the active one. The `transform` percentage is
@@ -81,12 +87,33 @@ a {
 }
 
 .pill {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 60px;
   height: 40px;
   border-radius: 99px;
+}
+
+// The number of unread messages, on the top right of the icon.
+.badge {
+  position: absolute;
+  top: 0;
+  left: 34px;
+  min-width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border-radius: 99px;
+  background: var(--kt-magenta);
+  box-shadow: 0 0 0 2px var(--kt-raised);
+  color: var(--kt-raised);
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .icon {

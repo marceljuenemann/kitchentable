@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -10,7 +10,6 @@ import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
 import { AuthService } from '../../core/auth/auth.service';
 import { openPolicySheet } from '../../shared/policy/open-policy-sheet';
-import { openSignInSheet } from './sign-in-sheet/sign-in-sheet.component';
 
 const EMAIL_PATTERN = /\S+@\S+\.\S+/;
 
@@ -25,6 +24,7 @@ const EMAIL_PATTERN = /\S+@\S+\.\S+/;
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    RouterLink,
   ],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
@@ -53,17 +53,13 @@ export class LandingComponent {
     this.submitting.set(true);
     this.errorMessage.set(null);
     try {
-      await this.auth.requestMagicLink(this.email(), this.inviteCode);
+      await this.auth.requestMagicLink(this.email(), { inviteCode: this.inviteCode });
       this.sent.set(true);
     } catch {
       this.errorMessage.set('Something went wrong. Please try again in a minute.');
     } finally {
       this.submitting.set(false);
     }
-  }
-
-  openSignIn() {
-    openSignInSheet(this.bottomSheet);
   }
 
   openPrivacyPolicy(event: Event) {

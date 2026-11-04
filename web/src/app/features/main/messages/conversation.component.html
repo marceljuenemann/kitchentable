@@ -1,0 +1,152 @@
+@if (conversation(); as conversation) {
+  @let person = conversation.person;
+  <div class="thread">
+    <header>
+      <button class="round" type="button" aria-label="Back to messages" (click)="back()">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      @if (conversation.isTeam) {
+        <div class="who">
+          <app-avatar [name]="person.name" [team]="true" [size]="40" />
+          <h1>{{ person.name }}</h1>
+        </div>
+      } @else {
+        <a
+          class="who"
+          routerLink="profile"
+          [attr.aria-label]="'View ' + person.name + '’s profile'"
+        >
+          <app-avatar
+            [name]="person.name"
+            [photoUrl]="conversation.photoUrl"
+            [size]="40"
+            [transitionName]="photoTransitionName()"
+          />
+          <div class="names">
+            <h1>{{ person.name }}</h1>
+            <span class="pronouns">{{ person.pronouns }}</span>
+          </div>
+        </a>
+        <button
+          class="round"
+          type="button"
+          [attr.aria-label]="'More about this conversation'"
+          (click)="openActions()"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      }
+    </header>
+
+    <div class="scroller kt-scroller" #scroller>
+      @if (conversation.isTeam) {
+        <p class="team-note">
+          Talk directly to the team that runs Kitchen Table. Ask us anything, tell us what you
+          think, or let us know if someone's made you uncomfortable. We'll get back to you here.
+        </p>
+      }
+
+      @for (item of items(); track item.key) {
+        @switch (item.kind) {
+          @case ('intro') {
+            <!-- What the conversation started with stays at the top of it. -->
+            <app-intro-card
+              [title]="item.message.mine ? 'Your introduction' : person.name + '’s introduction'"
+              [date]="item.message.createdAt"
+              [text]="textOf(item.message)"
+              [lookingFor]="conversation.lookingFor"
+              [mine]="item.message.mine"
+            />
+          }
+          @case ('connected') {
+            <p class="event">You're connected</p>
+          }
+          @case ('unread') {
+            <p class="unread-line" #unreadLine>New messages</p>
+          }
+          @case ('day') {
+            <p class="event">{{ item.label }}</p>
+          }
+          @case ('ended') {
+            <p class="event">
+              {{ item.message.mine ? 'You' : person.name }} ended this connection ·
+              {{ shortDate(item.message.createdAt) }}
+            </p>
+          }
+          @case ('message') {
+            @let message = item.message;
+            <div
+              class="message"
+              [class.mine]="message.mine"
+              [class.starts]="item.startsGroup"
+              [class.ends]="item.endsGroup"
+            >
+              <!--
+                Bindings, because the box keeps whitespace, also any around an interpolation.
+                Links open in a new tab and don't tell the site where they came from.
+              -->
+              <p class="bubble" [class.failed]="message.delivery === 'failed'">
+                @for (part of partsOf(message); track $index) {
+                  @if (part.href) {
+                    <a
+                      [href]="part.href"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      [textContent]="part.text"
+                    ></a>
+                  } @else {
+                    <span [textContent]="part.text"></span>
+                  }
+                }
+              </p>
+              @if (message.delivery === 'failed') {
+                <p class="status failed" role="alert">Not sent</p>
+              } @else if (message.delivery === 'sending') {
+                <p class="status">Sending…</p>
+              } @else if (item.endsGroup) {
+                <p class="status">{{ clockTime(message.createdAt) }}</p>
+              }
+            </div>
+          }
+        }
+      }
+    </div>
+
+    @switch (conversation.status) {
+      @case ('accepted') {
+        <div class="composer">
+          @if (showCount()) {
+            <p class="count">{{ draft().length }} / {{ maxLength }}</p>
+          }
+          <form (submit)="$event.preventDefault(); send()">
+            <textarea
+              #input
+              class="kt-scroller"
+              rows="1"
+              [attr.maxlength]="maxLength"
+              [attr.aria-label]="'Message to ' + person.name"
+              [placeholder]="
+                conversation.isTeam ? 'Message the team…' : 'Message ' + person.name + '…'
+              "
+              [value]="draft()"
+              (input)="onInput($event)"
+              (keydown.enter)="onEnter($event)"
+            ></textarea>
+            <button class="send" type="submit" aria-label="Send" [disabled]="!canSend()">
+              <mat-icon>send</mat-icon>
+            </button>
+          </form>
+        </div>
+      }
+      @case ('ended') {
+        <p class="closed">This connection has ended. You can still read your messages.</p>
+      }
+    }
+  </div>
+  <router-outlet (activate)="profileOpen.set(true)" (deactivate)="profileOpen.set(false)" />
+} @else if (ready()) {
+  <div class="gone">
+    <p>This conversation isn't available.</p>
+    <a mat-flat-button routerLink="/app/messages">Back to messages</a>
+  </div>
+}

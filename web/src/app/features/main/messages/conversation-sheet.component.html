@@ -1,0 +1,35 @@
+<div class="kt-sheet">
+  <div class="kt-grab-handle" aria-hidden="true"></div>
+
+  @if (confirmingEnd()) {
+    <h2 class="kt-sheet-title">End connection with {{ name }}?</h2>
+    <p>
+      You won't be able to message each other again, and this can't be undone. {{ name }} will see
+      that you ended it. You'll both keep your messages.
+    </p>
+    <div class="buttons">
+      <button mat-stroked-button type="button" (click)="cancel()">Keep it</button>
+      <button class="end" mat-flat-button type="button" (click)="choose('end')">
+        End connection
+      </button>
+    </div>
+  } @else {
+    <h2 class="kt-sheet-title">{{ name }}</h2>
+    <button class="row" type="button" (click)="choose('profile')">
+      <mat-icon aria-hidden="true">person</mat-icon>
+      View profile
+    </button>
+    @if (data.canReport) {
+      <button class="row" type="button" (click)="choose('report')">
+        <mat-icon aria-hidden="true">flag</mat-icon>
+        Report a problem
+      </button>
+    }
+    @if (data.canEnd) {
+      <button class="row danger" type="button" (click)="confirmingEnd.set(true)">
+        <mat-icon aria-hidden="true">link_off</mat-icon>
+        End connection
+      </button>
+    }
+  }
+</div>

@@ -87,7 +87,6 @@
   mat-form-field {
     width: 100%;
     margin-bottom: 16px;
-    --mat-form-field-outlined-container-shape: 14px;
   }
 
   button {
@@ -101,7 +100,7 @@
   font-size: 14px;
   color: var(--kt-muted);
 
-  button {
+  a {
     vertical-align: baseline;
   }
 }

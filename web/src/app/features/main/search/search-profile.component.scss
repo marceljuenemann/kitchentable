@@ -1,28 +1,3 @@
-// The bar's height (border, padding, button), plus 14px after the content to match the space
-// above the buttons, less the profile view's 48px of bottom padding.
-.actions {
-  height: calc(1px + 14px + 52px + max(20px, env(safe-area-inset-bottom)) + 14px - 48px);
-}
-
-// Fixed like the bottom nav, across the page width, over the profile.
-.bar {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  z-index: 1;
-  transform: translateX(-50%);
-  width: min(var(--kt-page-width), 100%);
-  box-sizing: border-box;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 14px 20px max(20px, env(safe-area-inset-bottom));
-  background: color-mix(in oklch, var(--kt-raised) 96%, transparent);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid var(--kt-outline-soft);
-  animation: fade-in 0.2s 0.2s ease-out both;
-}
-
 // Side by side, the same size. Slim side padding, so "Hide profile" fits on a 360px phone.
 .hide,
 .reach-out {
@@ -34,6 +9,29 @@
   --mat-button-outlined-horizontal-padding: 12px;
 }
 
+// Two columns rather than one per child, so the note can take a row of its own.
+.kt-profile-bar {
+  grid-auto-flow: row;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 6px;
+}
+
+// Under both buttons, so the bar is this much taller than usual.
+.no-intros {
+  grid-column: 1 / -1;
+  height: 18px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  color: var(--kt-muted);
+}
+
+.kt-profile-actions:has(.no-intros) {
+  margin-bottom: 24px;
+}
+
 // White, like the back button.
 .hide {
   --mat-button-outlined-outline-color: var(--kt-outline-soft);
@@ -41,22 +39,11 @@
   background: var(--kt-raised);
 }
 
+// Not `inline-flex`, which leaves room for a baseline under it and so sits high in the button.
 .label {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 10px;
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bar {
-    animation: none;
-  }
 }
 
 // Like the profile view: covers the grid.

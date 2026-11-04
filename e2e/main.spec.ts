@@ -9,19 +9,27 @@ test('the bottom nav switches between the tabs', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Search' })).toBeVisible();
   await expect(nav.getByRole('link', { name: 'Search' })).toHaveAttribute('aria-current', 'page');
 
-  for (const [label, path] of [
+  for (const [label, path, heading = label] of [
     ['Your profile', '/app/profile'],
-    ['Connections', '/app/connections'],
+    // A new member has none, so the empty state.
+    ['Connections', '/app/connections', 'No introductions'],
     ['Messages', '/app/messages'],
     ['Community', '/app/community'],
     ['Search', '/app'],
   ]) {
     await nav.getByRole('link', { name: label }).click();
     await expect(page).toHaveURL(path);
-    await expect(page.getByRole('heading', { name: label })).toBeVisible();
+    await expect(page.getByRole('heading', { name: heading })).toBeVisible();
     await expect(nav.getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
     await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
   }
+});
+
+test("an admin's profile tab says it's the admin account", async ({ page }) => {
+  await signInAs(page, 'admin');
+  const nav = page.getByRole('navigation', { name: 'Main' });
+
+  await expect(nav.getByRole('link', { name: 'Your profile, admin account' })).toBeVisible();
 });
 
 test('a tab opens directly by its URL, and an unknown one falls back to Search', async ({
@@ -48,13 +56,24 @@ test('a tab stays current with query parameters in the URL', async ({ page }) =>
   await expect(nav.getByRole('link', { name: 'Messages' })).toHaveAttribute('aria-current', 'page');
 });
 
-test('the profile tab has the legal documents and signs out', async ({ page }) => {
-  const email = await signInAs(page, 'active');
-  await page.goto('/app/profile');
+test('the Community tab has the legal documents', async ({ page }) => {
+  await signInAs(page, 'active');
+  await page.goto('/app/community');
 
   await page.getByRole('link', { name: 'Privacy Policy' }).click();
   const sheet = page.locator('mat-bottom-sheet-container');
   await expect(sheet.getByRole('heading', { name: 'Kitchen Table Privacy Policy' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(sheet).toBeHidden();
+});
+
+test('the profile tab has the legal documents too, and signs out', async ({ page }) => {
+  const email = await signInAs(page, 'active');
+  await page.goto('/app/profile');
+
+  await page.getByRole('link', { name: 'Terms of Use' }).click();
+  const sheet = page.locator('mat-bottom-sheet-container');
+  await expect(sheet.getByRole('heading', { name: 'Kitchen Table Terms of Use' })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(sheet).toBeHidden();
 

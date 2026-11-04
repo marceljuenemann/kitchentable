@@ -73,7 +73,10 @@
       <p class="message">Something went wrong loading search.</p>
       <button mat-flat-button type="button" (click)="store.load()">Try again</button>
     } @else {
-      <mat-spinner diameter="32" />
+      <!-- Where the shell's was, so it carries on from it. -->
+      <div class="kt-page-loading" role="status">
+        <span class="kt-visually-hidden">Loading…</span>
+      </div>
     }
   </main>
 </div>

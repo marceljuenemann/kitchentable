@@ -1,0 +1,25 @@
+@let person = conversation().person;
+<a
+  draggable="false"
+  [routerLink]="person.id"
+  [attr.aria-label]="'View ' + person.name + '’s profile'"
+  (click)="opening.emit()"
+>
+  <div class="photo" [style.view-transition-name]="transitionName()">
+    @if (conversation().photoUrl; as url) {
+      <img [src]="url" alt="" draggable="false" />
+    }
+  </div>
+  <div class="body">
+    <h2>
+      {{ person.name }}
+      <span class="pronouns">{{ person.pronouns }}</span>
+    </h2>
+    <p class="text">“{{ text() }}”</p>
+    <ul>
+      @for (chip of chips(); track chip) {
+        <li>{{ chip }}</li>
+      }
+    </ul>
+  </div>
+</a>

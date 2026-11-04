@@ -1,0 +1,113 @@
+:host {
+  display: block;
+}
+
+.row {
+  min-height: 72px;
+  display: flex;
+  border-radius: 16px;
+  color: var(--kt-ink);
+
+  &:hover {
+    background: var(--kt-bg-soft);
+  }
+
+  // Still there to read, but out of the way.
+  &.ended app-avatar {
+    opacity: 0.55;
+  }
+}
+
+a {
+  box-sizing: border-box;
+  display: flex;
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    outline: 2px solid var(--kt-violet);
+    outline-offset: -2px;
+    border-radius: 16px;
+  }
+}
+
+.photo {
+  flex: none;
+  align-items: center;
+  padding: 10px 0 10px 12px;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 12px;
+}
+
+.line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.name {
+  overflow: hidden;
+  font-family: var(--kt-font-display);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.time {
+  flex: none;
+  font-size: 12.5px;
+  color: var(--kt-muted);
+}
+
+.preview {
+  overflow: hidden;
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: var(--kt-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.count {
+  flex: none;
+  min-width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border-radius: 99px;
+  background: var(--kt-violet);
+  color: var(--kt-raised);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.unread {
+  .name {
+    font-weight: 700;
+    color: var(--kt-violet);
+  }
+
+  .time {
+    font-weight: 700;
+    color: var(--kt-violet);
+  }
+
+  .preview {
+    font-weight: 700;
+    color: var(--kt-ink);
+  }
+}

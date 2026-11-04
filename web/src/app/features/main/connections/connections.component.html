@@ -1,0 +1,29 @@
+<div class="page">
+  @if (store.requests().length > 0) {
+    <h1>Introductions</h1>
+    <p class="hint">People who have reached out to you</p>
+
+    <div class="requests">
+      @for (conversation of store.requests(); track conversation.person.id) {
+        <app-request-tile
+          [conversation]="conversation"
+          [transitionName]="transitionName(conversation.person.id)"
+          (opening)="morphId.set(conversation.person.id)"
+        />
+      }
+    </div>
+  } @else if (store.ready()) {
+    <div class="no-requests">
+      <app-header />
+      <!-- For screen readers: the bottom nav says which tab this is for everyone else. -->
+      <h1 class="kt-visually-hidden">Introductions</h1>
+      <section class="empty">
+        <app-hug-panda />
+        <h2>No introductions</h2>
+        <p>When someone reaches out to you with an introduction, it'll show up here.</p>
+      </section>
+    </div>
+  }
+</div>
+
+<router-outlet (activate)="profileOpen.set(true)" (deactivate)="profileOpen.set(false)" />

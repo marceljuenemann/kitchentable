@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UserStorage } from '../../../core/user-storage';
 import { OnboardingDraftStore } from '../onboarding-draft.store';
-import { ABOUT_MIN_LENGTH } from '../onboarding-options';
+import { ABOUT_MIN_LENGTH } from '../../../core/profile-options';
 import { AboutYouStepComponent } from './about-you-step.component';
 
 describe('AboutYouStepComponent', () => {

@@ -2,6 +2,10 @@ import { afterNextRender, Component, computed, inject, signal } from '@angular/c
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
+import { ConnectionsStore } from '../../core/connections/connections.store';
+import { ProfileService } from '../../core/profile.service';
+
+const PROFILE_PATH = '/app/profile';
 
 interface Tab {
   label: string;
@@ -20,12 +24,27 @@ interface Tab {
   imports: [RouterLink, RouterOutlet],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss',
+  providers: [ConnectionsStore],
 })
 export class MainComponent {
+  private readonly messages = inject(ConnectionsStore);
+
+  /**
+   * Whether the viewer is an admin, whose bottom nav is cream so they can tell at a glance that
+   * they're using the admin account. The shell only shows the main app once the profile has
+   * loaded.
+   */
+  readonly isAdmin = toSignal(
+    inject(ProfileService).state$.pipe(
+      map((state) => state.kind === 'loaded' && state.profile.status === 'admin'),
+    ),
+    { initialValue: false },
+  );
+
   readonly tabs: Tab[] = [
     {
       label: 'Your profile',
-      path: '/app/profile',
+      path: PROFILE_PATH,
       icon: 'M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM5 20c.8-3.4 3.6-5 7-5s6.2 1.6 7 5',
     },
     {
@@ -78,6 +97,19 @@ export class MainComponent {
 
   constructor() {
     afterNextRender(() => setTimeout(() => this.animated.set(true)));
+  }
+
+  /** What the tab is called for screen readers, who don't see the admin's colour. */
+  labelOf(tab: Tab, unread: number): string {
+    if (tab.path === PROFILE_PATH && this.isAdmin()) return `${tab.label}, admin account`;
+    return unread > 0 ? `${tab.label}, ${unread} unread` : tab.label;
+  }
+
+  /** What the tab's badge counts. */
+  unreadOn(tab: Tab): number {
+    if (tab.path === '/app/connections') return this.messages.newRequests();
+    if (tab.path === '/app/messages') return this.messages.totalUnread();
+    return 0;
   }
 
   private currentPath(): string {

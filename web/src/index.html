@@ -27,6 +27,11 @@
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
-    <app-root></app-root>
+    <!-- Until the app has started: the same spinner as its loading pages (styles.scss). -->
+    <app-root>
+      <div class="kt-page-loading" role="status">
+        <span class="kt-visually-hidden">Loading…</span>
+      </div>
+    </app-root>
   </body>
 </html>

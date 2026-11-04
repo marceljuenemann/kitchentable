@@ -1,0 +1,72 @@
+// Scrolls itself, like the other tabs, rather than the window. Under the bottom nav (z-index 10).
+:host {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  background: var(--kt-bg);
+  color: var(--kt-ink);
+  font-family: var(--kt-font-sans);
+}
+
+// The shell's column, with room for the bottom nav.
+.page {
+  max-width: var(--kt-page-width);
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 0 24px 104px;
+}
+
+.kt-card {
+  margin-top: 16px;
+
+  &:first-of-type {
+    margin-top: 24px;
+  }
+
+  a:not([mat-flat-button], [mat-stroked-button]) {
+    color: var(--mat-sys-primary);
+  }
+}
+
+.moods {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+
+  button {
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--kt-sunken);
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background-color 150ms,
+      opacity 150ms,
+      transform 150ms;
+
+    &:active {
+      transform: scale(0.92);
+    }
+
+    &.chosen {
+      background: var(--kt-gold-container);
+      box-shadow: inset 0 0 0 2px color-mix(in oklch, var(--kt-gold) 45%, transparent);
+      transform: scale(1.1);
+      cursor: default;
+    }
+  }
+}
+
+.kt-card p.thanks {
+  margin: 20px 0 0;
+  color: var(--kt-ink);
+}
+
+// Room for the label sitting on the field's border.
+mat-form-field {
+  margin: 20px 0 16px;
+}

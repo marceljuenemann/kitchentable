@@ -1,0 +1,39 @@
+.help {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--kt-muted);
+}
+
+.preview {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--kt-sunken);
+  text-align: center;
+
+  h3 {
+    margin: 0 0 12px;
+  }
+
+  // The size it has in search: two per row across the page (at most --kt-page-width), less the
+  // grid's 16px padding each side and 8px gap (search.component.scss).
+  app-profile-tile {
+    width: calc((min(100vw, var(--kt-page-width)) - 40px) / 2);
+    margin: 0 auto;
+    text-align: left;
+  }
+}
+
+mat-form-field {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.short {
+  color: var(--kt-magenta);
+}
+
+.done {
+  margin-top: 20px;
+  width: 100%;
+}

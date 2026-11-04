@@ -1,0 +1,24 @@
+.title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.help {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--kt-muted);
+}
+
+.body {
+  margin-top: 16px;
+}
+
+.custom {
+  margin-top: 24px;
+}
+
+.done {
+  margin-top: 20px;
+  width: 100%;
+}

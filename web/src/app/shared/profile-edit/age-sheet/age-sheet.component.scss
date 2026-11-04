@@ -1,0 +1,42 @@
+.title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.help {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--kt-muted);
+}
+
+.selects {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+
+  .month {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .year {
+    width: 130px;
+  }
+}
+
+.echo {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--kt-muted);
+
+  &.set {
+    color: var(--kt-violet);
+  }
+}
+
+.done {
+  margin-top: 20px;
+  width: 100%;
+}

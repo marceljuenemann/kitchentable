@@ -6,7 +6,7 @@ import { PhotoStorageService } from '../../../core/photo-storage.service';
 import { Member, MyProfile, SavedSearchFilters } from '../../../core/profile.model';
 import { ProfileService } from '../../../core/profile.service';
 import { SupabaseService } from '../../../core/supabase.service';
-import { GENDER_OPTIONS, LOOKING_FOR_OPTIONS } from '../../onboarding/onboarding-options';
+import { GENDER_OPTIONS, LOOKING_FOR_OPTIONS } from '../../../core/profile-options';
 
 /** How long the filters must stay put before they're saved, so a slider drag is one save. */
 const SAVE_DELAY_MS = 300;
@@ -247,6 +247,15 @@ export class SearchStore {
       })
       .onAction()
       .subscribe(() => this.setDismissed(member, false));
+  }
+
+  /** Takes someone off the grid once reached out to, as `search_profiles()` will from now on. */
+  showIntroSent(member: Member) {
+    this.setHidden(member.id, true);
+    this.snackBar.open(`Introduction sent to ${member.name}`, undefined, {
+      duration: 4000,
+      panelClass: 'kt-snackbar',
+    });
   }
 
   /** Changes the grid straight away; a failure to save puts it back. */

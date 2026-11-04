@@ -5,7 +5,9 @@
     <p class="message">Something went wrong loading the applications.</p>
     <button mat-flat-button type="button" (click)="store.load()">Try again</button>
   } @else if (store.applications() === null) {
-    <mat-spinner diameter="32" />
+    <div class="kt-page-loading" role="status">
+      <span class="kt-visually-hidden">Loading…</span>
+    </div>
   } @else if (tiles().length === 0) {
     <div class="empty">
       <p class="empty-title">No applications waiting</p>

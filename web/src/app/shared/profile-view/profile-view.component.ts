@@ -4,14 +4,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, firstValueFrom } from 'rxjs';
 import { Member } from '../../core/profile.model';
-import { lookingForLabel } from '../../features/onboarding/onboarding-options';
+import { lookingForLabel } from '../../core/profile-options';
 import { photoTransitionName } from './profile-transition';
 
 /**
  * A profile as members see it (prototype/browse): a full-width photo carousel, then the name,
  * pronouns, age and location, gender and sexuality chips, the About me text and Looking for. Covers the
  * screen over the grid it was opened from, as the child route of that grid. Anything placed
- * inside it (say, the admin's vetting box) goes below the profile.
+ * inside it (say, the admin's vetting box) goes below the profile, or above About me with the
+ * attribute `profileIntro` (say, the introduction someone sent you).
  */
 @Component({
   selector: 'app-profile-view',
@@ -19,6 +20,7 @@ import { photoTransitionName } from './profile-transition';
   imports: [MatIconModule],
   templateUrl: './profile-view.component.html',
   styleUrl: './profile-view.component.scss',
+  host: { class: 'kt-scroller' },
 })
 export class ProfileViewComponent {
   private readonly router = inject(Router);

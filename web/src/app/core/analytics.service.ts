@@ -2,7 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 
 /** Event names, as allowed by `track_event` (see docs/database.md). */
-export type AnalyticsEvent = 'onboarding_step_viewed';
+export type AnalyticsEvent =
+  'onboarding_step_viewed' | 'invite_link_shared' | 'photo_rejected' | 'profile_preview_opened';
 
 /**
  * First-party analytics: events go to our own database, keyed on the signed-in user, and nothing

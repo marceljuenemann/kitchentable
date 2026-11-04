@@ -1,54 +1,45 @@
-import { Component } from '@angular/core';
+import { Component, effect, inject, signal, untracked } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { ConnectionsStore } from '../../../core/connections/connections.store';
 import { HeaderComponent } from '../../../shared/header/header.component';
+import { photoTransitionName } from '../../../shared/profile-view/profile-transition';
 import { HugPandaComponent } from './hug-panda.component';
+import { RequestTileComponent } from './request-tile.component';
 
 /**
- * The Connections tab: introductions other members sent you. Introductions aren't built yet,
- * so for now it's always the empty state, which will also show once you've dismissed them all.
+ * The Connections tab: introductions other members sent you, as tiles leading to their profile,
+ * which opens as a child route; that's why the page scrolls itself: the router scrolls the window
+ * to the top on every navigation. Opening the tab counts as having seen them all. With none
+ * left, the empty state.
  */
 @Component({
   selector: 'app-connections',
   standalone: true,
-  imports: [HeaderComponent, HugPandaComponent],
-  template: `
-    <app-header />
-    <!-- For screen readers: the bottom nav says which tab this is for everyone else. -->
-    <h1 class="kt-visually-hidden">Connections</h1>
-    <section class="empty">
-      <app-hug-panda />
-      <h2>No connection requests</h2>
-      <p>When someone reaches out to you with an introduction, it'll show up here.</p>
-    </section>
-  `,
-  styles: `
-    :host {
-      display: block;
-    }
-
-    .empty {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 48px;
-      text-align: center;
-    }
-
-    h2 {
-      margin: 20px 0 0;
-      font-family: var(--kt-font-display);
-      font-size: 22px;
-      font-weight: 700;
-      line-height: 1.2;
-      color: var(--kt-violet);
-    }
-
-    p {
-      max-width: 300px;
-      margin: 8px 0 0;
-      font-size: 15px;
-      line-height: 1.5;
-      color: var(--kt-muted);
-    }
-  `,
+  imports: [HeaderComponent, HugPandaComponent, RequestTileComponent, RouterOutlet],
+  templateUrl: './connections.component.html',
+  styleUrl: './connections.component.scss',
+  host: { class: 'kt-scroller', '[class.covering]': 'profileOpen()' },
 })
-export class ConnectionsComponent {}
+export class ConnectionsComponent {
+  readonly store = inject(ConnectionsStore);
+
+  /** Whether a profile shows over the tiles, which raises the page over the bottom nav. */
+  readonly profileOpen = signal(false);
+  /** The one photo that morphs, the last one tapped, as in ProfileGridComponent. */
+  readonly morphId = signal<string | null>(null);
+
+  constructor() {
+    this.store.loadIfStale();
+    // Also the ones that arrive while the tab is open.
+    effect(() => {
+      this.store.requests();
+      untracked(() => this.store.markRequestsSeen());
+    });
+  }
+
+  /** While the profile shows, the tile gives up the name to the profile's photo. */
+  transitionName(id: string): string {
+    const morphs = id === this.morphId() && !this.profileOpen();
+    return morphs ? photoTransitionName(id) : 'none';
+  }
+}
