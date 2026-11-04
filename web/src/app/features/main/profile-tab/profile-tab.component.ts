@@ -188,9 +188,17 @@ export class ProfileTabComponent {
     ];
   });
 
-  /** Until saving is built, the files stay: the saved profile still shows the photo. */
-  readonly removePhoto = (id: string) =>
-    this.savePhotos(this.photos().filter((photoId) => photoId !== id));
+  /**
+   * Off the profile first, then the files: members can only load photos the profile lists, so it
+   * never shows one that's gone. If deleting fails, the files stay for the planned clean-up
+   * (docs/photos.md). A failed save has its own snackbar, so the grid shows no error.
+   */
+  readonly removePhoto = async (id: string) => {
+    if (!(await this.savePhotos(this.photos().filter((photoId) => photoId !== id)))) return;
+    await this.photoStorage
+      .remove(id)
+      .catch((error: unknown) => console.warn('Could not delete a photo', error));
+  };
 
   addPhoto(id: string) {
     void this.savePhotos([...this.photos(), id]);

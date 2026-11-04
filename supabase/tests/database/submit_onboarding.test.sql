@@ -1,5 +1,5 @@
 begin;
-select plan(16);
+select plan(17);
 
 -- Erin signed up with an invite code, Finn without one.
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, encrypted_password, email_confirmed_at, created_at, updated_at)
@@ -22,10 +22,11 @@ create function public.test_submit(
   p_looking_for text[] default '{polyamory}',
   p_photos uuid[] default '{aaaaaaaa-0000-0000-0000-000000000001,aaaaaaaa-0000-0000-0000-000000000002}',
   p_vetting_answers jsonb default '{"consent": "yes"}',
-  p_tagline text default 'Hi'
+  p_tagline text default 'Hi',
+  p_location text default 'London'
 ) returns void language sql as $$
   select public.submit_onboarding(
-    p_name, 'they/them', p_tagline, p_bio, 'London', '{Woman}', '{Queer}',
+    p_name, 'they/them', p_tagline, p_bio, p_location, '{Woman}', '{Queer}',
     p_birth_year, p_birth_month, p_looking_for, p_photos, p_vetting_answers
   );
 $$;
@@ -35,7 +36,9 @@ set local role authenticated;
 set local request.jwt.claim.sub = '88888888-8888-8888-8888-888888888888';
 
 select throws_ok($$ select public.test_submit(p_name => '  ') $$, 'P0001',
-  'Name, pronouns, location and bio are required.', 'a blank name is rejected');
+  'Name, pronouns and bio are required.', 'a blank name is rejected');
+select throws_ok($$ select public.test_submit(p_location => ' ') $$, 'P0001',
+  'A location is required.', 'a blank location is rejected');
 select throws_ok($$ select public.test_submit(p_tagline => repeat('x', 61)) $$, 'P0001',
   'The tagline can be at most 60 characters.', 'a tagline over 60 characters is rejected');
 select throws_ok($$ select public.test_submit(p_looking_for => '{}') $$, 'P0001',

@@ -1,21 +1,47 @@
-import { expect, test } from '@playwright/test';
-import { signInAs } from './support/admin';
+import { randomUUID } from 'node:crypto';
+import { expect, Page, test } from '@playwright/test';
+import { createMember, jpeg, photoObject, profileOf, signIn, uploadPhoto } from './support/admin';
 
-test('the profile tab edits each field in a sheet, and Preview shows the changes', async ({
+/**
+ * Signs in as a live member with photos (a profile needs one to be saved), in a location of
+ * their own so they stay out of other tests' search.
+ */
+async function signInWithPhotos(page: Page, count = 2) {
+  await page.goto('/');
+  const photos = Array.from({ length: count }, () => randomUUID());
+  const { id, email } = await createMember({
+    name: 'Sam',
+    location: `Profileville ${randomUUID()}`,
+    looking_for: ['polyamory'],
+    photos,
+  });
+  const image = await jpeg(page, '#6cc3a0');
+  for (const photo of photos) {
+    await uploadPhoto(`${id}/${photo}/full.jpg`, image);
+    await uploadPhoto(`${id}/${photo}/thumb.jpg`, image);
+  }
+  await signIn(page, email);
+  await page.goto('/app/profile');
+  return { id, photos };
+}
+
+const row = (page: Page, label: string) =>
+  page.getByRole('button', { name: new RegExp(`^${label}`) });
+
+test('each field is edited in a sheet and saved, and Preview shows the changes', async ({
   page,
 }) => {
-  await signInAs(page, 'active');
-  await page.goto('/app/profile');
+  const { id } = await signInWithPhotos(page);
   const sheet = page.locator('mat-bottom-sheet-container');
 
-  await page.getByRole('button', { name: /^Name/ }).click();
+  await row(page, 'Name').click();
   await sheet.getByRole('textbox', { name: 'Name' }).fill('Robin');
   await sheet.getByRole('button', { name: 'Done' }).click();
   await expect(sheet).toBeHidden();
-  await expect(page.getByRole('button', { name: /^Name/ })).toContainText('Robin');
+  await expect(row(page, 'Name')).toContainText('Robin');
 
   // The tagline sheet shows the tile as it will look in search.
-  await page.getByRole('button', { name: /^Tagline/ }).click();
+  await row(page, 'Tagline').click();
   await sheet.getByRole('textbox', { name: 'Tagline' }).fill('Tea and long walks');
   await expect(sheet.locator('app-profile-tile')).toContainText('Robin');
   await expect(sheet.locator('app-profile-tile')).toContainText('Tea and long walks');
@@ -23,12 +49,13 @@ test('the profile tab edits each field in a sheet, and Preview shows the changes
   await expect(sheet).toBeHidden();
 
   // Looking for needs at least one.
-  await page.getByRole('button', { name: /^Looking for/ }).click();
+  await row(page, 'Looking for').click();
+  await sheet.getByRole('button', { name: 'Clear' }).click();
   await expect(sheet.getByRole('button', { name: 'Pick at least one' })).toBeDisabled();
   await sheet.getByRole('option', { name: 'Friends' }).click();
   await sheet.getByRole('button', { name: 'Done' }).click();
   await expect(sheet).toBeHidden();
-  await expect(page.getByRole('button', { name: /^Looking for/ })).toContainText('Friends');
+  await expect(row(page, 'Looking for')).toContainText('Friends');
 
   await page.getByRole('link', { name: 'Preview' }).click();
   await expect(page).toHaveURL('/app/profile/preview');
@@ -42,4 +69,43 @@ test('the profile tab edits each field in a sheet, and Preview shows the changes
   await page.getByRole('link', { name: 'Preview' }).click();
   await page.locator('app-profile-view').getByRole('button', { name: 'Close preview' }).click();
   await expect(page).toHaveURL('/app/profile');
+
+  // Saved: still there after a reload.
+  await expect.poll(async () => (await profileOf(id)).looking_for).toEqual(['friends']);
+  await page.reload();
+  await expect(row(page, 'Name')).toContainText('Robin');
+  await expect(row(page, 'Tagline')).toContainText('Tea and long walks');
+  await expect(row(page, 'Looking for')).toContainText('Friends');
+});
+
+test('a removed photo comes off the profile, then its files are deleted', async ({ page }) => {
+  const { id, photos } = await signInWithPhotos(page);
+  await expect(page.getByRole('img', { name: 'Photo 2' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Remove photo 2' }).click();
+
+  await expect.poll(async () => (await profileOf(id)).photos).toEqual([photos[0]]);
+  await expect.poll(async () => (await photoObject(`${id}/${photos[1]}/thumb.jpg`)).ok).toBe(false);
+  await expect.poll(async () => (await photoObject(`${id}/${photos[1]}/full.jpg`)).ok).toBe(false);
+  expect((await photoObject(`${id}/${photos[0]}/thumb.jpg`)).ok).toBe(true);
+  // A profile needs a photo, so the last one can't be removed.
+  await expect(page.getByRole('button', { name: 'Remove photo 1' })).toBeHidden();
+});
+
+test('a failed save puts the profile back, and Retry saves it', async ({ page }) => {
+  const { id } = await signInWithPhotos(page);
+  const sheet = page.locator('mat-bottom-sheet-container');
+  await page.route('**/rest/v1/rpc/update_profile', (route) => route.abort());
+
+  await row(page, 'Name').click();
+  await sheet.getByRole('textbox', { name: 'Name' }).fill('Robin');
+  await sheet.getByRole('button', { name: 'Done' }).click();
+
+  await expect(page.getByText("Couldn't save your profile")).toBeVisible();
+  await expect(row(page, 'Name')).toContainText('Sam');
+
+  await page.unroute('**/rest/v1/rpc/update_profile');
+  await page.getByRole('button', { name: 'Retry' }).click();
+  await expect(row(page, 'Name')).toContainText('Robin');
+  await expect.poll(async () => (await profileOf(id)).name).toBe('Robin');
 });
