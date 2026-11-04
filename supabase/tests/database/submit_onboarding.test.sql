@@ -70,7 +70,8 @@ select is(
     "gender": ["Woman"], "sexuality": ["Queer"], "birth_year": 1990, "birth_month": 6,
     "looking_for": ["polyamory"],
     "photos": ["aaaaaaaa-0000-0000-0000-000000000001", "aaaaaaaa-0000-0000-0000-000000000002"],
-    "age_verified_at": null, "search_filters": null, "hide_by_gender": false
+    "age_verified_at": null, "search_filters": null, "hide_by_gender": false,
+    "intro_emails": true, "message_emails": true
   }'::jsonb,
   'the profile is created in vetting with the trimmed, submitted values (and is read back without the vetting answers)'
 );

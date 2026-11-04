@@ -1,4 +1,12 @@
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import {
+  Component,
+  ViewContainerRef,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -34,6 +42,7 @@ import {
 } from '../../../shared/profile-edit/text-sheet/text-sheet.component';
 import { photoTransitionName } from '../../../shared/profile-view/profile-transition';
 import { MyProfileStore } from './my-profile.store';
+import { SettingsSheetComponent } from './settings-sheet.component';
 
 type TextField = 'name' | 'tagline' | 'bio';
 /** Location isn't here: changing it isn't supported yet. */
@@ -82,8 +91,8 @@ const LOOKING_FOR_SHEET: Omit<OptionSheetData, 'selected'> = {
 /**
  * The "Your profile" tab: the user's photos to add, remove and reorder, the fields in groups, a
  * row each that opens a sheet to edit it, and Preview, which opens the profile as other members see it as
- * a child route (so the page scrolls itself, like search). Then the account: signing out, and
- * the legal documents (also on the Community tab).
+ * a child route (so the page scrolls itself, like search). Then the account: the Settings sheet,
+ * signing out, and the legal documents (also on the Community tab).
  */
 @Component({
   selector: 'app-profile-tab',
@@ -104,6 +113,7 @@ const LOOKING_FOR_SHEET: Omit<OptionSheetData, 'selected'> = {
 export class ProfileTabComponent {
   private readonly bottomSheet = inject(MatBottomSheet);
   private readonly photoStorage = inject(PhotoStorageService);
+  private readonly viewContainerRef = inject(ViewContainerRef);
   readonly store = inject(MyProfileStore);
 
   readonly session = inject(AuthService).session;
@@ -263,6 +273,14 @@ export class ProfileTabComponent {
           });
         return;
     }
+  }
+
+  /** Opened with the tab's ViewContainerRef, so it gets the route's MyProfileStore. */
+  openSettings() {
+    this.bottomSheet.open(SettingsSheetComponent, {
+      ...PROFILE_SHEET_CONFIG,
+      viewContainerRef: this.viewContainerRef,
+    });
   }
 
   private photos(): string[] {

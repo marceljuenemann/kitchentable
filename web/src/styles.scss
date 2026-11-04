@@ -410,6 +410,32 @@ mat-checkbox {
   }
 }
 
+// A switch for a setting rather than an option (such as "Include profiles with no age"): in
+// regular weight, and only the switch itself turns violet when on. With a `.kt-switch-hint` (in
+// a `span` with the label), two lines: the setting in bold, and what it does.
+.kt-switch-row.kt-setting {
+  font-weight: 400;
+
+  &[aria-checked='true'] {
+    border-color: var(--kt-outline-soft);
+    background: var(--kt-raised);
+  }
+
+  &:has(.kt-switch-hint) {
+    padding-block: 10px;
+    font-weight: 700;
+  }
+}
+
+.kt-switch-hint {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--kt-muted);
+}
+
 // A profile field that opens a sheet to edit it, such as Pronouns: a `button.kt-field-row`
 // (with `set` once it has a value) holding a `span.text` with the field's `.kt-label` (maybe
 // with a `span.suffix`, " · optional") over a `span.value`, then a `chevron_right` `mat-icon`.

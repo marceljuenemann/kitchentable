@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { map } from 'rxjs';
 import { ageFrom } from '../../../core/age';
-import { Member, MyProfile, NewProfile } from '../../../core/profile.model';
+import { Member, MyProfile, NewProfile, Settings } from '../../../core/profile.model';
 import { ProfileService } from '../../../core/profile.service';
 import { SupabaseService } from '../../../core/supabase.service';
 
@@ -23,6 +23,17 @@ const EDITABLE_FIELDS = [
 
 /** The fields the profile tab edits. */
 export type ProfileChanges = Partial<Pick<NewProfile, (typeof EDITABLE_FIELDS)[number]>>;
+
+/** What `update_settings` saves, the same way. */
+const SETTINGS = ['intro_emails', 'message_emails'] as const satisfies (keyof Settings)[];
+
+/** The settings in the profile (all on until it has loaded, as for a new profile). */
+function settingsOf(profile: MyProfile | null): Settings {
+  return {
+    intro_emails: profile?.intro_emails ?? true,
+    message_emails: profile?.message_emails ?? true,
+  };
+}
 
 /** The user's own profile as other members see it. */
 export function toMember(profile: MyProfile): Member {
@@ -74,6 +85,9 @@ export class MyProfileStore {
   private readonly current = linkedSignal(() => this.loaded());
   /** Saves run one at a time, each sending the profile as it is by then. */
   private queue: Promise<unknown> = Promise.resolve();
+  /** The Settings sheet's settings, saved with `update_settings` rather than with the fields. */
+  private readonly savedSettings = linkedSignal(() => settingsOf(this.loaded()));
+  private readonly currentSettings = linkedSignal(() => settingsOf(this.loaded()));
 
   /** Null only until it has loaded (the main app shows once it has, so hardly ever). */
   readonly profile = this.current.asReadonly();
@@ -81,6 +95,7 @@ export class MyProfileStore {
     const profile = this.profile();
     return profile && toMember(profile);
   });
+  readonly settings = this.currentSettings.asReadonly();
 
   /**
    * Shows the change and saves it. Resolves with whether it was saved. If it wasn't, the profile
@@ -117,6 +132,39 @@ export class MyProfileStore {
         .open("Couldn't save your profile", 'Retry', { duration: 6000, panelClass: 'kt-snackbar' })
         .onAction()
         .subscribe(() => void this.save(changes));
+      return false;
+    }
+  }
+
+  /** Like `save`, for the settings: shows the change, then saves them in turn with the profile. */
+  updateSettings(changes: Partial<Settings>): Promise<boolean> {
+    this.currentSettings.update((settings) => ({ ...settings, ...changes }));
+    const saved = this.queue.then(() => this.sendSettings());
+    this.queue = saved;
+    return saved;
+  }
+
+  private async sendSettings(): Promise<boolean> {
+    const settings = this.currentSettings();
+    const saved = this.savedSettings();
+    // Switched back meanwhile, or already sent with an earlier save.
+    if (SETTINGS.every((setting) => settings[setting] === saved[setting])) return true;
+    try {
+      const args = Object.fromEntries(
+        SETTINGS.map((setting) => [`p_${setting}`, settings[setting]]),
+      );
+      const { error } = await this.supabase.client.rpc('update_settings', args);
+      if (error) throw error;
+      this.savedSettings.set(settings);
+      return true;
+    } catch (error) {
+      console.warn('Could not save the settings', error);
+      if (this.currentSettings() !== settings) return false;
+      this.currentSettings.set(saved);
+      this.snackBar
+        .open("Couldn't save your settings", 'Retry', { duration: 6000, panelClass: 'kt-snackbar' })
+        .onAction()
+        .subscribe(() => void this.updateSettings(settings));
       return false;
     }
   }

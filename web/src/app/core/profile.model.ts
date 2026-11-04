@@ -47,8 +47,16 @@ export interface SavedSearchFilters {
   show_unspecified_age: boolean;
 }
 
+/** The account settings in the Settings sheet, saved together with `update_settings`. */
+export interface Settings {
+  /** Whether they get emails about new intros. */
+  intro_emails: boolean;
+  /** Whether they get emails about new messages. */
+  message_emails: boolean;
+}
+
 /** The user's own profile, as returned by `get_my_profile()` (which leaves out the vetting answers). */
-export interface MyProfile extends Profile {
+export interface MyProfile extends Profile, Settings {
   /** Null until search first saves them. */
   search_filters: SavedSearchFilters | null;
   /** "Only show me to these genders" (only ever true with a Gender filter). */

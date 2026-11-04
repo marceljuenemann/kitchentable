@@ -21,31 +21,8 @@ mat-chip-listbox {
   margin-top: 8px;
 }
 
-// A switch under a filter: a setting rather than an option, so in regular weight, and only the
-// switch itself turns violet when on.
-.setting {
+.kt-setting {
   margin-top: 16px;
-  font-weight: 400;
-
-  &[aria-checked='true'] {
-    border-color: var(--kt-outline-soft);
-    background: var(--kt-raised);
-  }
-}
-
-// Two lines: the setting in bold, and what it does.
-.only-show-me {
-  padding-block: 10px;
-  font-weight: 700;
-
-  .hint {
-    display: block;
-    margin-top: 2px;
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.4;
-    color: var(--kt-muted);
-  }
 }
 
 // At the ends of the range, the thumbs' outer edges line up with the content's (measured: they

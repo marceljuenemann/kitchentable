@@ -49,7 +49,10 @@
         Signed in as <b>{{ session.user.email }}</b>
       </p>
     }
-    <button mat-stroked-button type="button" (click)="signOut()">Sign out</button>
+    <div class="actions">
+      <button mat-stroked-button type="button" (click)="openSettings()">Settings</button>
+      <button mat-stroked-button type="button" (click)="signOut()">Sign out</button>
+    </div>
   </mat-card>
 
   <app-legal-links />

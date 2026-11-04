@@ -22,6 +22,8 @@ const profile: MyProfile = {
   photos: ['a', 'b'],
   search_filters: null,
   hide_by_gender: false,
+  intro_emails: true,
+  message_emails: false,
 };
 
 describe('toMember', () => {
@@ -137,5 +139,51 @@ describe('MyProfileStore', () => {
     expect(rpc.calls.mostRecent().args[1]).toEqual(
       jasmine.objectContaining({ p_name: 'Alex', p_tagline: 'Hi' }),
     );
+  });
+
+  describe('the settings', () => {
+    it('start as saved, show a change straight away and save the whole set', async () => {
+      expect(store.settings()).toEqual({ intro_emails: true, message_emails: false });
+
+      const saved = store.updateSettings({ intro_emails: false });
+      expect(store.settings()).toEqual({ intro_emails: false, message_emails: false });
+
+      expect(await saved).toBeTrue();
+      expect(rpc).toHaveBeenCalledOnceWith('update_settings', {
+        p_intro_emails: false,
+        p_message_emails: false,
+      });
+    });
+
+    it('send nothing when switched back before the save', async () => {
+      const off = store.updateSettings({ intro_emails: false });
+      const on = store.updateSettings({ intro_emails: true });
+
+      expect(await off).toBeTrue();
+      expect(await on).toBeTrue();
+      expect(rpc).not.toHaveBeenCalled();
+    });
+
+    it('go back to what was saved when a save fails, and Retry saves the change again', async () => {
+      rpc.and.resolveTo({ error: { message: 'offline' } });
+
+      expect(await store.updateSettings({ message_emails: true })).toBeFalse();
+      expect(store.settings().message_emails).toBeFalse();
+      expect(open).toHaveBeenCalledOnceWith(
+        "Couldn't save your settings",
+        'Retry',
+        jasmine.anything(),
+      );
+
+      rpc.and.resolveTo({ error: null });
+      retry.next();
+      expect(store.settings().message_emails).toBeTrue();
+      await tick();
+      expect(rpc).toHaveBeenCalledTimes(2);
+      expect(rpc.calls.mostRecent().args).toEqual([
+        'update_settings',
+        { p_intro_emails: true, p_message_emails: true },
+      ]);
+    });
   });
 });

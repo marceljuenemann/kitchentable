@@ -109,3 +109,29 @@ test('a failed save puts the profile back, and Retry saves it', async ({ page })
   await expect(row(page, 'Name')).toContainText('Robin');
   await expect.poll(async () => (await profileOf(id)).name).toBe('Robin');
 });
+
+test('each kind of email is switched off in the Settings sheet', async ({ page }) => {
+  const { id } = await signInWithPhotos(page, 1);
+  const sheet = page.locator('mat-bottom-sheet-container');
+  const intros = sheet.getByRole('switch', { name: 'Email me about new intros' });
+  const messages = sheet.getByRole('switch', { name: 'Email me about new messages' });
+
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await expect(intros).toHaveAttribute('aria-checked', 'true');
+  await expect(messages).toHaveAttribute('aria-checked', 'true');
+  await messages.click();
+  await expect(messages).toHaveAttribute('aria-checked', 'false');
+  await expect
+    .poll(async () => {
+      const { intro_emails, message_emails } = await profileOf(id);
+      return { intro_emails, message_emails };
+    })
+    .toEqual({ intro_emails: true, message_emails: false });
+  await sheet.getByRole('button', { name: 'Done' }).click();
+  await expect(sheet).toBeHidden();
+
+  await page.reload();
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await expect(intros).toHaveAttribute('aria-checked', 'true');
+  await expect(messages).toHaveAttribute('aria-checked', 'false');
+});

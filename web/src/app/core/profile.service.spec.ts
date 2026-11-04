@@ -21,6 +21,8 @@ const PROFILE: MyProfile = {
   photos: ['photo-1'],
   search_filters: null,
   hide_by_gender: false,
+  intro_emails: true,
+  message_emails: true,
 };
 
 const NEW_PROFILE: NewProfile = {

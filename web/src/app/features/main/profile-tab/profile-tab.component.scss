@@ -67,4 +67,10 @@ h2.kt-label {
     color: var(--kt-ink);
     overflow-wrap: anywhere;
   }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 }
