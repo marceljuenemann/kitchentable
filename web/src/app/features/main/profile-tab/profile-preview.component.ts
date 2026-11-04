@@ -1,5 +1,6 @@
 import { Component, inject, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { AnalyticsService } from '../../../core/analytics.service';
 import { injectProfilePhotoUrls } from '../../../shared/profile-view/profile-photo-urls';
 import { ProfileViewComponent } from '../../../shared/profile-view/profile-view.component';
 import { MyProfileStore } from './my-profile.store';
@@ -36,4 +37,8 @@ export class ProfilePreviewComponent {
   readonly view = viewChild(ProfileViewComponent);
   /** No cached thumbnail here: the photo grid keeps its own. */
   readonly photoUrls = injectProfilePhotoUrls(this.store.member, () => null);
+
+  constructor() {
+    inject(AnalyticsService).track('profile_preview_opened');
+  }
 }

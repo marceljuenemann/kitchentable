@@ -13,6 +13,7 @@ import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { firstValueFrom } from 'rxjs';
+import { AnalyticsService } from '../../../core/analytics.service';
 import { PhotoStorageService } from '../../../core/photo-storage.service';
 import { MAX_PHOTOS } from '../../../core/profile-options';
 import { PROFILE_SHEET_CONFIG } from '../field-sheets';
@@ -34,6 +35,7 @@ import { checkPhotoFile, PhotoError } from '../photos/photo-processor';
 export class PhotoGridComponent {
   private readonly bottomSheet = inject(MatBottomSheet);
   private readonly storage = inject(PhotoStorageService);
+  private readonly analytics = inject(AnalyticsService);
 
   /** Ids of the photos, in display order (first = main); see docs/photos.md. */
   readonly photos = input.required<string[]>();
@@ -119,9 +121,12 @@ export class PhotoGridComponent {
       if (id) this.added.emit(id);
       return id !== undefined;
     } catch (error) {
-      this.error.set(
-        error instanceof PhotoError ? error.message : 'Something went wrong with that photo.',
-      );
+      if (error instanceof PhotoError) {
+        this.error.set(error.message);
+        this.analytics.track('photo_rejected', { reason: error.reason });
+      } else {
+        this.error.set('Something went wrong with that photo.');
+      }
       return false;
     }
   }

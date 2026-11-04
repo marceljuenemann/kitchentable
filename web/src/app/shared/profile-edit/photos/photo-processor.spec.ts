@@ -95,39 +95,49 @@ describe('visibleSquare', () => {
 });
 
 describe('checkPhotoFile', () => {
-  const message = async (file: File) => {
+  /** The error that turned the file down, or null if it was accepted. */
+  const rejection = async (file: File) => {
     try {
       await checkPhotoFile(file);
     } catch (error) {
       expect(error).toBeInstanceOf(PhotoError);
-      return (error as Error).message;
+      return error as PhotoError;
     }
     return null;
   };
 
   it('accepts a big enough image', async () => {
-    expect(await message(await jpegFile(MIN_SOURCE_SIZE + 100, MIN_SOURCE_SIZE + 100))).toBeNull();
+    expect(
+      await rejection(await jpegFile(MIN_SOURCE_SIZE + 100, MIN_SOURCE_SIZE + 100)),
+    ).toBeNull();
   });
 
   it('rejects something that is not an image', async () => {
     const file = new File(['hello'], 'notes.txt', { type: 'text/plain' });
-    expect(await message(file)).toBe("That file isn't an image.");
+    const error = await rejection(file);
+    expect(error?.message).toBe("That file isn't an image.");
+    expect(error?.reason).toBe('not_an_image');
   });
 
   it('rejects a file over the size limit', async () => {
     const file = new File(['x'], 'huge.jpg', { type: 'image/jpeg' });
     Object.defineProperty(file, 'size', { value: MAX_SOURCE_BYTES + 1 });
-    expect(await message(file)).toBe('That photo is too large (25 MB maximum).');
+    const error = await rejection(file);
+    expect(error?.message).toBe('That photo is too large (25 MB maximum).');
+    expect(error?.reason).toBe('too_large');
   });
 
   it('rejects an image the browser cannot decode', async () => {
     const file = new File(['not really a jpeg'], 'broken.jpg', { type: 'image/jpeg' });
-    expect(await message(file)).toContain("couldn't read that photo");
+    const error = await rejection(file);
+    expect(error?.message).toContain("couldn't read that photo");
+    expect(error?.reason).toBe('unreadable');
   });
 
   it('rejects a photo whose short side is too small, however long the other side is', async () => {
-    const file = await jpegFile(MIN_SOURCE_SIZE - 1, 2000);
-    expect(await message(file)).toContain('too small');
+    const error = await rejection(await jpegFile(MIN_SOURCE_SIZE - 1, 2000));
+    expect(error?.message).toContain('too small');
+    expect(error?.reason).toBe('too_small');
   });
 });
 

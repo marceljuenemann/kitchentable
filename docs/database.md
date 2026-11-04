@@ -88,7 +88,7 @@ Before anything else, a signed-in user accepts the Terms of Use and gives the ex
 
 ### `analytics_events`
 
-First-party product analytics: no third-party service and nothing stored in the browser for it. Events are recorded on the server against the signed-in user's session, so no cookie consent is needed. The legal basis is legitimate interests (GDPR). No client access: events are written only through `track_event`.
+First-party product analytics: no third-party service and nothing stored in the browser for it. Events are recorded on the server against the signed-in user's session, so no cookie consent is needed. The legal basis is legitimate interests (GDPR). No client access: the app records events through `track_event`, and the `profiles_record_change` trigger records `profile_changed` itself (below).
 
 | Column       | Type          | Notes                                     |
 | ------------ | ------------- | ----------------------------------------- |
@@ -100,7 +100,12 @@ First-party product analytics: no third-party service and nothing stored in the 
 
 - **Use existing data first.** Sign-ups (`auth.users.created_at`), clicked links (`email_confirmed_at`, `last_sign_in_at`) and profile statuses are already in the database. Events are only for things that leave no other trace, such as onboarding progress, because the draft stays in the browser until it is submitted.
 - **Never record** other people's ids (e.g. "viewed profile X"), free text or profile content.
-- **Adding an event needs a migration,** since names are allowlisted. Current events: `onboarding_step_viewed` (`{"step": n}`, sent each time a step is shown, including after a reload).
+- **Adding an event needs a migration,** since names are allowlisted. Current events from the app:
+  - `onboarding_step_viewed` (`{"step": n}`): sent each time a step is shown, including after a reload.
+  - `invite_link_shared` (`{"method": "share" | "copy"}`): the invite link was shared through the system's share sheet (not cancelled) or copied, on any screen that has it.
+  - `photo_rejected` (`{"reason": "not_an_image" | "too_large" | "unreadable" | "too_small"}`): a picked photo was turned down before cropping, in onboarding or the profile tab.
+  - `profile_preview_opened`: the profile tab's Preview was opened.
+- **`profile_changed`** (`{"fields": [...], "by": "self" | "admin" | "system"}`) is recorded by the `profiles_record_change` trigger after every update to `profiles` that changes something: the names of the changed columns (never their values), and who changed them, the profile's owner, an admin, or `system` when there's no signed-in user (the Didit webhook, cron jobs, the service role, Studio). Its `user_id` is the profile that changed, not whoever changed it. It isn't on `track_event`'s list, so members can't record one themselves. `updated_at`, `intros_emailed_at` and `messages_emailed_at` don't count: they change without anyone editing anything, and any column like them must be added to the trigger's list.
 - **Retention:** the `purge-analytics-events` pg_cron job deletes events older than 3 months every night.
 - **Objections** (GDPR Art. 21): there's no opt-out setting yet, so delete the user's rows by hand.
 - **Reading the data:** the Studio SQL editor (service role). There are no views yet. Write them when there's an analysis to do.

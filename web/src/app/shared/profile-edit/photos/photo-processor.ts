@@ -10,7 +10,22 @@ export const FULL_TARGET_BYTES = 1_000_000;
 export const MIN_SOURCE_SIZE = 600;
 export const MAX_SOURCE_BYTES = 25 * 1024 * 1024;
 
-export class PhotoError extends Error {}
+/**
+ * Why a photo was turned down, for analytics (`photo_rejected`), or `render_failed` when the
+ * browser couldn't make the images from a chosen crop.
+ */
+export type PhotoErrorReason =
+  'not_an_image' | 'too_large' | 'unreadable' | 'too_small' | 'render_failed';
+
+/** A photo that can't be used, with a user-facing message. */
+export class PhotoError extends Error {
+  constructor(
+    message: string,
+    readonly reason: PhotoErrorReason,
+  ) {
+    super(message);
+  }
+}
 
 export interface ProcessedPhoto {
   /** Up to FULL_SIZE square JPEG. */
@@ -22,21 +37,24 @@ export interface ProcessedPhoto {
 /** Throws a PhotoError with a user-facing message if the file can't be used as a photo. */
 export async function checkPhotoFile(file: File): Promise<void> {
   if (!file.type.startsWith('image/')) {
-    throw new PhotoError("That file isn't an image.");
+    throw new PhotoError("That file isn't an image.", 'not_an_image');
   }
   if (file.size > MAX_SOURCE_BYTES) {
-    throw new PhotoError('That photo is too large (25 MB maximum).');
+    throw new PhotoError('That photo is too large (25 MB maximum).', 'too_large');
   }
   let bitmap: ImageBitmap;
   try {
     bitmap = await createImageBitmap(file);
   } catch {
-    throw new PhotoError("We couldn't read that photo. Try a JPEG or PNG.");
+    throw new PhotoError("We couldn't read that photo. Try a JPEG or PNG.", 'unreadable');
   }
   const shortSide = Math.min(bitmap.width, bitmap.height);
   bitmap.close();
   if (shortSide < MIN_SOURCE_SIZE) {
-    throw new PhotoError(`That photo is too small (at least ${MIN_SOURCE_SIZE} px needed).`);
+    throw new PhotoError(
+      `That photo is too small (at least ${MIN_SOURCE_SIZE} px needed).`,
+      'too_small',
+    );
   }
 }
 
@@ -106,12 +124,17 @@ function encodeJpeg(
   canvas.width = size;
   canvas.height = size;
   const context = canvas.getContext('2d');
-  if (!context) return Promise.reject(new PhotoError("We couldn't process that photo."));
+  if (!context) {
+    return Promise.reject(new PhotoError("We couldn't process that photo.", 'render_failed'));
+  }
   context.imageSmoothingQuality = 'high';
   context.drawImage(bitmap, crop.x, crop.y, crop.size, crop.size, 0, 0, size, size);
   return new Promise((resolve, reject) =>
     canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new PhotoError("We couldn't process that photo."))),
+      (blob) =>
+        blob
+          ? resolve(blob)
+          : reject(new PhotoError("We couldn't process that photo.", 'render_failed')),
       'image/jpeg',
       quality,
     ),

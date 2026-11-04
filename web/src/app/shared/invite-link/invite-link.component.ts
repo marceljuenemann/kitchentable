@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { filter, map, switchMap } from 'rxjs';
+import { AnalyticsService } from '../../core/analytics.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { inviteCodeFor } from '../../core/invite-code';
 
@@ -63,6 +64,7 @@ const SHARE_TEXT =
 })
 export class InviteLinkComponent {
   private readonly clipboard = inject(Clipboard);
+  private readonly analytics = inject(AnalyticsService);
 
   readonly inviteLink = toSignal(
     inject(AuthService).userId$.pipe(
@@ -76,7 +78,9 @@ export class InviteLinkComponent {
 
   copy() {
     const link = this.inviteLink();
-    if (link) this.copied.set(this.clipboard.copy(link));
+    if (!link) return;
+    this.copied.set(this.clipboard.copy(link));
+    if (this.copied()) this.analytics.track('invite_link_shared', { method: 'copy' });
   }
 
   async share() {
@@ -84,6 +88,7 @@ export class InviteLinkComponent {
     if (!link) return;
     try {
       await navigator.share({ text: SHARE_TEXT, url: link });
+      this.analytics.track('invite_link_shared', { method: 'share' });
     } catch {
       // Closing the share sheet without sharing rejects too; nothing to do either way.
     }

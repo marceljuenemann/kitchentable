@@ -1,6 +1,7 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { AnalyticsService } from '../../../core/analytics.service';
 import { PhotoStorageService } from '../../../core/photo-storage.service';
 import { PhotoGridComponent } from './photo-grid.component';
 
@@ -19,6 +20,7 @@ describe('PhotoGridComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: MatBottomSheet, useValue: {} },
+        { provide: AnalyticsService, useValue: { track: () => undefined } },
         {
           provide: PhotoStorageService,
           useValue: {
