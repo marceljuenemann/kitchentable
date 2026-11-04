@@ -1,0 +1,60 @@
+<div class="page">
+  <app-header />
+
+  <h1 class="headline">Welcome back</h1>
+  <p class="subhead">Sign in to continue to Kitchen Table.</p>
+
+  <mat-card class="kt-card" appearance="outlined">
+    @if (!sent()) {
+      <h2>Sign in</h2>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+          <mat-label>Email</mat-label>
+          <input
+            #emailInput
+            matInput
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+          />
+          @if (form.controls.email.touched && form.controls.email.hasError('email')) {
+            <mat-error>Enter a valid email address</mat-error>
+          }
+        </mat-form-field>
+
+        @if (errorMessage()) {
+          <p class="error">{{ errorMessage() }}</p>
+        }
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="form.invalid || submitting()"
+        >
+          @if (submitting()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Sign in
+          }
+        </button>
+      </form>
+
+      <p class="kt-fine-print">
+        We'll email you a link to sign in. See our
+        <a href="/about/privacy" (click)="openPrivacyPolicy($event)">Privacy Policy</a> for how we
+        handle your data.
+      </p>
+    } @else {
+      <h2>Check your email</h2>
+      <p class="intro">
+        We've sent a sign-in link to {{ form.controls.email.value }}. Open it on this device to
+        continue.
+      </p>
+    }
+  </mat-card>
+
+  <app-footer />
+</div>

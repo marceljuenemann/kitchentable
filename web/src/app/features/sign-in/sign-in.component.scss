@@ -1,0 +1,59 @@
+// The landing page's column and type, at a smaller size.
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: var(--kt-bg);
+  color: var(--kt-ink);
+  font-family: var(--kt-font-sans);
+}
+
+.page {
+  max-width: var(--kt-page-width);
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+
+.headline {
+  margin: 34px 0 0;
+  font-family: var(--kt-font-display);
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--kt-violet);
+}
+
+.subhead {
+  margin: 10px 0 0;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--kt-muted);
+}
+
+mat-card {
+  margin: 28px 0 8px;
+}
+
+.intro {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--kt-muted);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+mat-form-field {
+  width: 100%;
+  margin: 8px 0;
+}
+
+.error {
+  margin: 0;
+  color: var(--mat-sys-error);
+  font-size: 13.5px;
+}

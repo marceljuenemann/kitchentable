@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { adminGuard, authGuard, signedOutGuard } from './core/auth/auth.guard';
 import { CallbackComponent } from './features/auth-callback/callback.component';
 import { LandingComponent } from './features/landing/landing.component';
+import { SignInComponent } from './features/sign-in/sign-in.component';
 
 // Chunks: everything signed-out visitors need is in the initial bundle, everything for
 // signed-in users is one lazy chunk (the shell and all its screens, and the admin tool; see
@@ -13,6 +14,12 @@ export const routes: Routes = [
     pathMatch: 'full',
     canActivate: [signedOutGuard],
     component: LandingComponent,
+  },
+  // Where signed-out visitors to /app and /admin go: once signed in, they're back on that page.
+  {
+    path: 'sign-in',
+    canActivate: [signedOutGuard],
+    component: SignInComponent,
   },
   {
     path: 'auth/callback',

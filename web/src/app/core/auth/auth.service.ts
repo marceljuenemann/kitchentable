@@ -38,11 +38,20 @@ export class AuthService {
     });
   }
 
-  async requestMagicLink(email: string, inviteCode?: string) {
+  /**
+   * Emails a sign-in link, which creates the account if there is none. `next` is the page the
+   * link leads to (the callback checks it with `safeNext`); without it, the app.
+   */
+  async requestMagicLink(
+    email: string,
+    { inviteCode, next }: { inviteCode?: string; next?: string } = {},
+  ) {
+    const callback = new URL('/auth/callback', window.location.origin);
+    if (next) callback.searchParams.set('next', next);
     const { error } = await this.supabase.client.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: callback.toString(),
         ...(inviteCode ? { data: { invite_code: inviteCode } } : {}),
       },
     });

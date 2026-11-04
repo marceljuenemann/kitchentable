@@ -59,7 +59,7 @@ npx supabase test db --local supabase/tests/database
 
 ### E2E tests (Playwright)
 
-Covers the invite/auth flows and the status-driven shell: landing-page invite gating, the sign-in bottom sheet, auth-guard redirects, and the screen shown for each profile status.
+Covers the invite/auth flows and the status-driven shell: landing-page invite gating, the sign-in page, auth-guard redirects, and the screen shown for each profile status.
 
 ```bash
 npx supabase start      # if not already running
