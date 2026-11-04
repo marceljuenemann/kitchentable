@@ -3,10 +3,12 @@ import { Browser, expect, Page, test } from '@playwright/test';
 import {
   createIntro,
   createMember,
+  jpeg,
   secretOf,
   setStatus,
   signIn,
   signInAs,
+  uploadPhoto,
   userIdOf,
 } from './support/admin';
 
@@ -215,6 +217,40 @@ test('ending a connection shows on both sides', async ({ page, browser }) => {
     .click();
   await expect(mayaPage.getByText('Ife ended this connection')).toBeVisible();
   await mayaPage.close();
+});
+
+test('the profile of someone you’re connected with shows all their photos', async ({ page }) => {
+  await page.goto('/');
+  const image = await jpeg(page, '#6cc3a0');
+  const location = `Testville ${randomUUID()}`;
+  /** A member with three photos, who has sent Ife an intro. */
+  async function withPhotos(name: string, ifeId: string, status: 'pending' | 'accepted') {
+    const photos = [randomUUID(), randomUUID(), randomUUID()];
+    const member = await createMember({ name, location, looking_for: ['friends'], photos });
+    for (const photo of photos) {
+      await uploadPhoto(`${member.id}/${photo}/full.jpg`, image);
+      await uploadPhoto(`${member.id}/${photo}/thumb.jpg`, image);
+    }
+    await createIntro(member.id, ifeId, `Hi Ife, it’s ${name}`, status);
+    return member;
+  }
+  const ife = await createMember({ name: 'Ife', location, looking_for: ['friends'] });
+  const maya = await withPhotos('Maya', ife.id, 'accepted');
+  const toby = await withPhotos('Toby', ife.id, 'pending');
+  await signIn(page, ife.email);
+  const profile = page.locator('app-profile-view');
+  const loaded = (name: string) =>
+    profile
+      .getByRole('img', { name })
+      .evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0);
+
+  // From a conversation.
+  await page.goto(`/app/messages/${maya.id}/profile`);
+  await expect.poll(() => loaded('Photo 3 of 3')).toBe(true);
+
+  // From an introduction in Connections.
+  await page.goto(`/app/connections/${toby.id}`);
+  await expect.poll(() => loaded('Photo 3 of 3')).toBe(true);
 });
 
 test('signing out deletes the local copy of messages', async ({ page }) => {

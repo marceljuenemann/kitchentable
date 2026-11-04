@@ -2,6 +2,7 @@ import { Component, computed, inject, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConnectionsStore } from '../../../core/connections/connections.store';
+import { injectProfilePhotoUrls } from '../../../shared/profile-view/profile-photo-urls';
 import { ProfileViewComponent } from '../../../shared/profile-view/profile-view.component';
 
 /**
@@ -17,7 +18,7 @@ import { ProfileViewComponent } from '../../../shared/profile-view/profile-view.
     @if (conversation(); as conversation) {
       <app-profile-view
         [profile]="conversation.person"
-        [photoUrls]="[conversation.photoUrl]"
+        [photoUrls]="photoUrls()"
         [backLabel]="overConversation ? 'Back to conversation' : 'Back to messages'"
       >
         <div class="kt-profile-actions">
@@ -48,6 +49,10 @@ export class ConversationProfileComponent {
   /** Whether it shows over the conversation, rather than the list. */
   readonly overConversation = this.conversationId !== null;
   readonly conversation = computed(() => this.store.conversation(this.id));
+  readonly photoUrls = injectProfilePhotoUrls(
+    () => this.conversation()?.person,
+    () => this.conversation()?.photoUrl ?? null,
+  );
   /** An ended conversation can only be read. */
   readonly actionLabel = computed(() => {
     const conversation = this.conversation();

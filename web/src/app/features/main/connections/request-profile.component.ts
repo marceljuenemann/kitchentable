@@ -6,6 +6,7 @@ import { ConnectionsStore } from '../../../core/connections/connections.store';
 import { HeartComponent } from '../../../shared/heart/heart.component';
 import { HideIconComponent } from '../../../shared/hide-icon/hide-icon.component';
 import { CLOSE_ANIMATION_MS } from '../../../shared/profile-view/profile-transition';
+import { injectProfilePhotoUrls } from '../../../shared/profile-view/profile-photo-urls';
 import { ProfileViewComponent } from '../../../shared/profile-view/profile-view.component';
 import { IntroCardComponent } from '../messages/intro-card.component';
 import { injectRequestActions } from './request-actions';
@@ -26,7 +27,7 @@ import { injectRequestActions } from './request-actions';
     @if (conversation(); as conversation) {
       <app-profile-view
         [profile]="conversation.person"
-        [photoUrls]="[conversation.photoUrl]"
+        [photoUrls]="photoUrls()"
         backLabel="Back to introductions"
       >
         <div class="intro" profileIntro>
@@ -122,6 +123,10 @@ export class RequestProfileComponent {
    * once, not kept in step: it has to stay while the page leaves, after accepting or hiding.
    */
   readonly conversation = signal<Conversation | null | undefined>(undefined);
+  readonly photoUrls = injectProfilePhotoUrls(
+    () => this.conversation()?.person,
+    () => this.conversation()?.photoUrl ?? null,
+  );
   readonly connecting = signal(false);
   readonly introText = introText;
 
