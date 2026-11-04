@@ -455,8 +455,12 @@ mat-checkbox {
 
   .value {
     font-size: 15.5px;
-    font-weight: 700;
     line-height: 1.35;
+  }
+
+  // However long the value.
+  mat-icon {
+    flex: none;
   }
 }
 
