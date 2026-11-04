@@ -2,8 +2,6 @@
 
 Postgres via Supabase. The schema lives in `supabase/migrations/` and is covered by pgTAP tests in `supabase/tests/database/`. **Update this file with any schema change.**
 
-Sections marked **(planned)** describe the member emails, which aren't built yet. Update them as they're built, and move anything that turns out differently.
-
 ## Access rules
 
 - **Writes go through `security definer` functions** that check `auth.uid()`, so the rules and state changes live in one auditable place instead of being spread across RLS policies. Functions are added as the features that need them are built.
@@ -68,8 +66,8 @@ One row per user who has **completed onboarding**. Signing up creates only an `a
 | `photos`                                                 | `uuid[]`      | Photo ids in display order, the first being the main photo; at most 6 (a check). The files are in the `photos` bucket: see [photos.md](photos.md).                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `search_filters`                                         | `jsonb`       | The user's search filters, so they survive signing out and follow them to other devices: `{"looking_for": [...], "gender": [...], "min_age": n, "max_age": n, "show_unspecified_age": bool}`, the filter values `SearchStore` uses (`self-described` and `not-specified` included). Null until first saved, meaning no filters. One column rather than five, since the filters will change and only `gender` is ever read on the server. Set only through `set_search_filters`, which checks every value.                                                                        |
 | `hide_by_gender`                                         | `boolean`     | "Only show me to these genders": whether only members whose `gender` matches the Gender filter in `search_filters` (the way the filter matches: a standard option, `self-described` for a value of their own, `not-specified` for none) can find the user in search or send them an intro (`is_hidden_by_gender()`, shared by `search_profiles` and `send_intro`). Tied to the user's own Gender filter, so in the app nobody sees people they hide from. That half is the app's filter, not a server rule: `search_profiles` applies `hide_by_gender` only to who can find the user, so changing filters needs no new request. Only ever true with a non-empty Gender filter. |
-| `intro_emails`, `message_emails`                         | `boolean`     | The user's settings, a switch each in the app's Settings sheet (on the profile tab): whether they get the [member emails](#member-emails-planned) about new intros, and about new messages. On by default. Set only through `update_settings`. The emails aren't sent yet, so for now they're only stored. |
-| `intros_emailed_at`, `messages_emailed_at` **(planned)** | `timestamptz` | When the user was last emailed about new intros, and about new messages; null until the first. See [Member emails](#member-emails-planned).                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `intro_emails`, `message_emails`                         | `boolean`     | The user's settings, a switch each in the app's Settings sheet (on the profile tab): whether they get the [email notifications](#email-notifications) about new intros, and about new messages. On by default. Set only through `update_settings`. |
+| `intros_emailed_at`, `messages_emailed_at`               | `timestamptz` | When the user was last emailed about new intros, and about new messages; null until the first. See [Email notifications](#email-notifications).                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `created_at`, `updated_at`                               | `timestamptz` | `updated_at` is set by a trigger.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 ### `terms_acceptances`
@@ -140,7 +138,7 @@ Every member has an `accepted` connection with each admin (one for now), so they
 | `last_read_at`             | `timestamptz` | Read watermark for the conversation with that person. Null until the user first opens it, so a new intro is unread.                                                          |
 | `updated_at`               | `timestamptz` | Set by a trigger, for replication.                                                                                                                                           |
 
-**Read state without read receipts:** a message is unread for its recipient if it was sent after their `last_read_at`, so the user's own messages never count (or they've never opened the conversation), unless they declined the intro. An intro is just the first message, so new intros are unread the same way (they get their own email, though: see [Member emails](#member-emails-planned)). Opening a conversation moves the watermark: one write, however many messages there were. The sender never sees it, because it's in the reader's own row. A read flag on each message would have to be hidden from the sender by column, and the recipient would be updating rows someone else wrote.
+**Read state without read receipts:** a message is unread for its recipient if it was sent after their `last_read_at`, so the user's own messages never count (or they've never opened the conversation), unless they declined the intro. An intro is just the first message, so new intros are unread the same way (they get their own email, though: see [Email notifications](#email-notifications)). Opening a conversation moves the watermark: one write, however many messages there were. The sender never sees it, because it's in the reader's own row. A read flag on each message would have to be hidden from the sender by column, and the recipient would be updating rows someone else wrote.
 
 **Accepted intros:** accepting adds no message, so the app also counts an `accepted` connection as unread if it has messages and the user's `last_read_at` is null. That's how the initiator finds out: `last_read_at` is only set by `mark_read`, and they can't open the conversation before it's accepted. For the recipient the intro is already read: opening the Connections tab calls `mark_read` for every request in it that's new (a null `last_read_at`), which is also what clears that tab's badge. The conversation with the admins starts accepted and never opened too, which is why it needs messages to count.
 
@@ -232,34 +230,39 @@ All emails apart from the sign-in email (which Supabase Auth sends) go through o
 - **Settings:** the function's URL and shared secret are the vault secrets `send_email_url` and `send_email_secret`. The function checks the secret against `SEND_EMAIL_SECRET`, because it runs with `verify_jwt = false`. They're set in `supabase/seed.sql` and `supabase/functions/.env` locally, and by hand on staging and production (see README.md). If either vault secret is missing, `send_email` logs a warning and sends nothing.
 - **Delivery:** locally, emails go to Mailpit; elsewhere, through Mailtrap.
 
-| Template                | To        | Sent when                                                                                                                                                                             |
-| ----------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `application_submitted` | the admin | an application comes in (a profile row inserted in `vetting`, the `notify_admin_of_application` trigger). Links to `/admin/vetting`.                                                  |
-| `application_approved`  | the user  | the status changes from `vetting` to `approved` (the `notify_member_of_approval` trigger, so approving by hand in Studio sends it too). Links to `/app`, where the age check is next. |
+| Template                     | To        | Sent when                                                                                                                                                                             |
+| ---------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `application_submitted`      | the admin | an application comes in (a profile row inserted in `vetting`, the `notify_admin_of_application` trigger). Links to `/admin/vetting`.                                                  |
+| `application_approved`       | the user  | the status changes from `vetting` to `approved` (the `notify_member_of_approval` trigger, so approving by hand in Studio sends it too). Links to `/app`, where the age check is next. |
+| `new_intros`, `new_messages` | the user  | they're due: see [Email notifications](#email-notifications).                                                                                                                         |
 
-### Member emails (planned)
+### Email notifications
 
-A pg_cron job runs every 10 minutes and calls `send_email` for each email that is due, with new templates in `send-email`. There are two kinds, each with its own timestamp on `profiles`, so they back off separately:
+A pg_cron job, `send-email-notifications`, runs `send_email_notifications()` every 10 minutes (like the analytics clean-up). It finds the emails that are due with one query per kind, calls `send_email` for each, and sets that kind's timestamp in the same transaction. Clients can't call it; the service role can, so the e2e tests run it rather than wait (`sendEmailNotifications()` in `e2e/support/admin.ts`). There are two kinds, each with its own template in `send-email`, its own setting (the switches in the app's Settings sheet, see `update_settings`) and its own timestamp on `profiles`, so they back off separately:
 
-| Kind     | Says                                                           | About                                                                                                        | Timestamp             |
-| -------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------- |
-| intro    | "Someone wants to connect with you <3", and links to the app   | `pending` connections where the user is the recipient, not declined and not yet opened (`last_read_at` null) | `intros_emailed_at`   |
-| messages | "You have new messages on Kitchen Table", and links to the app | unread messages and [accepted intros](#connection_secrets) in `accepted` connections                         | `messages_emailed_at` |
+| Kind     | Template       | Says                                                                    | About                                                                                                        | Setting          | Timestamp             |
+| -------- | -------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ---------------- | --------------------- |
+| intro    | `new_intros`   | "Someone wants to connect with you", and links to `/app/connections`    | `pending` connections where the user is the recipient, not declined and not yet opened (`last_read_at` null) | `intro_emails`   | `intros_emailed_at`   |
+| messages | `new_messages` | "You have new messages", and links to `/app/messages`                   | unread messages and [accepted intros](#connection_secrets) in `accepted` connections                         | `message_emails` | `messages_emailed_at` |
 
-One email of each kind covers all connections. An email of a kind is due when:
+Like the other emails, they hold no names or message text. Their footer says why the email came and, with the word "unsubscribe", that it can be switched off under Settings on the profile tab. A one-click unsubscribe without signing in (a signed token, a public endpoint and `List-Unsubscribe` headers) can come later if it's needed.
+
+Only `active` and `admin` profiles are emailed (`can_message()`), and only for a kind they haven't switched off. One email of each kind covers all connections. The conversations with the admins count like any other, except that the admin is never emailed about an "accepted intro" in them. An email of a kind is due when:
 
 1. something of that kind arrived **after the last email of that kind** (no reminders about things we've already emailed about), and
 2. it is **at least 15 minutes old** (so people using the app aren't emailed), and
-3. if the user hasn't read anything since the last email of that kind, enough time has passed since it: at least as long as they had already been away when it was sent, and at least 1 day, at most 30 days.
+3. if the user hasn't read anything since the last email of that kind, enough time has passed since it: at least as long as they had already been away when it was sent, and at least 1 day, at most 14 days.
 
-"Read anything" means their latest `last_read_at` across all their `connection_secrets` rows, or when their profile was created if they've never opened a conversation. With `read` for that and `emailed` for the kind's timestamp, the last condition is:
+"Read anything" means their latest `last_read_at` across all their `connection_secrets` rows, or when their profile was created if they've never opened a conversation (`last_read_at(profile)`). With `read` for that and `emailed` for the kind's timestamp, the last condition is (in `email_notification_due()`, with the other two):
 
 ```sql
 read >= emailed
-or now() - emailed >= least(greatest(emailed - read, interval '1 day'), interval '30 days')
+or now() - emailed >= least(greatest(emailed - read, interval '1 day'), interval '14 days')
 ```
 
-This doubles the wait for each unanswered email without counting them: for someone who was last in the app just before a message came, message emails go out after 15 minutes, then 1 day, 2, 4, 8 and 16 days, then every 30 days. Someone who had already been away for a while gets a longer wait after the first email. Reading anything resets it. Nothing of a kind is sent to someone who has switched that kind off (`intro_emails`, `message_emails`).
+This doubles the wait for each unanswered email without counting them: for someone who was last in the app just before a message came, message emails go out after 15 minutes, then 1 day, 2, 4 and 8 days, then every 14 days for as long as they stay away. Someone who had already been away for a while gets a longer wait after the first email. Reading anything resets it.
+
+An accepted intro counts from when its connection last changed (`connections.updated_at`, which accepting sets). A kind switched off and on again picks up whatever arrived since its last email.
 
 ## Signup and invite codes
 
@@ -309,4 +312,3 @@ The admin functions are listed under [Functions](#functions).
 - **Declined intros, later:** the sender isn't told for now, can't send another (one connection per pair) or withdraw it (deliberately: `end_connection` only ends accepted connections), and the recipient can't accept it after all. Should a declined intro eventually be shown to the sender, expire, or be undoable by the recipient? Blocking and reporting need their own design (until then, members can report to the admins in their conversation with them).
 - **Deleted users:** their profile stays as a tombstone. Do their sent messages stay visible to the other person, or are they scrubbed?
 - **Retention:** keep messages until either participant deletes their account, or for a fixed time?
-- **Back-off ceiling:** once the wait reaches 30 days, keep sending monthly, or stop until the user comes back?

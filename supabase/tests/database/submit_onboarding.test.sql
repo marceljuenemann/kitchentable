@@ -71,7 +71,8 @@ select is(
     "looking_for": ["polyamory"],
     "photos": ["aaaaaaaa-0000-0000-0000-000000000001", "aaaaaaaa-0000-0000-0000-000000000002"],
     "age_verified_at": null, "search_filters": null, "hide_by_gender": false,
-    "intro_emails": true, "message_emails": true
+    "intro_emails": true, "message_emails": true,
+    "intros_emailed_at": null, "messages_emailed_at": null
   }'::jsonb,
   'the profile is created in vetting with the trimmed, submitted values (and is read back without the vetting answers)'
 );

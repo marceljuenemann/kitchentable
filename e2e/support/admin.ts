@@ -222,6 +222,21 @@ export async function createIntro(
   ]);
 }
 
+/** Makes the intros and messages sent to the user look `minutes` old. */
+export async function backdateSentTo(userId: string, minutes: number) {
+  const created_at = new Date(Date.now() - minutes * 60_000).toISOString();
+  await api(`/rest/v1/connections?recipient_id=eq.${userId}`, { created_at }, 'PATCH');
+  await api(`/rest/v1/messages?recipient_id=eq.${userId}`, { created_at }, 'PATCH');
+}
+
+/**
+ * Runs the job that sends the email notifications that are due (pg_cron runs it every 10
+ * minutes), to everyone in the database.
+ */
+export async function sendEmailNotifications() {
+  await api('/rest/v1/rpc/send_email_notifications', {});
+}
+
 /** One user's `connection_secrets` row about another, read with the service role. */
 export async function secretOf(userId: string, otherId: string): Promise<Record<string, unknown>> {
   const response = await fetch(
