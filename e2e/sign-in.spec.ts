@@ -13,7 +13,7 @@ async function createExistingUser(page: Page, email: string) {
 
 test('the landing page links to the sign-in page', async ({ page }) => {
   await page.goto('/');
-  await page.locator('.signin-line').getByRole('link', { name: 'Sign in' }).click();
+  await page.locator('.signin-link').click();
   await page.waitForURL((url) => url.pathname === '/sign-in');
   await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
   await expect(page.getByLabel('Email')).toBeFocused();

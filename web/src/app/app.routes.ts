@@ -9,10 +9,10 @@ import { SignInComponent } from './features/sign-in/sign-in.component';
 // signed-in-chunk.ts), and the policy documents load only when someone opens one. Fewer, bigger
 // chunks mean fewer round trips one after another.
 export const routes: Routes = [
+  // Signed-in users see it too, with a way into the app instead of signing up or in.
   {
     path: '',
     pathMatch: 'full',
-    canActivate: [signedOutGuard],
     component: LandingComponent,
   },
   // Where signed-out visitors to /app and /admin go: once signed in, they're back on that page.

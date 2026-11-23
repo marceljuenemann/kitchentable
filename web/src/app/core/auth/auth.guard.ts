@@ -31,8 +31,8 @@ export const adminGuard: CanMatchFn = async () => {
 };
 
 /**
- * Pages for signed-out visitors (the landing page, sign-in): signed-in users are sent on to the
- * app, or to the page they asked to sign in for.
+ * Pages for signed-out visitors (sign-in): signed-in users are sent on to the app, or to the page
+ * they asked to sign in for.
  */
 export const signedOutGuard: CanActivateFn = async (route) => {
   const supabase = inject(SupabaseService);

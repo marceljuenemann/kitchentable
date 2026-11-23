@@ -1,83 +1,167 @@
-<div class="landing">
-  <app-header />
-
-  <h1 class="headline">ENM dating, reimagined.</h1>
-
-  <p class="subhead">Kitchen Table is a new dating community for non-monogamous folks in London.</p>
-
-  <ul class="pitch">
-    <li>
-      <span class="dot dot-sky"></span>
-      <span><b>Non-profit.</b>&nbsp;No need to pay just to see who likes you</span>
-    </li>
-    <li>
-      <span class="dot dot-magenta"></span>
-      <span><b>Invite-only.</b>&nbsp;Building a community you can trust</span>
-    </li>
-    <li>
-      <span class="dot dot-primary"></span>
-      <span
-        ><b>Community-driven.</b>&nbsp;Help shape the guidelines, features, and even the code</span
-      >
-    </li>
-  </ul>
-
-  <mat-card class="kt-card signup-card" appearance="outlined">
-    @if (inviteCode) {
-      @if (!sent()) {
-        <h2>Sign up</h2>
-
-        <!-- A plain form (no Angular forms module), so Enter in the field submits it. -->
-        <form (submit)="$event.preventDefault(); signUp()">
-          <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
-            <mat-label>Email</mat-label>
-            <input
-              matInput
-              type="email"
-              placeholder="you@example.com"
-              [value]="email()"
-              (input)="setEmail($any($event.target).value)"
-            />
-          </mat-form-field>
-
-          @if (errorMessage()) {
-            <p class="error">{{ errorMessage() }}</p>
-          }
-
-          <button
-            mat-flat-button
-            color="primary"
-            type="submit"
-            [disabled]="!canSignUp() || submitting()"
-          >
-            @if (submitting()) {
-              <mat-spinner diameter="20" />
-            } @else {
-              Sign up
-            }
-          </button>
-        </form>
-
-        <p class="kt-fine-print">
-          We'll email you a link to sign up. See our
-          <a href="/about/privacy" (click)="openPrivacyPolicy($event)">Privacy Policy</a> for how we
-          handle your data.
-        </p>
+<section class="hero">
+  <div class="column">
+    <header class="top-bar">
+      <span class="brand">
+        <app-logo [size]="44" />
+        <span class="wordmark">Kitchen Table</span>
+      </span>
+      @if (signedIn()) {
+        <a class="signin-link" routerLink="/app">Open app</a>
       } @else {
-        <h2>Check your email</h2>
-        <p>We've sent a sign-in link to {{ email() }}. Open it on this device to continue.</p>
+        <a class="signin-link" routerLink="/sign-in">Sign in</a>
       }
-    } @else {
-      <h2>Kitchen Table is currently invite-only</h2>
-      <p>Want to join or help out? Drop us a line.</p>
-      <a mat-flat-button color="primary" href="mailto:hello@kitchentable.dating">Email us</a>
+    </header>
+
+    <h1 class="headline">ENM dating, <span class="highlight">reimagined.</span></h1>
+    <p class="subhead">
+      Kitchen Table is a new dating community for non-monogamous folks in London.
+    </p>
+
+    @if (sessionKnown()) {
+      <mat-card #signupCard class="kt-card signup-card" appearance="outlined">
+        @if (signedIn()) {
+          <h2>Welcome back!</h2>
+          @if (signedInEmail(); as email) {
+            <p>You're signed in as {{ email }}.</p>
+          }
+          <a mat-flat-button color="primary" routerLink="/app">Open the app</a>
+        } @else if (inviteCode) {
+          @if (!sent()) {
+            <h2>Sign up</h2>
+
+            <!-- A plain form (no Angular forms module), so Enter in the field submits it. -->
+            <form (submit)="$event.preventDefault(); signUp()">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+                <mat-label>Email</mat-label>
+                <input
+                  #emailInput
+                  matInput
+                  type="email"
+                  placeholder="you@example.com"
+                  [value]="email()"
+                  (input)="setEmail($any($event.target).value)"
+                />
+              </mat-form-field>
+
+              @if (errorMessage()) {
+                <p class="error">{{ errorMessage() }}</p>
+              }
+
+              <button
+                mat-flat-button
+                color="primary"
+                type="submit"
+                [disabled]="!canSignUp() || submitting()"
+              >
+                @if (submitting()) {
+                  <mat-spinner diameter="20" />
+                } @else {
+                  Sign up
+                }
+              </button>
+            </form>
+
+            <p class="kt-fine-print">
+              We'll email you a link to sign up. See our
+              <a href="/about/privacy" (click)="openPrivacyPolicy($event)">Privacy Policy</a> for
+              how we handle your data.
+            </p>
+          } @else {
+            <h2>Check your email</h2>
+            <p>We've sent a sign-in link to {{ email() }}. Open it on this device to continue.</p>
+          }
+        } @else {
+          <h2>Kitchen Table is currently invite-only</h2>
+          <p>Want to join or help out? Drop us a line.</p>
+          <a mat-flat-button color="primary" href="mailto:hello@kitchentable.dating">Email us</a>
+        }
+      </mat-card>
     }
-  </mat-card>
+  </div>
+</section>
 
-  <p class="signin-line">
-    Already signed up?
-    <a mat-button routerLink="/sign-in">Sign in</a>
-  </p>
+<main>
+  <section class="tour" aria-labelledby="tour-title">
+    <div class="column">
+      <h2 id="tour-title" class="section-title">Take a look inside</h2>
+      <p class="section-lead">A two-minute tour of the app, with sound.</p>
 
-  <app-footer />
-</div>
+      <div class="phone">
+        <video
+          #video
+          src="/promo-v2.mp4"
+          poster="/promo-poster-v1.jpg"
+          preload="none"
+          playsinline
+          width="720"
+          height="1280"
+          [controls]="playing()"
+          (play)="playing.set(true)"
+        ></video>
+        @if (!playing()) {
+          <button class="play" type="button" (click)="video.play()">
+            <span class="play-icon"><mat-icon>play_arrow</mat-icon></span>
+            <span class="play-label">Watch the tour</span>
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+
+  <div class="content">
+    <div class="column">
+      <ul class="pitch">
+        <li class="pitch-card">
+          <span class="pitch-icon pitch-icon-sky"><mat-icon>volunteer_activism</mat-icon></span>
+          <div>
+            <h3>Non-profit</h3>
+            <p>No need to pay just to see who likes you.</p>
+          </div>
+        </li>
+        <li class="pitch-card">
+          <span class="pitch-icon pitch-icon-magenta"><mat-icon>verified_user</mat-icon></span>
+          <div>
+            <h3>Invite-only</h3>
+            <p>All new profiles are reviewed by a human to prevent empty profiles and bots.</p>
+          </div>
+        </li>
+        <li class="pitch-card">
+          <span class="pitch-icon pitch-icon-gold"><mat-icon>groups</mat-icon></span>
+          <div>
+            <h3>Community-driven</h3>
+            <p>Join discussions about new features and community guidelines.</p>
+          </div>
+        </li>
+      </ul>
+
+      <figure class="testimonial">
+        <blockquote>
+          <p>
+            It's just so exciting to encounter a privacy-respecting, poly-first dating app eager to
+            listen to, work with, and ultimately exist for the users!
+          </p>
+          <p>And non-profit too, so you know they're actually in it for the love.</p>
+        </blockquote>
+        <figcaption>Shaun, early member</figcaption>
+      </figure>
+
+      <section class="closing" aria-labelledby="closing-title">
+        <app-heart class="closing-heart" [size]="56" />
+        <h2 id="closing-title">Pull up a chair.</h2>
+        @if (signedIn()) {
+          <a mat-flat-button class="closing-button" routerLink="/app">Open the app</a>
+        } @else if (inviteCode) {
+          <button mat-flat-button class="closing-button" type="button" (click)="goToSignUp()">
+            Join Kitchen Table
+          </button>
+        } @else {
+          <a mat-flat-button class="closing-button" href="mailto:hello@kitchentable.dating">
+            Ask for an invite
+          </a>
+        }
+      </section>
+
+      <app-footer />
+    </div>
+  </div>
+</main>
