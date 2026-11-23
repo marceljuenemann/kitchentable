@@ -1,4 +1,16 @@
+// The landing page is the one screen with a look of its own: light and airy, white fading into
+// the logo's sky blue with a touch of lavender, around a deep violet band for the video, with a
+// closing card to match. The arc colours are the logo's own (logo.svg), not the darker
+// text-safe tokens: they're decorative, never behind text.
 :host {
+  --logo-sky: #70c4ec;
+  --logo-magenta: #c83897;
+  --logo-gold: #e3af47;
+  --hero-bottom: #dff1fa; // a pale tint of the logo's sky
+  --night-top: #2a0a52;
+  --night-bottom: #44197a;
+  --on-night: var(--kt-cream-soft);
+
   display: block;
   min-height: 100dvh;
   background: var(--kt-bg);
@@ -6,77 +18,98 @@
   font-family: var(--kt-font-sans);
 }
 
-.landing {
+.column {
   max-width: var(--kt-page-width);
   margin: 0 auto;
-  padding: 0 24px 48px;
+  padding: 0 20px;
+}
+
+// Hero
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 48px;
+  color: var(--kt-violet);
+  // White into the logo's sky blue, with a touch of --kt-violet-container (lavender).
+  background:
+    radial-gradient(circle at 0% 0%, rgb(233 226 249 / 0.9), transparent 50%),
+    radial-gradient(circle at 100% 100%, rgb(112 196 236 / 0.4), transparent 55%),
+    linear-gradient(180deg, var(--kt-bg), var(--hero-bottom));
+
+  .column {
+    position: relative;
+  }
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wordmark {
+  font-family: var(--kt-font-display);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding-top: 3px;
+}
+
+.signin-link {
+  padding: 8px 16px;
+  border: 1.5px solid var(--kt-outline-soft);
+  border-radius: 99px;
+  background: rgb(255 255 255 / 0.6);
+  font-size: 14px;
+  font-weight: 700;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 150ms;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--kt-bg);
+  }
 }
 
 .headline {
-  margin: 34px 0 0;
+  margin: 48px 0 0;
   font-family: var(--kt-font-display);
-  font-size: 42px;
+  font-size: clamp(44px, 13vw, 56px);
   font-weight: 800;
-  line-height: 1.03;
+  line-height: 0.98;
   letter-spacing: -0.02em;
-  color: var(--kt-violet);
   text-wrap: balance;
 }
 
+.highlight {
+  color: var(--kt-magenta);
+}
+
 .subhead {
-  margin: 16px 0 0;
-  font-size: 17.5px;
+  margin: 18px 0 0;
+  font-size: 18px;
   line-height: 1.5;
   color: var(--kt-muted);
   text-wrap: pretty;
 }
 
-.pitch {
-  list-style: none;
-  margin: 26px 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 13px;
-
-  li {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 12px;
-    align-items: start;
-  }
-
-  span:not(.dot) {
-    min-width: 0;
-    font-size: 15.5px;
-    line-height: 1.5;
-    text-wrap: pretty;
-  }
-}
-
-.dot {
-  width: 9px;
-  height: 9px;
-  flex: none;
-  border-radius: 99px;
-  margin-top: 7px;
-
-  // The logo's own arc colors, not the darker --kt-sky/--kt-magenta text-safe tokens —
-  // these are small decorative swatches with no text on them, so contrast isn't a concern,
-  // and matching the logo directly reads as more on-brand.
-  &-sky {
-    background: #70c4ec;
-  }
-  &-magenta {
-    background: #c83897;
-  }
-  &-primary {
-    background: var(--mat-sys-primary);
-  }
-}
-
 .signup-card {
-  margin: 28px 0 8px;
+  margin-top: 30px;
+  box-shadow:
+    0 2px 6px rgb(42 10 82 / 0.08),
+    0 24px 48px rgb(42 10 82 / 0.14);
+  color: var(--kt-ink);
 
   .error {
     margin: -4px 0 12px;
@@ -89,18 +122,252 @@
     margin-bottom: 16px;
   }
 
-  button {
+  button,
+  a[mat-flat-button] {
     width: 100%;
   }
 }
 
-.signin-line {
-  margin: 20px 0 0;
-  text-align: center;
-  font-size: 14px;
-  color: var(--kt-muted);
+// Content
 
-  a {
-    vertical-align: baseline;
+// The tour: a full-width deep violet band, so the video stands out between the light hero and
+// the light sections around it.
+.tour {
+  padding: 48px 0 56px;
+  color: var(--on-night);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(200 56 151 / 0.35), transparent 45%),
+    radial-gradient(circle at 0% 100%, rgb(112 196 236 / 0.25), transparent 50%),
+    linear-gradient(180deg, var(--night-top), var(--night-bottom));
+}
+
+// Below the tour, the hero's sky again, the other way round: blue fading into white.
+.content {
+  padding-top: 40px;
+  background:
+    radial-gradient(circle at 100% 0%, rgb(112 196 236 / 0.35), transparent 40%),
+    radial-gradient(circle at 0% 55%, rgb(233 226 249 / 0.9), transparent 45%),
+    linear-gradient(180deg, var(--hero-bottom), var(--kt-bg));
+}
+
+.section-title {
+  margin: 0;
+  font-family: var(--kt-font-display);
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.section-lead {
+  margin: 8px 0 0;
+  font-size: 16px;
+  opacity: 0.8;
+  text-align: center;
+}
+
+.phone {
+  position: relative;
+  width: min(300px, 78vw);
+  margin: 26px auto 0;
+  padding: 8px;
+  border-radius: 40px;
+  background: #14041f;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.14),
+    0 30px 60px rgb(10 0 20 / 0.45);
+
+  video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 9 / 16;
+    border-radius: 32px;
+    background: var(--kt-bg);
   }
+}
+
+.play {
+  position: absolute;
+  inset: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 0;
+  border-radius: 32px;
+  background: linear-gradient(180deg, transparent 30%, rgb(42 10 82 / 0.55));
+  color: var(--on-night);
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 3px solid var(--logo-gold);
+    outline-offset: 4px;
+  }
+}
+
+.play-icon {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: var(--kt-violet);
+  box-shadow: 0 0 0 8px rgb(255 255 255 / 0.35);
+  transition: transform 150ms;
+
+  mat-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 44px;
+    color: var(--on-night);
+  }
+
+  .play:hover & {
+    transform: scale(1.06);
+  }
+}
+
+.play-label {
+  padding: 6px 14px;
+  border-radius: 99px;
+  background: var(--kt-violet);
+  font-family: var(--kt-font-display);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.pitch {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pitch-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 22px;
+  background: var(--kt-bg);
+  box-shadow: var(--kt-shadow-soft);
+
+  h3 {
+    margin: 0;
+    font-family: var(--kt-font-display);
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--kt-violet);
+  }
+
+  p {
+    margin: 2px 0 0;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--kt-muted);
+    text-wrap: pretty;
+  }
+}
+
+.pitch-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  color: var(--kt-violet);
+
+  &-sky {
+    background: rgb(112 196 236 / 0.28);
+  }
+  &-magenta {
+    background: rgb(200 56 151 / 0.18);
+  }
+  &-gold {
+    background: rgb(227 175 71 / 0.3);
+  }
+}
+
+.testimonial {
+  position: relative;
+  margin: 48px 0 0;
+  padding: 44px 24px 24px;
+  border-radius: 28px;
+  background: var(--kt-bg);
+  box-shadow: var(--kt-shadow-soft);
+
+  &::before {
+    content: '“';
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    font-family: var(--kt-font-display);
+    font-size: 96px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--logo-magenta);
+  }
+
+  blockquote {
+    margin: 0;
+    font-family: var(--kt-font-display);
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--kt-violet);
+  }
+
+  p {
+    margin: 0;
+  }
+
+  p + p {
+    margin-top: 10px;
+  }
+
+  figcaption {
+    margin-top: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--kt-muted);
+  }
+}
+
+.closing {
+  margin: 48px 0 0;
+  padding: 36px 24px 28px;
+  border-radius: 28px;
+  text-align: center;
+  color: var(--on-night);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(227 175 71 / 0.35), transparent 45%),
+    radial-gradient(circle at 0% 100%, rgb(200 56 151 / 0.45), transparent 50%),
+    linear-gradient(180deg, var(--night-top), var(--night-bottom));
+
+  app-heart {
+    justify-content: center;
+  }
+
+  h2 {
+    margin: 12px 0 0;
+    font-family: var(--kt-font-display);
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.05;
+  }
+}
+
+.closing-button {
+  width: 100%;
+  margin-top: 24px;
+  --mat-button-filled-container-color: var(--logo-gold);
+  --mat-button-filled-label-text-color: var(--night-top);
+  --mat-button-filled-container-height: 48px;
+  font-weight: 800;
 }

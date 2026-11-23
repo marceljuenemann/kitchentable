@@ -26,9 +26,17 @@ test('an admin can open the admin tool', async ({ page }) => {
   await expect(page.getByText(/applications? waiting/)).toBeVisible();
 });
 
-test('sends a signed-in user from the landing page to the app', async ({ page }) => {
-  await signInAs(page, 'vetting');
-  await page.goto('/');
+test('welcomes a signed-in user back on the landing page, with a way into the app', async ({
+  page,
+}) => {
+  const email = await signInAs(page, 'vetting');
+  await page.goto('/?invite=anything');
+  const card = page.locator('.signup-card');
+  await expect(card.getByRole('heading', { name: 'Welcome back!' })).toBeVisible();
+  await expect(card.getByText(`You're signed in as ${email}.`)).toBeVisible();
+  await expect(page.getByLabel('Email')).toHaveCount(0);
+
+  await card.getByRole('link', { name: 'Open the app' }).click();
   await page.waitForURL('**/app');
   await expect(page.getByRole('heading', { name: 'Thanks for applying' })).toBeVisible();
 });

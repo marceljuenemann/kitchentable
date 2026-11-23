@@ -26,9 +26,13 @@ async function api(path: string, body: unknown, method = 'POST') {
   return text ? JSON.parse(text) : null;
 }
 
-/** Asks GoTrue to email a sign-in link to an existing user, without going through the UI. */
+/**
+ * Asks GoTrue to email a sign-in link to an existing user, without going through the UI. Like
+ * the app's links, it leads to the callback page.
+ */
 export async function sendSignInEmail(email: string) {
-  await api('/auth/v1/otp', { email, create_user: false });
+  const redirect = encodeURIComponent('http://localhost:4200/auth/callback');
+  await api(`/auth/v1/otp?redirect_to=${redirect}`, { email, create_user: false });
 }
 
 /** The profile rows with the given name, read with the service role. */
