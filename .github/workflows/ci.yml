@@ -76,6 +76,13 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      # The hosted databases' Postgres version rather than the CLI's default image, which sets up
+      # different default grants, so tests and supabase/schema.sql see what staging and
+      # production have. Locally `supabase link` writes this file. Update it when Supabase
+      # upgrades the hosted databases.
+      - name: Use the hosted databases' Postgres version
+        run: mkdir -p supabase/.temp && echo 17.6.1.171 > supabase/.temp/postgres-version
+
       - name: Start Supabase (runs migrations)
         run: npx supabase start
 
