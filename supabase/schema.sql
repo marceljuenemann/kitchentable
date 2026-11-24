@@ -987,8 +987,8 @@ begin
     raise exception 'A location is required.';
   end if;
 
-  if jsonb_typeof(p_vetting_answers) is distinct from 'object' or p_vetting_answers = '{}' then
-    raise exception 'The vetting questions must be answered.';
+  if jsonb_typeof(p_vetting_answers) is distinct from 'object' then
+    raise exception 'The vetting answers must be an object (it may be empty).';
   end if;
 
   -- The invite code comes from the sign-up metadata, which the user can edit, so it is only a

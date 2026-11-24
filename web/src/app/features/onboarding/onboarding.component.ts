@@ -7,7 +7,6 @@ import { OnboardingProgressComponent } from './progress/onboarding-progress.comp
 import { AboutYouStepComponent } from './steps/about-you-step.component';
 import { CreateProfileStepComponent } from './steps/create-profile-step.component';
 import { PhotosStepComponent } from './steps/photos-step.component';
-import { VettingStepComponent } from './steps/vetting-step.component';
 
 /** The onboarding flow: header with progress, the current step, footer. */
 @Component({
@@ -20,7 +19,6 @@ import { VettingStepComponent } from './steps/vetting-step.component';
     HeaderComponent,
     OnboardingProgressComponent,
     PhotosStepComponent,
-    VettingStepComponent,
   ],
   providers: [OnboardingDraftStore],
   templateUrl: './onboarding.component.html',

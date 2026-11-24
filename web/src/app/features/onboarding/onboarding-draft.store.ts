@@ -4,10 +4,10 @@ import { UserStorage } from '../../core/user-storage';
 import { MAX_PHOTOS } from '../../core/profile-options';
 
 /** The steps of the form, which the draft goes through. */
-export const ONBOARDING_STEPS = 4;
+export const ONBOARDING_STEPS = 3;
 
 /**
- * The steps people are shown ("Step 1 of 5"): the form's, then the age check, which the age
+ * The steps people are shown ("Step 1 of 4"): the form's, then the age check, which the age
  * verification screen shows once the application is submitted.
  */
 export const STEPS_SHOWN = ONBOARDING_STEPS + 1;
@@ -33,8 +33,6 @@ export interface OnboardingDraft {
   lookingFor: string[];
   /** Step 3: ids of the uploaded photos, in display order (first = main); see docs/photos.md. */
   photos: string[];
-  /** Step 4: answers to the private vetting questions, keyed by VETTING_QUESTIONS id. */
-  vettingAnswers: Record<string, string>;
 }
 
 const EMPTY_DRAFT: OnboardingDraft = {
@@ -50,7 +48,6 @@ const EMPTY_DRAFT: OnboardingDraft = {
   aboutText: '',
   lookingFor: [],
   photos: [],
-  vettingAnswers: {},
 };
 
 /** The finished draft as what gets submitted. Only call this once every step is complete. */
@@ -68,7 +65,8 @@ export function toNewProfile(draft: OnboardingDraft): NewProfile {
     birth_month: hasBirthday ? Number(draft.birthMonth) : null,
     looking_for: draft.lookingFor,
     photos: draft.photos,
-    vetting_answers: draft.vettingAnswers,
+    // Onboarding no longer asks the vetting questions (see onboarding-options.ts).
+    vetting_answers: {},
   };
 }
 
@@ -115,15 +113,16 @@ export class OnboardingDraftStore {
   }
 
   private restore(): OnboardingDraft {
-    const stored = this.storage.get<Partial<OnboardingDraft>>(STORAGE_KEY);
+    const stored =
+      this.storage.get<Partial<OnboardingDraft> & { vettingAnswers?: unknown }>(STORAGE_KEY) ?? {};
+    // Drafts saved while onboarding still asked the vetting questions have their answers too,
+    // which are no longer needed.
+    delete stored.vettingAnswers;
     const draft = { ...EMPTY_DRAFT, ...stored };
     draft.step = Math.min(Math.max(Math.trunc(Number(draft.step)) || 1, 1), ONBOARDING_STEPS);
     draft.photos = Array.isArray(draft.photos)
       ? draft.photos.filter((id) => typeof id === 'string').slice(0, MAX_PHOTOS)
       : [];
-    if (typeof draft.vettingAnswers !== 'object' || draft.vettingAnswers === null) {
-      draft.vettingAnswers = {};
-    }
     return draft;
   }
 }
