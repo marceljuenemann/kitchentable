@@ -1,6 +1,6 @@
 # Database
 
-Postgres via Supabase. The schema lives in `supabase/migrations/` and is covered by pgTAP tests in `supabase/tests/database/`. **Update this file with any schema change.**
+Postgres via Supabase. The schema lives in `supabase/migrations/` and is covered by pgTAP tests in `supabase/tests/database/`. `supabase/schema.sql` is the `public` schema the migrations add up to, regenerated with `npm run db:schema` and checked by CI, so a PR shows what each migration changes. **Update this file with any schema change.**
 
 ## Access rules
 

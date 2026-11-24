@@ -87,6 +87,17 @@ jobs:
       - name: Lint database functions
         run: npx supabase db lint --local --schema public --fail-on error
 
+      # supabase/schema.sql is what the migrations add up to, so a PR shows how they change
+      # functions, triggers and grants. It must be regenerated with each migration.
+      - name: Check the schema snapshot is up to date
+        run: |
+          npm run db:schema
+          if [ -n "$(git status --porcelain -- supabase/schema.sql)" ]; then
+            git diff -- supabase/schema.sql
+            echo "::error::supabase/schema.sql is out of date: run 'npm run db:schema' and commit it."
+            exit 1
+          fi
+
       - name: Run pgTAP tests
         run: npx supabase test db --local supabase/tests/database
 
