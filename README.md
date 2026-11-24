@@ -34,6 +34,12 @@ Useful local URLs (from `supabase start` output):
 - Supabase Studio (DB browser/table editor): http://127.0.0.1:54323
 - Mailpit (captured emails): http://127.0.0.1:54324
 
+### Demo data
+
+`npm run seed:demo` fills the local database with a cast of animals (`supabase/demo/`): 25 live members to search and message, and 3 applicants for the vetting tool. Their profiles are playful and obviously fake on purpose, and the photos are CC0 or public domain (`sources.json`). Run it again whenever you like, for example after the e2e tests, which add users of their own: it deletes every e2e user (`@example.com`) and the previous cast, with their photos, and creates the cast afresh. It only ever talks to a local stack.
+
+To look around, sign in as **`prickles@demo.kitchentable.test`** (the sign-in link is in Mailpit). Prickles the hedgehog has a conversation with Hammy (2 messages unread) and an intro from Professor Hoot waiting in Connections. Every other member can sign in the same way, as `<name>@demo.kitchentable.test`. Re-running the seed recreates the cast, which signs you out.
+
 ### Age verification locally
 
 Approved applicants verify their age with Didit (see "Age verification" in [docs/database.md](docs/database.md)). Locally there's no Didit API key, so "Verify my age" fails. To get past the screen, run this in Studio's SQL editor:
