@@ -30,7 +30,7 @@ test('submitting the application creates the profile and moves on to the age che
   await fillInEverything(page, name);
 
   const submittedAt = new Date();
-  await page.getByRole('button', { name: 'Submit application' }).click();
+  await page.getByRole('button', { name: 'Create profile' }).click();
 
   // The shell reloads the profile, which is in `vetting` without an age check yet.
   await expect(page.getByRole('heading', { name: 'Selfie age check' })).toBeVisible();
@@ -70,14 +70,14 @@ test('a failed submission shows an error, keeps the draft, and can be retried', 
   await fillInEverything(page, name);
 
   await page.route('**/rest/v1/rpc/submit_onboarding', (route) => route.abort());
-  await page.getByRole('button', { name: 'Submit application' }).click();
-  await expect(page.getByRole('alert')).toContainText("We couldn't submit your application");
-  await expect(page.getByRole('button', { name: 'Submit application' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Create profile' }).click();
+  await expect(page.getByRole('alert')).toContainText("We couldn't create your profile");
+  await expect(page.getByRole('button', { name: 'Create profile' })).toBeEnabled();
   expect(await profilesNamed(name)).toHaveLength(0);
   expect(await draftKeys(page)).toHaveLength(1);
 
   await page.unroute('**/rest/v1/rpc/submit_onboarding');
-  await page.getByRole('button', { name: 'Submit application' }).click();
+  await page.getByRole('button', { name: 'Create profile' }).click();
   await expect(page.getByRole('heading', { name: 'Selfie age check' })).toBeVisible();
   expect(await profilesNamed(name)).toHaveLength(1);
 });

@@ -1,9 +1,12 @@
 <app-header />
 
-<app-onboarding-progress [step]="step()" [canGoBack]="step() > 1" (back)="back()" />
+<app-onboarding-progress [step]="step()" [canGoBack]="step() > 0" (back)="back()" />
 
 <main>
   @switch (draft().step) {
+    @case (0) {
+      <app-overview-step />
+    }
     @case (1) {
       <app-create-profile-step />
     }

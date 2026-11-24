@@ -55,6 +55,8 @@ describe('CreateProfileStepComponent', () => {
     });
 
     it('goes to step 2, but only when it can continue', () => {
+      // A new draft starts on the overview (step 0), which leads here.
+      store.update({ step: 1 });
       component.next();
       expect(store.draft().step).toBe(1);
 

@@ -2,10 +2,10 @@ import { expect, test } from '@playwright/test';
 import { ProfileStatus, signInAs } from './support/admin';
 
 const screens: [ProfileStatus | null, string, boolean?][] = [
-  [null, 'Create profile'],
+  [null, 'Join in 4 simple steps'],
   // Applicants check their age right after submitting.
   ['vetting', 'Selfie age check'],
-  ['vetting', 'Thanks for applying', true],
+  ['vetting', 'Thanks for signing up', true],
   ['approved', 'Selfie age check'],
   // The main app opens on the Search tab.
   ['active', 'Search'],
@@ -41,7 +41,7 @@ test('welcomes a signed-in user back on the landing page, with a way into the ap
 
   await card.getByRole('link', { name: 'Open the app' }).click();
   await page.waitForURL('**/app');
-  await expect(page.getByRole('heading', { name: 'Thanks for applying' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Thanks for signing up' })).toBeVisible();
 });
 
 test('an applicant gets a personal invite link that opens the sign-up form', async ({

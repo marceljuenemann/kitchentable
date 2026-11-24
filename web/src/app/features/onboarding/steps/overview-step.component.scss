@@ -1,0 +1,52 @@
+:host {
+  display: block;
+}
+
+.steps {
+  display: grid;
+  gap: 14px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+}
+
+// Numbered circles, in the colours of the progress bar.
+.number {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--kt-violet-container);
+  font-family: var(--kt-font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--kt-violet);
+}
+
+.title {
+  font-family: var(--kt-font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--kt-ink);
+}
+
+.after {
+  margin: 24px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--kt-ink);
+}
+
+.continue {
+  width: 100%;
+  margin-top: 32px;
+}

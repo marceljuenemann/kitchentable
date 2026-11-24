@@ -1,11 +1,35 @@
 import { expect, Page, test } from '@playwright/test';
 import { signIn, signInAs } from './support/admin';
+import { startOnboarding } from './support/onboarding';
 
 const draftKeys = (page: Page) =>
   page.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('kt.user.')));
 
-test('step 1 only continues once name, pronouns and location are filled in', async ({ page }) => {
+test('the overview explains the steps, and step 1 leads back to it', async ({ page }) => {
   await signInAs(page, null);
+
+  await expect(page.getByRole('heading', { name: 'Join in 4 simple steps' })).toBeVisible();
+  await expect(page.getByRole('listitem')).toHaveText([
+    /Add profile data/,
+    /Write about yourself/,
+    /Add photos/,
+    /Selfie age check/,
+  ]);
+  await expect(page.getByText('Your progress is saved in this browser')).toBeVisible();
+  // The progress bar has started, before step 1, and there's nothing to go back to.
+  await expect(page.getByRole('progressbar', { name: 'Before step 1 of 4' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Back' })).toBeHidden();
+
+  await page.getByRole('button', { name: 'Get started' }).click();
+  await expect(page.getByRole('heading', { name: 'Add profile data' })).toBeVisible();
+  await expect(page.getByText('Step 1 of 4')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Back' }).click();
+  await expect(page.getByRole('heading', { name: 'Join in 4 simple steps' })).toBeVisible();
+});
+
+test('step 1 only continues once name, pronouns and location are filled in', async ({ page }) => {
+  await startOnboarding(page);
   const next = page.getByRole('button', { name: 'Continue' });
   await expect(next).toBeDisabled();
 
@@ -31,7 +55,7 @@ test('step 1 only continues once name, pronouns and location are filled in', asy
 });
 
 test('age is worked out from the birth month and year in the age sheet', async ({ page }) => {
-  await signInAs(page, null);
+  await startOnboarding(page);
   // The age and the years on offer depend on today's date, so pin it: 15 June 2026.
   await page.clock.setFixedTime(new Date('2026-06-15T12:00:00'));
 
@@ -85,7 +109,7 @@ test('age is worked out from the birth month and year in the age sheet', async (
 });
 
 test('a custom value can be added in the option sheet', async ({ page }) => {
-  await signInAs(page, null);
+  await startOnboarding(page);
   await page.getByRole('button', { name: /^Gender/ }).click();
   await page.getByRole('option', { name: 'Woman', exact: true }).click();
   await page.getByLabel('Add your own').fill('bigender');
@@ -98,7 +122,7 @@ test('a custom value can be added in the option sheet', async ({ page }) => {
 test('step 2 needs an about text of 250 characters and something you are looking for', async ({
   page,
 }) => {
-  await signInAs(page, null);
+  await startOnboarding(page);
   await page.getByLabel('Name').fill('Sam');
   await page.getByRole('button', { name: /Pronouns/ }).click();
   await page.getByRole('option', { name: 'they/them' }).click();
@@ -132,7 +156,7 @@ test('step 2 needs an about text of 250 characters and something you are looking
 test('a draft saved on the vetting questions, which are gone, opens on the photos step', async ({
   page,
 }) => {
-  await signInAs(page, null);
+  await startOnboarding(page);
   // A draft from before the vetting step (step 4) was removed.
   await page.getByLabel('Name').fill('Sam');
   await expect.poll(() => draftKeys(page)).toHaveLength(1);
@@ -148,22 +172,22 @@ test('a draft saved on the vetting questions, which are gone, opens on the photo
 
   await expect(page.getByRole('heading', { name: 'Add photos' })).toBeVisible();
   await expect(page.getByText('Step 3 of 4')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Submit application' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Create profile' })).toBeDisabled();
 });
 
 test('the draft survives a reload and an expired session, and is cleared on sign-out', async ({
   page,
 }) => {
-  const email = await signInAs(page, null);
+  const email = await startOnboarding(page);
   await page.getByLabel('Name').fill('Sam');
   await page.getByRole('button', { name: /Pronouns/ }).click();
   await page.getByRole('option', { name: 'they/them' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(page.getByRole('heading', { name: 'About you' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Write about yourself' })).toBeVisible();
   await expect.poll(() => draftKeys(page)).toHaveLength(1);
 
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'About you' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Write about yourself' })).toBeVisible();
 
   // Simulate the session expiring: the auth token goes, the draft must stay.
   await page.evaluate(() =>

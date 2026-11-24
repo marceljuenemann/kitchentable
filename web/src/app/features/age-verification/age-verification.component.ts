@@ -95,7 +95,7 @@ export class AgeVerificationComponent {
 
   /**
    * Didit usually calls the webhook within seconds. Once it has recorded the check, a refresh
-   * makes the shell show what's next: "Thanks for applying!", or the main app for an approved
+   * makes the shell show what's next: "Thanks for signing up!", or the main app for an approved
    * applicant, whose profile is now active.
    */
   waitForActivation() {

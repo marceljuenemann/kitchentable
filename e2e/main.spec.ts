@@ -87,6 +87,6 @@ test("the tabs' URLs show someone who isn't a member yet their own screen", asyn
 
   await page.goto('/app/messages');
 
-  await expect(page.getByRole('heading', { name: 'Thanks for applying' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Thanks for signing up' })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Main' })).toBeHidden();
 });

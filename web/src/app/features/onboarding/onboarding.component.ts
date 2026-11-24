@@ -6,6 +6,7 @@ import { OnboardingDraftStore } from './onboarding-draft.store';
 import { OnboardingProgressComponent } from './progress/onboarding-progress.component';
 import { AboutYouStepComponent } from './steps/about-you-step.component';
 import { CreateProfileStepComponent } from './steps/create-profile-step.component';
+import { OverviewStepComponent } from './steps/overview-step.component';
 import { PhotosStepComponent } from './steps/photos-step.component';
 
 /** The onboarding flow: header with progress, the current step, footer. */
@@ -18,6 +19,7 @@ import { PhotosStepComponent } from './steps/photos-step.component';
     FooterComponent,
     HeaderComponent,
     OnboardingProgressComponent,
+    OverviewStepComponent,
     PhotosStepComponent,
   ],
   providers: [OnboardingDraftStore],

@@ -12,10 +12,10 @@
 
 @if (failed()) {
   <p class="error" role="alert">
-    We couldn't submit your application. Check your connection and try again.
+    We couldn't create your profile. Check your connection and try again.
   </p>
 }
 
 <button mat-flat-button class="continue" type="button" [disabled]="!canSubmit()" (click)="submit()">
-  {{ submitting() ? 'Submitting…' : 'Submit application' }}
+  {{ submitting() ? 'Creating profile…' : 'Create profile' }}
 </button>

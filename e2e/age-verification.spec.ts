@@ -42,7 +42,7 @@ test('an applicant checks their age right after applying, then waits for vetting
 
   expect(await (await sendDiditWebhook(id, 'Approved')).text()).toBe('Verified');
 
-  await expect(page.getByRole('heading', { name: 'Thanks for applying' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Thanks for signing up' })).toBeVisible();
   const profile = await profileOf(id);
   expect(profile['status']).toBe('vetting');
   expect(profile['age_verified_at']).not.toBeNull();

@@ -1,0 +1,19 @@
+<p class="kt-step-eyebrow">Overview</p>
+<h1 class="kt-step-title">Join in {{ steps.length }} simple steps</h1>
+<p class="kt-step-subtitle">
+  Your progress is saved in this browser, so you can take a break and pick up where you left off.
+</p>
+
+<!-- role="list": Safari drops a list's semantics once its markers are hidden. -->
+<ol class="steps" role="list">
+  @for (step of steps; track step; let i = $index) {
+    <li>
+      <span class="number" aria-hidden="true">{{ i + 1 }}</span>
+      <span class="title">{{ step }}</span>
+    </li>
+  }
+</ol>
+
+<p class="after">We'll review your profile before it goes live.</p>
+
+<button mat-flat-button class="continue" type="button" (click)="start()">Get started</button>

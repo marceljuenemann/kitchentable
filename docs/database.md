@@ -104,7 +104,7 @@ First-party product analytics: no third-party service and nothing stored in the 
 - **Use existing data first.** Sign-ups (`auth.users.created_at`), clicked links (`email_confirmed_at`, `last_sign_in_at`) and profile statuses are already in the database. Events are only for things that leave no other trace, such as onboarding progress, because the draft stays in the browser until it is submitted.
 - **Never record** other people's ids (e.g. "viewed profile X"), free text or profile content.
 - **Adding an event needs a migration,** since names are allowlisted. Current events from the app:
-  - `onboarding_step_viewed` (`{"step": n}`): sent each time a step is shown, including after a reload.
+  - `onboarding_step_viewed` (`{"step": n}`): sent each time a step is shown, including after a reload. Step 0 is the overview before the form (since 2026-11-24).
   - `invite_link_shared` (`{"method": "share" | "copy"}`): the invite link was shared through the system's share sheet (not cancelled) or copied, on any screen that has it.
   - `photo_rejected` (`{"reason": "not_an_image" | "too_large" | "unreadable" | "too_small"}`): a picked photo was turned down before cropping, in onboarding or the profile tab.
   - `profile_preview_opened`: the profile tab's Preview was opened.
@@ -222,7 +222,7 @@ Set up in the Didit console, the same for each environment's application:
 
 1. The age verification screen (`features/age-verification/`) calls the `start-age-verification` edge function with the user's JWT. It reads the caller's profile with `get_my_profile` and, if it's in `vetting` or `approved` without `age_verified_at`, creates a Didit session with the user id as `vendor_data` and `<SITE_URL>/app` as the callback. It returns the URL of Didit's page, and the app sends the user there.
 2. Didit calls the `didit-webhook` edge function (`verify_jwt = false`) on every status change. The function checks Didit's `X-Signature` (the hex HMAC-SHA256 of the raw body, with `DIDIT_WEBHOOK_SECRET`), refuses events whose `timestamp` is more than 5 minutes off, and ignores other workflows. For an `Approved` check it calls `complete_age_verification` with the service role. Any other status changes nothing: the user still hasn't passed, and can try again. It answers 500 if the database call fails, so Didit retries.
-3. Didit sends the user back to `/app?verificationSessionId=…&status=…`. The status is only a hint for the screen: after `Approved` it polls `get_my_profile` until the webhook has set `age_verified_at`, then reloads the profile, which shows "Thanks for applying!" (or, for an `approved` profile, now `active`, the main app). After `Declined` it offers another try, and after `In Review` it says to check back later.
+3. Didit sends the user back to `/app?verificationSessionId=…&status=…`. The status is only a hint for the screen: after `Approved` it polls `get_my_profile` until the webhook has set `age_verified_at`, then reloads the profile, which shows "Thanks for signing up!" (or, for an `approved` profile, now `active`, the main app). After `Declined` it offers another try, and after `In Review` it says to check back later.
 
 - **Nothing about the check is stored but `age_verified_at`.** The webhook destination is set in the Didit console not to send ID details, and the function never logs or stores the payload anyway. Didit keeps its session data for 1 month (set in the console) and then deletes it.
 - **Checks that need a manual review** ("In Review") are decided by an admin in the Didit console. Nothing notifies us of them yet.
@@ -278,7 +278,7 @@ Signing up is open: requesting a sign-in link for an address without an account 
 
 The landing page sends the invite code from the `?invite=` link as sign-up metadata (`invite_code` in `auth.users.raw_user_meta_data`), and `submit_onboarding` copies it into `profiles.vetting_answers` as `invite_code`. It is checked by hand during vetting. Treat it as a hint only: users can edit their own metadata before submitting, and someone who first signs in without an invite link has no code at all. There is no table of valid codes yet.
 
-Applicants can invite friends from the "Thanks for applying" screen. Their personal code is the first 8 hex digits of the SHA-256 of their user id, worked out in the browser (`core/invite-code.ts`), so nothing is stored for it. To see who invited an applicant:
+Applicants can invite friends from the "Thanks for signing up" screen. Their personal code is the first 8 hex digits of the SHA-256 of their user id, worked out in the browser (`core/invite-code.ts`), so nothing is stored for it. To see who invited an applicant:
 
 ```sql
 select id, name from profiles

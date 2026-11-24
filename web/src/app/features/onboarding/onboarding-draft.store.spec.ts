@@ -32,10 +32,10 @@ describe('OnboardingDraftStore', () => {
   afterEach(() => jasmine.clock().uninstall());
 
   describe('starting state', () => {
-    it('is an empty draft on step 1, with London as the location', () => {
+    it('is an empty draft on the overview (step 0), with London as the location', () => {
       const store = createStore();
 
-      expect(store.draft().step).toBe(1);
+      expect(store.draft().step).toBe(0);
       expect(store.draft().name).toBe('');
       expect(store.draft().location).toBe('London');
       expect(store.draft().photos).toEqual([]);
@@ -54,9 +54,9 @@ describe('OnboardingDraftStore', () => {
     it('keeps the step within range', () => {
       expect(createStore({ step: 99 }).draft().step).toBe(ONBOARDING_STEPS);
       TestBed.resetTestingModule();
-      expect(createStore({ step: 0 }).draft().step).toBe(1);
+      expect(createStore({ step: -1 }).draft().step).toBe(0);
       TestBed.resetTestingModule();
-      expect(createStore({ step: 'two' }).draft().step).toBe(1);
+      expect(createStore({ step: 'two' }).draft().step).toBe(0);
     });
 
     it('drops photo ids that are not strings and caps the list at six', () => {

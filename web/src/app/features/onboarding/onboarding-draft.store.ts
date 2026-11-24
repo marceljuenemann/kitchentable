@@ -14,7 +14,7 @@ export const STEPS_SHOWN = ONBOARDING_STEPS + 1;
 
 /** The in-progress onboarding answers (see prototype/onboarding/README.md, "State model"). */
 export interface OnboardingDraft {
-  /** Current step, 1 to ONBOARDING_STEPS. */
+  /** Current step: 0 for the overview, then 1 to ONBOARDING_STEPS. */
   step: number;
   name: string;
   /** Exactly one entry once set. */
@@ -36,7 +36,7 @@ export interface OnboardingDraft {
 }
 
 const EMPTY_DRAFT: OnboardingDraft = {
-  step: 1,
+  step: 0,
   name: '',
   pronouns: [],
   gender: [],
@@ -119,7 +119,7 @@ export class OnboardingDraftStore {
     // which are no longer needed.
     delete stored.vettingAnswers;
     const draft = { ...EMPTY_DRAFT, ...stored };
-    draft.step = Math.min(Math.max(Math.trunc(Number(draft.step)) || 1, 1), ONBOARDING_STEPS);
+    draft.step = Math.min(Math.max(Math.trunc(Number(draft.step)) || 0, 0), ONBOARDING_STEPS);
     draft.photos = Array.isArray(draft.photos)
       ? draft.photos.filter((id) => typeof id === 'string').slice(0, MAX_PHOTOS)
       : [];
