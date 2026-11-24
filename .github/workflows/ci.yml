@@ -76,11 +76,11 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      # A fresh database, built from the migrations. No `db reset` after it: start revokes the API
-      # roles' default grants (as the cloud does, see `auto_expose_new_tables` in config.toml),
-      # and a reset rebuilds the database without that.
       - name: Start Supabase (runs migrations)
         run: npx supabase start
+
+      - name: Reset database for a clean, deterministic state
+        run: npx supabase db reset
 
       # Restricted to our own schema: the default also lints pgTAP's `extensions` schema,
       # whose internals produce "errors" that aren't ours.
