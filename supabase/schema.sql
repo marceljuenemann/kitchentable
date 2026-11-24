@@ -83,7 +83,9 @@ CREATE OR REPLACE FUNCTION "public"."admin_approve_application"("p_id" "uuid") R
     AS $$
 begin
   perform public.require_admin();
-  update public.profiles set status = 'approved' where id = p_id and status = 'vetting';
+  update public.profiles
+  set status = case when age_verified_at is null then 'approved' else 'active' end::public.profile_status
+  where id = p_id and status = 'vetting';
   if not found then
     raise exception 'There is no application waiting for review with this id.';
   end if;
@@ -208,8 +210,10 @@ CREATE OR REPLACE FUNCTION "public"."complete_age_verification"("p_user_id" "uui
     SET "search_path" TO 'public'
     AS $$
 begin
-  update public.profiles set status = 'active', age_verified_at = now()
-  where id = p_user_id and status = 'approved';
+  update public.profiles
+  set status = case when status = 'approved' then 'active' else status end,
+      age_verified_at = now()
+  where id = p_user_id and status in ('vetting', 'approved') and age_verified_at is null;
   return found;
 end;
 $$;
@@ -1236,7 +1240,7 @@ CREATE INDEX "messages_sender_updated_at" ON "public"."messages" USING "btree" (
 
 
 
-CREATE OR REPLACE TRIGGER "connect_new_member_with_admins" AFTER UPDATE OF "status" ON "public"."profiles" FOR EACH ROW WHEN ((("old"."status" = 'approved'::"public"."profile_status") AND ("new"."status" = 'active'::"public"."profile_status"))) EXECUTE FUNCTION "public"."connect_new_member_with_admins"();
+CREATE OR REPLACE TRIGGER "connect_new_member_with_admins" AFTER UPDATE OF "status" ON "public"."profiles" FOR EACH ROW WHEN ((("old"."status" = ANY (ARRAY['vetting'::"public"."profile_status", 'approved'::"public"."profile_status"])) AND ("new"."status" = 'active'::"public"."profile_status"))) EXECUTE FUNCTION "public"."connect_new_member_with_admins"();
 
 
 
@@ -1256,7 +1260,7 @@ CREATE OR REPLACE TRIGGER "notify_admin_of_application" AFTER INSERT ON "public"
 
 
 
-CREATE OR REPLACE TRIGGER "notify_member_of_approval" AFTER UPDATE OF "status" ON "public"."profiles" FOR EACH ROW WHEN ((("old"."status" = 'vetting'::"public"."profile_status") AND ("new"."status" = 'approved'::"public"."profile_status"))) EXECUTE FUNCTION "public"."notify_member_of_approval"();
+CREATE OR REPLACE TRIGGER "notify_member_of_approval" AFTER UPDATE OF "status" ON "public"."profiles" FOR EACH ROW WHEN ((("old"."status" = 'vetting'::"public"."profile_status") AND ("new"."status" = ANY (ARRAY['approved'::"public"."profile_status", 'active'::"public"."profile_status"])))) EXECUTE FUNCTION "public"."notify_member_of_approval"();
 
 
 
