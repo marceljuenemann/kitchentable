@@ -41,8 +41,13 @@ export class ShellComponent {
   readonly view = computed(() => {
     const state = this.state();
     switch (state.kind) {
-      case 'loaded':
-        return state.profile.status;
+      case 'loaded': {
+        // Applicants check their age right after submitting. Those approved before they did
+        // (`approved`) check it before going live.
+        const { status, age_verified_at } = state.profile;
+        const needsAgeCheck = status === 'approved' || (status === 'vetting' && !age_verified_at);
+        return needsAgeCheck ? 'age-verification' : status;
+      }
       case 'none':
         return 'onboarding';
       case 'signed-out':
@@ -50,6 +55,12 @@ export class ShellComponent {
       default:
         return state.kind;
     }
+  });
+
+  /** Whether an admin has approved the application yet, for the age check's wording. */
+  readonly approved = computed(() => {
+    const state = this.state();
+    return state.kind === 'loaded' && state.profile.status === 'approved';
   });
 
   retry() {

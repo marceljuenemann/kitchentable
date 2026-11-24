@@ -1,19 +1,20 @@
+<!-- The last step of onboarding, and looks like one (also for those approved before it). -->
 <app-header />
-
-<div class="kt-status-heading">
-  <span class="kt-status-heading-icon" aria-hidden="true"><mat-icon>check</mat-icon></span>
-  <h1>You're approved!</h1>
-</div>
-<p>
-  One last step before your profile goes live: to comply with the UK's Online Safety Act, we need to
-  confirm that you're 18 or over.
+<app-onboarding-progress [step]="totalSteps" />
+<p class="kt-step-eyebrow">Step {{ totalSteps }} of {{ totalSteps }}</p>
+<h1 class="kt-step-title">Selfie age check</h1>
+<p class="kt-step-subtitle">
+  To comply with the UK's Online Safety Act, we need to confirm that you're 18 or over.
 </p>
 
 <mat-card class="kt-card check" appearance="outlined">
   @switch (phase()) {
     @case ('finishing') {
       <h2>Finishing up</h2>
-      <p>Your age check went through. Your profile goes live in a moment.</p>
+      <p>
+        Your age check went through.
+        {{ approved() ? 'Your profile goes live in a moment.' : 'Just a moment…' }}
+      </p>
       <mat-spinner diameter="32" />
     }
     @case ('slow') {
@@ -28,8 +29,12 @@
     @case ('review') {
       <h2>Your check is being reviewed</h2>
       <p>
-        Your age check needs a closer look. Your profile goes live as soon as it's confirmed, so
-        check back later.
+        Your age check needs a closer look.
+        @if (approved()) {
+          Your profile goes live as soon as it's confirmed, so check back later.
+        } @else {
+          We'll review your application in the meantime, so check back later.
+        }
       </p>
     }
     @default {
@@ -44,7 +49,8 @@
         <h2>Verify your age</h2>
         <p>
           Our provider, Didit, estimates your age from a selfie. Only if that's inconclusive will it
-          ask for a photo ID. We don't receive your selfie or ID, and keep only whether you passed.
+          ask for a photo ID. Didit deletes your selfie and ID after one month, and we keep only
+          whether you passed.
         </p>
       }
       <button mat-flat-button type="button" [disabled]="starting()" (click)="start()">

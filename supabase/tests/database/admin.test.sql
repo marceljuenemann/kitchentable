@@ -1,5 +1,5 @@
 begin;
-select plan(15);
+select plan(18);
 
 -- Ada is an admin, Mia an active member, Ivy and Jon applicants.
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, encrypted_password, email_confirmed_at, created_at, updated_at)
@@ -28,6 +28,9 @@ insert into public.profiles (id, status, name, pronouns, bio, location, photos, 
   ('a0000000-0000-0000-0000-000000000003', 'vetting', 'Ivy', 'she/her', 'About Ivy', 'London',
     array['bbbbbbbb-0000-0000-0000-000000000002', 'bbbbbbbb-0000-0000-0000-000000000001']::uuid[],
     '{"consent": "Ivy on consent", "invite_code": "IVY-CODE"}', now() - interval '2 days');
+
+-- Jon has passed the age check, Ivy hasn't yet.
+update public.profiles set age_verified_at = now() where id = 'a0000000-0000-0000-0000-000000000004';
 
 insert into storage.objects (bucket_id, name) values
   ('photos', 'a0000000-0000-0000-0000-000000000003/bbbbbbbb-0000-0000-0000-000000000001/thumb.jpg');
@@ -93,12 +96,27 @@ select is(
 select throws_ok($$ select public.admin_approve_application('a0000000-0000-0000-0000-000000000003') $$,
   'P0001', 'There is no application waiting for review with this id.',
   'an application cannot be approved twice');
+select lives_ok($$ select public.admin_approve_application('a0000000-0000-0000-0000-000000000004') $$,
+  'the admin can approve an applicant who has passed the age check');
 
 reset role;
 select is(
   (select status from public.profiles where id = 'a0000000-0000-0000-0000-000000000003'),
   'approved'::public.profile_status,
-  'approving sets the status to approved'
+  'approving before the age check sets the status to approved'
+);
+select is(
+  (select status from public.profiles where id = 'a0000000-0000-0000-0000-000000000004'),
+  'active'::public.profile_status,
+  'approving after the age check makes the profile live'
+);
+-- (The local database may have admins of its own.)
+select ok(
+  exists (select 1 from public.connections
+          where initiator_id = 'a0000000-0000-0000-0000-000000000001'
+            and recipient_id = 'a0000000-0000-0000-0000-000000000004'
+            and status = 'accepted'),
+  'a profile that goes live straight from vetting is connected with the admins'
 );
 
 -- Anonymous ------------------------------------------------------------

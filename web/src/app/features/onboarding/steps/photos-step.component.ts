@@ -2,7 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { PhotoStorageService } from '../../../core/photo-storage.service';
 import { PhotoGridComponent } from '../../../shared/profile-edit/photo-grid/photo-grid.component';
-import { OnboardingDraftStore, ONBOARDING_STEPS } from '../onboarding-draft.store';
+import { OnboardingDraftStore, STEPS_SHOWN } from '../onboarding-draft.store';
 
 /** Onboarding step 3: add and crop up to six photos. */
 @Component({
@@ -17,7 +17,7 @@ export class PhotosStepComponent {
   private readonly storage = inject(PhotoStorageService);
 
   readonly photoIds = computed(() => this.store.draft().photos);
-  readonly totalSteps = ONBOARDING_STEPS;
+  readonly totalSteps = STEPS_SHOWN;
 
   readonly canContinue = computed(() => this.photoIds().length > 0);
 

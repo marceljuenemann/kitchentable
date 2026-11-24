@@ -27,7 +27,7 @@ async function fillInEverything(page: Page, name: string) {
   await page.getByLabel(/^What guidelines/).fill('b'.repeat(80));
 }
 
-test('submitting the application creates the profile and moves on to "being vetted"', async ({
+test('submitting the application creates the profile and moves on to the age check', async ({
   page,
 }) => {
   const name = `Sam ${Date.now()}`;
@@ -36,8 +36,9 @@ test('submitting the application creates the profile and moves on to "being vett
   const submittedAt = new Date();
   await page.getByRole('button', { name: 'Submit application' }).click();
 
-  // The shell reloads the profile and shows the screen for the new `vetting` status.
-  await expect(page.getByText('Thanks for applying')).toBeVisible();
+  // The shell reloads the profile, which is in `vetting` without an age check yet.
+  await expect(page.getByRole('heading', { name: 'Selfie age check' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Verify my age' })).toBeVisible();
 
   // The admin gets an email with a link to review it, and no personal data.
   const email = await getLatestEmail(ADMIN_EMAIL, 10_000, submittedAt);
@@ -65,7 +66,7 @@ test('submitting the application creates the profile and moves on to "being vett
 
   // A reload stays on the same screen rather than back in onboarding.
   await page.reload();
-  await expect(page.getByText('Thanks for applying')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Selfie age check' })).toBeVisible();
 });
 
 test('a failed submission shows an error, keeps the draft, and can be retried', async ({
@@ -83,6 +84,6 @@ test('a failed submission shows an error, keeps the draft, and can be retried', 
 
   await page.unroute('**/rest/v1/rpc/submit_onboarding');
   await page.getByRole('button', { name: 'Submit application' }).click();
-  await expect(page.getByText('Thanks for applying')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Selfie age check' })).toBeVisible();
   expect(await profilesNamed(name)).toHaveLength(1);
 });

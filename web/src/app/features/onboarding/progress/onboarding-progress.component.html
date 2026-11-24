@@ -1,0 +1,10 @@
+@if (canGoBack()) {
+  <button mat-icon-button type="button" aria-label="Back" (click)="back.emit()">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+}
+<mat-progress-bar
+  mode="determinate"
+  [value]="(step() / totalSteps) * 100"
+  [attr.aria-label]="'Step ' + step() + ' of ' + totalSteps"
+/>

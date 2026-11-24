@@ -21,6 +21,7 @@ const PROFILE: MyProfile = {
   photos: ['photo-1'],
   search_filters: null,
   hide_by_gender: false,
+  age_verified_at: null,
   intro_emails: true,
   message_emails: true,
 };
@@ -292,24 +293,29 @@ describe('ProfileService', () => {
     });
   });
 
-  describe('fetchStatus', () => {
-    it('returns the status without reloading state$', async () => {
+  describe('fetchAgeVerified', () => {
+    it('says whether the age check is done, without reloading state$', async () => {
       const states: ProfileState['kind'][] = [];
       const subscription = service.state$.subscribe((state) => states.push(state.kind));
       await settled();
 
-      rpc.and.resolveTo({ data: { ...PROFILE, status: 'active' }, error: null });
-      expect(await service.fetchStatus()).toBe('active');
+      rpc.and.resolveTo({ data: PROFILE, error: null });
+      expect(await service.fetchAgeVerified()).toBeFalse();
+      rpc.and.resolveTo({
+        data: { ...PROFILE, age_verified_at: '2026-11-24T12:00:00Z' },
+        error: null,
+      });
+      expect(await service.fetchAgeVerified()).toBeTrue();
       await new Promise((resolve) => setTimeout(resolve));
       subscription.unsubscribe();
 
       expect(states).toEqual(['loading', 'loaded']);
     });
 
-    it('is null without a profile', async () => {
+    it('is false without a profile', async () => {
       rpc.and.resolveTo({ data: null, error: null });
 
-      expect(await service.fetchStatus()).toBeNull();
+      expect(await service.fetchAgeVerified()).toBeFalse();
     });
   });
 });

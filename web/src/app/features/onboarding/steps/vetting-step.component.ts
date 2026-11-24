@@ -3,7 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ProfileService } from '../../../core/profile.service';
-import { OnboardingDraftStore, ONBOARDING_STEPS, toNewProfile } from '../onboarding-draft.store';
+import { OnboardingDraftStore, STEPS_SHOWN, toNewProfile } from '../onboarding-draft.store';
 import {
   ONBOARDING_FEEDBACK_ID,
   VETTING_MIN_LENGTH,
@@ -25,7 +25,7 @@ export class VettingStepComponent {
   readonly draft = this.store.draft;
   readonly submitting = signal(false);
   readonly failed = signal(false);
-  readonly totalSteps = ONBOARDING_STEPS;
+  readonly totalSteps = STEPS_SHOWN;
   readonly questions = VETTING_QUESTIONS;
   readonly minLength = VETTING_MIN_LENGTH;
   readonly feedbackId = ONBOARDING_FEEDBACK_ID;

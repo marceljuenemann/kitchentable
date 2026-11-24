@@ -4,7 +4,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AddValueFieldComponent } from '../../../shared/add-value-field/add-value-field.component';
-import { OnboardingDraftStore, ONBOARDING_STEPS } from '../onboarding-draft.store';
+import { OnboardingDraftStore, STEPS_SHOWN } from '../onboarding-draft.store';
 import {
   ABOUT_MIN_LENGTH,
   LOOKING_FOR_OPTIONS,
@@ -31,7 +31,7 @@ export class AboutYouStepComponent {
   private readonly store = inject(OnboardingDraftStore);
 
   readonly draft = this.store.draft;
-  readonly totalSteps = ONBOARDING_STEPS;
+  readonly totalSteps = STEPS_SHOWN;
   readonly taglineMax = TAGLINE_MAX_LENGTH;
   readonly aboutMin = ABOUT_MIN_LENGTH;
   readonly label = lookingForLabel;

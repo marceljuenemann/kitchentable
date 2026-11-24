@@ -83,7 +83,7 @@ test('the profile tab has the legal documents too, and signs out', async ({ page
 });
 
 test("the tabs' URLs show someone who isn't a member yet their own screen", async ({ page }) => {
-  await signInAs(page, 'vetting');
+  await signInAs(page, 'vetting', { ageVerified: true });
 
   await page.goto('/app/messages');
 

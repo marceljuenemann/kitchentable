@@ -36,7 +36,7 @@ Useful local URLs (from `supabase start` output):
 
 ### Age verification locally
 
-Approved applicants verify their age with Didit (see "Age verification" in [docs/database.md](docs/database.md)). Locally there's no Didit API key, so "Verify my age" fails. To get past the screen, run this in Studio's SQL editor:
+Applicants verify their age with Didit right after submitting their application (see "Age verification" in [docs/database.md](docs/database.md)). Locally there's no Didit API key, so "Verify my age" fails. To get past the screen, run this in Studio's SQL editor:
 
 ```sql
 select complete_age_verification(id) from auth.users where email = '<address>';

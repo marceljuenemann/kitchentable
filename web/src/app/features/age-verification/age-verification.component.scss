@@ -2,16 +2,13 @@
   display: block;
 }
 
-:host > p {
-  margin: 16px 0 0;
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--kt-ink);
+// Centred above the progress bar, as in onboarding.
+app-header {
+  justify-content: center;
 }
 
+// Right under the step's subtitle, which has its own margin, like the other steps' content.
 .check {
-  margin-top: 28px;
-
   p:not(.kt-fine-print) a {
     color: var(--mat-sys-primary);
   }

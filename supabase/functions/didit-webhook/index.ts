@@ -1,5 +1,5 @@
 // Didit calls this when an age check changes status (see "Age verification" in docs/database.md).
-// When a check is approved, it activates the user's profile.
+// When a check is approved, it records that, and activates the profile if it's already approved.
 //
 // Called by Didit, never by users, so it checks Didit's signature instead of a JWT
 // (verify_jwt = false in config.toml). The webhook destination is set in the Didit console not to
@@ -35,8 +35,8 @@ Deno.serve(async (req) => {
       return new Response('Too old', { status: 401 });
     }
 
-    // Other statuses (declined, in review, abandoned) need nothing from us: the user stays
-    // `approved` and can try again.
+    // Other statuses (declined, in review, abandoned) need nothing from us: the user still
+    // hasn't passed, and can try again.
     if (
       event.webhook_type !== 'status.updated' ||
       event.workflow_id !== env('DIDIT_WORKFLOW_ID') ||
@@ -44,8 +44,8 @@ Deno.serve(async (req) => {
     ) {
       return new Response('Nothing to do');
     }
-    const activated = await completeAgeVerification(event.vendor_data);
-    return new Response(activated ? 'Activated' : 'Nothing to do');
+    const verified = await completeAgeVerification(event.vendor_data);
+    return new Response(verified ? 'Verified' : 'Nothing to do');
   } catch (error) {
     // A 5xx makes Didit retry.
     console.error('Could not handle a Didit webhook', error);
@@ -69,7 +69,7 @@ async function isSignedByDidit(body: string, signature: string): Promise<boolean
   return given.length === expected.length && timingSafeEqual(given, expected);
 }
 
-/** Whether the profile was activated (false if it wasn't waiting for an age check). */
+/** Whether the check was recorded (false if the profile wasn't waiting for one). */
 async function completeAgeVerification(userId: string): Promise<boolean> {
   const key = env('SUPABASE_SERVICE_ROLE_KEY');
   const response = await fetch(`${env('SUPABASE_URL')}/rest/v1/rpc/complete_age_verification`, {

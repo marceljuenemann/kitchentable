@@ -3,12 +3,16 @@ import { expect, Page, test } from '@playwright/test';
 import { createApplicant, jpeg, profilesNamed, signInAs, uploadPhoto } from './support/admin';
 import { firstLink, getLatestEmail } from './support/mailpit';
 
-/** An applicant with two photos, the answers to the vetting questions and an invite code. */
-async function applicantWithPhotos(page: Page) {
+/**
+ * An applicant with two photos, the answers to the vetting questions and an invite code, who has
+ * passed the age check unless `ageVerified` is false.
+ */
+async function applicantWithPhotos(page: Page, { ageVerified = true } = {}) {
   const name = `Ivy ${Date.now()}`;
   const photos = [randomUUID(), randomUUID()];
   const { id, email } = await createApplicant({
     name,
+    age_verified_at: ageVerified ? new Date() : null,
     tagline: 'Long tables and longer walks',
     bio: 'I host a monthly supper club.\n\nAnd I like long walks.',
     gender: ['Woman'],
@@ -54,20 +58,36 @@ test('an admin reviews an application and approves it', async ({ page }) => {
   await expect(box).toContainText('E2E-INVITE');
   await expect(box).toContainText('Long tables and longer walks');
   await expect(box).toContainText('Smooth');
+  await expect(box).toContainText(/Age check\s*Passed/);
+  await expect(box).toContainText('Their profile goes live straight away.');
 
-  // Approving goes back to the grid, without the application.
+  // Approving goes back to the grid, without the application, and the profile goes live.
   await box.getByRole('button', { name: `Approve ${applicant.name}` }).click();
   await page.waitForURL((url) => url.pathname === '/admin/vetting');
   await expect(tile).toBeHidden();
-  expect((await profilesNamed(applicant.name))[0]['status']).toBe('approved');
+  expect((await profilesNamed(applicant.name))[0]['status']).toBe('active');
 
-  // The applicant is emailed a link to the next step, without personal data.
+  // The applicant is emailed a link to the app, without personal data.
   const email = await getLatestEmail(applicant.email);
   expect(email.subject).toBe("You're in! Welcome to Kitchen Table");
   expect(firstLink(email.html)).toBe('http://localhost:4200/app');
-  expect(email.text).toContain('Finish joining: http://localhost:4200/app');
+  expect(email.text).toContain('Open Kitchen Table: http://localhost:4200/app');
   expect(email.text).toContain('See you there');
   expect(email.html).not.toContain(applicant.name);
+});
+
+test('an applicant approved before the age check still needs it', async ({ page }) => {
+  const applicant = await applicantWithPhotos(page, { ageVerified: false });
+  await signInAs(page, 'admin');
+
+  await page.goto(`/admin/vetting/${applicant.id}`);
+  const box = page.getByRole('region', { name: 'Vetting' });
+  await expect(box).toContainText(/Age check\s*Not yet/);
+  await expect(box).toContainText("Their profile goes live once they've passed the age check.");
+  await box.getByRole('button', { name: `Approve ${applicant.name}` }).click();
+  await page.waitForURL((url) => url.pathname === '/admin/vetting');
+
+  expect((await profilesNamed(applicant.name))[0]['status']).toBe('approved');
 });
 
 test('the back button and the browser back both close a profile', async ({ page }) => {

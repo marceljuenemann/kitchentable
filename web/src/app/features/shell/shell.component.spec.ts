@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
-import { Profile, ProfileStatus } from '../../core/profile.model';
+import { MyProfile, ProfileStatus } from '../../core/profile.model';
 import { ProfileService, ProfileState } from '../../core/profile.service';
 import { ShellComponent } from './shell.component';
 
@@ -8,7 +8,10 @@ describe('ShellComponent', () => {
   let state$: BehaviorSubject<ProfileState>;
   let refresh: jasmine.Spy;
 
-  const profile = (status: ProfileStatus) => ({ kind: 'loaded', profile: { status } as Profile });
+  const profile = (status: ProfileStatus, ageVerified = true) => ({
+    kind: 'loaded',
+    profile: { status, age_verified_at: ageVerified ? '2026-11-24T12:00:00Z' : null } as MyProfile,
+  });
 
   /** Creates the shell without rendering it: only the choice of screen is under test here. */
   const createShell = () => TestBed.createComponent(ShellComponent).componentInstance;
@@ -39,7 +42,6 @@ describe('ShellComponent', () => {
 
   for (const status of [
     'vetting',
-    'approved',
     'active',
     'disabled',
     'suspended',
@@ -52,6 +54,22 @@ describe('ShellComponent', () => {
       expect(createShell().view()).toBe(status);
     });
   }
+
+  it('asks an applicant to check their age right after submitting', () => {
+    state$.next(profile('vetting', false) as ProfileState);
+    const shell = createShell();
+
+    expect(shell.view()).toBe('age-verification');
+    expect(shell.approved()).toBeFalse();
+  });
+
+  it('asks an applicant approved before their age check to check it', () => {
+    state$.next(profile('approved', false) as ProfileState);
+    const shell = createShell();
+
+    expect(shell.view()).toBe('age-verification');
+    expect(shell.approved()).toBeTrue();
+  });
 
   it('shows the error screen when the profile could not be loaded', () => {
     state$.next({ kind: 'error' });

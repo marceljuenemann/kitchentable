@@ -66,6 +66,13 @@ button {
   width: 100%;
 }
 
+.hint {
+  margin: 8px 0 0;
+  font-size: 13px;
+  text-align: center;
+  color: var(--kt-muted);
+}
+
 .error {
   margin: 12px 0 0;
   font-size: 14px;

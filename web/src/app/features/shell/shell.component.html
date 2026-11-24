@@ -22,8 +22,8 @@
     @case ('vetting') {
       <app-submitted />
     }
-    @case ('approved') {
-      <app-age-verification />
+    @case ('age-verification') {
+      <app-age-verification [approved]="approved()" />
     }
     @case ('active') {
       <app-main />

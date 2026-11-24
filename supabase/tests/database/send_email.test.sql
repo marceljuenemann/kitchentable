@@ -1,5 +1,5 @@
 begin;
-select plan(8);
+select plan(9);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, encrypted_password, email_confirmed_at, created_at, updated_at)
 values
@@ -69,7 +69,15 @@ select is(
 update public.profiles set status = 'active' where id = 'bbbbbbbb-0000-0000-0000-000000000002';
 update public.profiles set status = 'approved' where id = 'bbbbbbbb-0000-0000-0000-000000000003';
 select is((select count(*) from pg_temp.requests()), 2::bigint,
-  'only the move from vetting to approved emails the member');
+  'only moves out of vetting email the member');
+
+-- Hal passed the age check while being vetted, so approval makes him active straight away.
+update public.profiles set status = 'active' where id = 'bbbbbbbb-0000-0000-0000-000000000001';
+select is(
+  (select convert_from(body, 'utf8')::jsonb from pg_temp.requests() offset 2),
+  '{"template": "application_approved", "user_id": "bbbbbbbb-0000-0000-0000-000000000001"}'::jsonb,
+  'an approval straight to active emails the applicant too'
+);
 
 -- Clients can't send emails themselves.
 set local role authenticated;

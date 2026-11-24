@@ -3,7 +3,14 @@ import { NewProfile } from '../../core/profile.model';
 import { UserStorage } from '../../core/user-storage';
 import { MAX_PHOTOS } from '../../core/profile-options';
 
+/** The steps of the form, which the draft goes through. */
 export const ONBOARDING_STEPS = 4;
+
+/**
+ * The steps people are shown ("Step 1 of 5"): the form's, then the age check, which the age
+ * verification screen shows once the application is submitted.
+ */
+export const STEPS_SHOWN = ONBOARDING_STEPS + 1;
 
 /** The in-progress onboarding answers (see prototype/onboarding/README.md, "State model"). */
 export interface OnboardingDraft {

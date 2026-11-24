@@ -20,7 +20,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
   try {
     const profile = await getMyProfile(req.headers.get('Authorization') ?? '');
-    if (profile?.status !== 'approved') {
+    // Applicants do it right after submitting; those approved before they did, once approved.
+    const waiting = profile?.status === 'vetting' || profile?.status === 'approved';
+    if (!profile || !waiting || profile.age_verified_at !== null) {
       return new Response('Not waiting for an age check', { status: 409, headers: CORS });
     }
 
@@ -43,7 +45,13 @@ Deno.serve(async (req) => {
   }
 });
 
-async function getMyProfile(authorization: string): Promise<{ id: string; status: string } | null> {
+interface MyProfile {
+  id: string;
+  status: string;
+  age_verified_at: string | null;
+}
+
+async function getMyProfile(authorization: string): Promise<MyProfile | null> {
   const response = await fetch(`${env('SUPABASE_URL')}/rest/v1/rpc/get_my_profile`, {
     method: 'POST',
     headers: { apikey: env('SUPABASE_ANON_KEY'), Authorization: authorization },

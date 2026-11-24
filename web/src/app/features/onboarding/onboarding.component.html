@@ -1,17 +1,6 @@
 <app-header />
 
-<div class="progress">
-  @if (draft().step > 1) {
-    <button mat-icon-button type="button" aria-label="Back" (click)="back()">
-      <mat-icon>chevron_left</mat-icon>
-    </button>
-  }
-  <mat-progress-bar
-    mode="determinate"
-    [value]="(draft().step / totalSteps) * 100"
-    [attr.aria-label]="'Step ' + draft().step + ' of ' + totalSteps"
-  />
-</div>
+<app-onboarding-progress [step]="step()" [canGoBack]="step() > 1" (back)="back()" />
 
 <main>
   @switch (draft().step) {

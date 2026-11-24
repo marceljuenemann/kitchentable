@@ -13,7 +13,7 @@ import {
 } from '../../../shared/profile-edit/field-sheets';
 import { LocationSheetComponent } from '../../../shared/profile-edit/location-sheet/location-sheet.component';
 import { OptionSheetComponent } from '../../../shared/profile-edit/option-sheet/option-sheet.component';
-import { OnboardingDraftStore, ONBOARDING_STEPS } from '../onboarding-draft.store';
+import { OnboardingDraftStore, STEPS_SHOWN } from '../onboarding-draft.store';
 
 interface Row {
   key: ListField | 'age' | 'location';
@@ -36,7 +36,7 @@ export class CreateProfileStepComponent {
   private readonly bottomSheet = inject(MatBottomSheet);
 
   readonly draft = this.store.draft;
-  readonly totalSteps = ONBOARDING_STEPS;
+  readonly totalSteps = STEPS_SHOWN;
 
   readonly rows = computed<Row[]>(() => {
     const draft = this.draft();

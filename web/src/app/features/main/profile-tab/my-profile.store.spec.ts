@@ -22,6 +22,7 @@ const profile: MyProfile = {
   photos: ['a', 'b'],
   search_filters: null,
   hide_by_gender: false,
+  age_verified_at: '2026-10-01T00:00:00Z',
   intro_emails: true,
   message_emails: false,
 };

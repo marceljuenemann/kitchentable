@@ -134,6 +134,8 @@ export function createMember(fields: Record<string, unknown>) {
 interface UserOptions {
   acceptedTerms?: boolean;
   location?: string;
+  /** Whether they've passed the age check (sets `age_verified_at`). */
+  ageVerified?: boolean;
 }
 
 /**
@@ -159,7 +161,7 @@ export async function signInAs(
  */
 export async function createUser(
   status: ProfileStatus | null,
-  { acceptedTerms = true, location = 'London' }: UserOptions = {},
+  { acceptedTerms = true, location = 'London', ageVerified = false }: UserOptions = {},
 ): Promise<string> {
   const email = uniqueEmail('shell');
   const user = await api('/auth/v1/admin/users', {
@@ -182,6 +184,7 @@ export async function createUser(
       pronouns: 'they/them',
       bio: 'About the E2E user',
       location,
+      age_verified_at: ageVerified ? new Date() : null,
     });
   }
 

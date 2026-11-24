@@ -8,6 +8,14 @@
       <dd>{{ application().created_at | date: 'd MMM y, HH:mm' }}</dd>
     </div>
     <div>
+      <dt>Age check</dt>
+      @if (application().age_verified_at; as verifiedAt) {
+        <dd>Passed {{ verifiedAt | date: 'd MMM y, HH:mm' }}</dd>
+      } @else {
+        <dd class="none">Not yet</dd>
+      }
+    </div>
+    <div>
       <dt>Tagline</dt>
       <dd [class.none]="!application().tagline">{{ application().tagline || 'None' }}</dd>
     </div>
@@ -32,6 +40,13 @@
   <button mat-flat-button type="button" [disabled]="busy()" (click)="approve.emit()">
     Approve {{ application().name }}
   </button>
+  <p class="hint">
+    @if (application().age_verified_at) {
+      Their profile goes live straight away.
+    } @else {
+      Their profile goes live once they've passed the age check.
+    }
+  </p>
   @if (failed()) {
     <p class="error" role="alert">Something went wrong approving. Please try again.</p>
   }
