@@ -1,4 +1,5 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, Routes } from '@angular/router';
 import { adminGuard, authGuard, signedOutGuard } from './core/auth/auth.guard';
 import { CallbackComponent } from './features/auth-callback/callback.component';
 import { LandingComponent } from './features/landing/landing.component';
@@ -14,6 +15,13 @@ export const routes: Routes = [
     path: '',
     pathMatch: 'full',
     component: LandingComponent,
+  },
+  // A short invite link that's easy to type from print (the flyers say kitchentable.dating/join/…):
+  // the landing page with that invite code.
+  {
+    path: 'join/:code',
+    redirectTo: ({ params }) =>
+      inject(Router).createUrlTree(['/'], { queryParams: { invite: params['code'] } }),
   },
   // Where signed-out visitors to /app and /admin go: once signed in, they're back on that page.
   {

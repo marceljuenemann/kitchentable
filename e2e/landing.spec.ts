@@ -15,6 +15,14 @@ test('shows the sign-up form when an invite code is present', async ({ page }) =
   await expect(page.getByRole('heading', { name: 'Sign up' })).toBeVisible();
 });
 
+test('the short /join/:code link opens the sign-up form with that invite code', async ({
+  page,
+}) => {
+  await page.goto('/join/enmfam26');
+  await expect(page).toHaveURL(/\/\?invite=enmfam26$/);
+  await expect(page.getByRole('heading', { name: 'Sign up' })).toBeVisible();
+});
+
 test('pressing Enter in the email field signs up', async ({ page }) => {
   // The failing request shows that the form was submitted, without sending an email.
   await page.route('**/auth/v1/otp*', (route) => route.abort());
