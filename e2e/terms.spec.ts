@@ -25,9 +25,9 @@ test('a new user accepts the terms before onboarding', async ({ page }) => {
   await consent.check();
   await continueButton.click();
 
-  await expect(page.getByRole('heading', { name: 'Create profile' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Join in 4 simple steps' })).toBeVisible();
 
   // The acceptance is stored, so the screen doesn't come back.
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Create profile' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Join in 4 simple steps' })).toBeVisible();
 });

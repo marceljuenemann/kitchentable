@@ -12,6 +12,8 @@ export interface Application extends Profile, Member {
   /** Answers by question id, plus `invite_code` and `onboarding_feedback` if given. */
   vetting_answers: Record<string, string>;
   created_at: string;
+  /** When they passed the age check; null until then, and approving them makes them wait for it. */
+  age_verified_at: string | null;
 }
 
 /**

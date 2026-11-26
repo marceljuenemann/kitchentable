@@ -278,6 +278,11 @@ mat-form-field textarea {
   }
 }
 
+// Under a disabled button (with .kt-fine-print): what's still missing before it can be used.
+.kt-missing-hint {
+  text-align: center;
+}
+
 // Small print under a form's button, such as what happens to the email address entered.
 .kt-fine-print {
   margin: 12px 0 0;

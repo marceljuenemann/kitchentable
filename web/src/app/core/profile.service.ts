@@ -11,7 +11,7 @@ import {
   switchMap,
 } from 'rxjs';
 import { AuthService } from './auth/auth.service';
-import { MyProfile, NewProfile, ProfileStatus } from './profile.model';
+import { MyProfile, NewProfile } from './profile.model';
 import { SupabaseService } from './supabase.service';
 
 /**
@@ -103,11 +103,12 @@ export class ProfileService {
   }
 
   /**
-   * The profile's status, or null without a profile, for polling. Unlike `refresh()`, it doesn't
-   * put `state$` back into `loading`, which would make the shell replace the current screen.
+   * Whether the user has passed the age check, for polling until the webhook has recorded it.
+   * Unlike `refresh()`, it doesn't put `state$` back into `loading`, which would make the shell
+   * replace the current screen.
    */
-  async fetchStatus(): Promise<ProfileStatus | null> {
-    return (await this.getMyProfile())?.status ?? null;
+  async fetchAgeVerified(): Promise<boolean> {
+    return !!(await this.getMyProfile())?.age_verified_at;
   }
 
   private fetchState(): Observable<ProfileState> {

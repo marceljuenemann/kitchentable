@@ -31,7 +31,7 @@ test('the sign-in email is branded, and its first link signs the user in', async
 
   await page.goto(firstLink(message.html));
   await page.waitForURL('**/app');
-  await expect(page.getByRole('heading', { name: 'Create profile' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Join in 4 simple steps' })).toBeVisible();
 });
 
 // The templates are in supabase/functions/send-email; see "Email notifications" in

@@ -15,7 +15,8 @@ concurrency:
 
 jobs:
   # Fast checks, no Docker: fails within a couple of minutes on formatting, lint, type errors
-  # or a broken production build, while the slower e2e job below is still running.
+  # or a broken production build, while the slower e2e job below is still running. Its steps
+  # stay one after another: together they take less than half the e2e job.
   check:
     runs-on: ubuntu-latest
     steps:
@@ -70,17 +71,29 @@ jobs:
       - name: Install root dependencies (Supabase CLI, Playwright)
         run: npm ci
 
+      # The slowest step (pulling images, running the migrations on a fresh database), so it runs
+      # in the background while the steps below install the rest; "Wait for Supabase" joins it.
+      # Its output goes to a file: a background process holding the step's output would make the
+      # step wait for it after all. `|| status=$?` because steps run with `bash -e`, which would
+      # otherwise end the subshell on a failed start before it writes the exit code.
+      - name: Start Supabase in the background (runs migrations)
+        run: |
+          (status=0
+           npx supabase start > "$RUNNER_TEMP/supabase-start.log" 2>&1 || status=$?
+           echo "$status" > "$RUNNER_TEMP/supabase-start.exit") < /dev/null > /dev/null 2>&1 &
+
       - name: Install web app dependencies
         run: npm ci --prefix web
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Start Supabase (runs migrations)
-        run: npx supabase start
-
-      - name: Reset database for a clean, deterministic state
-        run: npx supabase db reset
+      - name: Wait for Supabase
+        timeout-minutes: 10
+        run: |
+          until [ -f "$RUNNER_TEMP/supabase-start.exit" ]; do sleep 2; done
+          cat "$RUNNER_TEMP/supabase-start.log"
+          exit "$(cat "$RUNNER_TEMP/supabase-start.exit")"
 
       # Restricted to our own schema: the default also lints pgTAP's `extensions` schema,
       # whose internals produce "errors" that aren't ours.

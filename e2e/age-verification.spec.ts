@@ -29,7 +29,26 @@ test('says so when the check cannot be started', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Verify my age' })).toBeEnabled();
 });
 
-test('a passed check activates the profile and opens the app', async ({ page }) => {
+test('an applicant checks their age right after applying, then waits for vetting', async ({
+  page,
+}) => {
+  const email = await signInAs(page, 'vetting');
+  const id = await userIdOf(email);
+  await expect(page.getByRole('heading', { name: 'Selfie age check' })).toBeVisible();
+  await expect(page.getByText('Step 4 of 4')).toBeVisible();
+
+  await page.goto('/app?verificationSessionId=e2e-session&status=Approved');
+  await expect(page.getByRole('heading', { name: 'Finishing up' })).toBeVisible();
+
+  expect(await (await sendDiditWebhook(id, 'Approved')).text()).toBe('Verified');
+
+  await expect(page.getByRole('heading', { name: 'Thanks for signing up' })).toBeVisible();
+  const profile = await profileOf(id);
+  expect(profile['status']).toBe('vetting');
+  expect(profile['age_verified_at']).not.toBeNull();
+});
+
+test('a passed check activates an approved profile and opens the app', async ({ page }) => {
   const email = await signInAs(page, 'approved');
   const id = await userIdOf(email);
 
@@ -79,7 +98,7 @@ test('the webhook activates only on a genuine, recent approval', async () => {
   expect(await statusAfter(otherWorkflow)).toBe('approved');
 
   const genuine = await sendDiditWebhook(id, 'Approved');
-  expect(await genuine.text()).toBe('Activated');
+  expect(await genuine.text()).toBe('Verified');
   expect((await profileOf(id))['status']).toBe('active');
 
   // Didit retries deliveries; a repeat changes nothing.

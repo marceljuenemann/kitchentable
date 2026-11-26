@@ -11,7 +11,7 @@ import {
 } from './age-verification.component';
 
 describe('AgeVerificationComponent', () => {
-  let fetchStatus: jasmine.Spy;
+  let fetchAgeVerified: jasmine.Spy;
   let refresh: jasmine.Spy;
   let startAgeVerification: jasmine.Spy;
   let navigate: jasmine.Spy;
@@ -24,13 +24,13 @@ describe('AgeVerificationComponent', () => {
   };
 
   beforeEach(() => {
-    fetchStatus = jasmine.createSpy('fetchStatus').and.resolveTo('approved');
+    fetchAgeVerified = jasmine.createSpy('fetchAgeVerified').and.resolveTo(false);
     refresh = jasmine.createSpy('refresh');
     startAgeVerification = jasmine.createSpy('startAgeVerification');
     navigate = jasmine.createSpy('navigate').and.resolveTo(true);
     TestBed.configureTestingModule({
       providers: [
-        { provide: ProfileService, useValue: { fetchStatus, refresh, startAgeVerification } },
+        { provide: ProfileService, useValue: { fetchAgeVerified, refresh, startAgeVerification } },
         { provide: Router, useValue: { navigate } },
         { provide: ActivatedRoute, useValue: route },
         // For the footer.
@@ -57,35 +57,35 @@ describe('AgeVerificationComponent', () => {
     );
   });
 
-  it('after a passed check, reloads the profile once the webhook has activated it', fakeAsync(() => {
+  it('after a passed check, reloads the profile once the webhook has recorded it', fakeAsync(() => {
     const fixture = create('Approved');
     expect(fixture.componentInstance.phase()).toBe('finishing');
 
     tick(POLL_INTERVAL_MS);
-    expect(fetchStatus).toHaveBeenCalledTimes(1);
+    expect(fetchAgeVerified).toHaveBeenCalledTimes(1);
     expect(refresh).not.toHaveBeenCalled();
 
-    fetchStatus.and.resolveTo('active');
+    fetchAgeVerified.and.resolveTo(true);
     tick(POLL_INTERVAL_MS);
     expect(refresh).toHaveBeenCalledTimes(1);
 
     tick(POLL_INTERVAL_MS * POLL_ATTEMPTS);
-    expect(fetchStatus).toHaveBeenCalledTimes(2);
+    expect(fetchAgeVerified).toHaveBeenCalledTimes(2);
     fixture.destroy();
   }));
 
   it('keeps polling through failed requests, then says it is taking longer', fakeAsync(() => {
-    fetchStatus.and.rejectWith(new Error('network'));
+    fetchAgeVerified.and.rejectWith(new Error('network'));
     const screen = create('Approved').componentInstance;
 
     tick(POLL_INTERVAL_MS * POLL_ATTEMPTS);
 
-    expect(fetchStatus).toHaveBeenCalledTimes(POLL_ATTEMPTS);
+    expect(fetchAgeVerified).toHaveBeenCalledTimes(POLL_ATTEMPTS);
     expect(refresh).not.toHaveBeenCalled();
     expect(screen.phase()).toBe('slow');
 
     // "Check again" polls once more.
-    fetchStatus.and.resolveTo('active');
+    fetchAgeVerified.and.resolveTo(true);
     screen.waitForActivation();
     expect(screen.phase()).toBe('finishing');
     tick(POLL_INTERVAL_MS);
@@ -98,7 +98,7 @@ describe('AgeVerificationComponent', () => {
 
     tick(POLL_INTERVAL_MS * POLL_ATTEMPTS);
 
-    expect(fetchStatus).not.toHaveBeenCalled();
+    expect(fetchAgeVerified).not.toHaveBeenCalled();
   }));
 
   it('shows an error and allows another try if the check cannot be started', async () => {

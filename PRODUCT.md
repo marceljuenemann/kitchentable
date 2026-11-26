@@ -61,7 +61,7 @@ If the app is successful and grows beyond what's maintainable as a side project,
 **Costs**
 
 - Server & infrastructure (minimal)
-- Age verification according to the Online Safety Act (~50p / user?)
+- Age verification according to the Online Safety Act (Didit: $0.10 per check, plus $0.15 for an ID check when the selfie looks under 25; every applicant does one, before vetting)
 - Moderation work: handling reports, vetting etc. — could lean heavily into AI and/or volunteers, but some paid staff would probably lead to a better experience for everyone
 - Ongoing software development
 - General business development, management & leadership

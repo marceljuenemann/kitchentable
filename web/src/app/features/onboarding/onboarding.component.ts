@@ -1,30 +1,26 @@
 import { Component, computed, effect, HostListener, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { AnalyticsService } from '../../core/analytics.service';
 import { FooterComponent } from '../../shared/footer/footer.component';
 import { HeaderComponent } from '../../shared/header/header.component';
-import { ONBOARDING_STEPS, OnboardingDraftStore } from './onboarding-draft.store';
+import { OnboardingDraftStore } from './onboarding-draft.store';
+import { OnboardingProgressComponent } from './progress/onboarding-progress.component';
 import { AboutYouStepComponent } from './steps/about-you-step.component';
 import { CreateProfileStepComponent } from './steps/create-profile-step.component';
+import { OverviewStepComponent } from './steps/overview-step.component';
 import { PhotosStepComponent } from './steps/photos-step.component';
-import { VettingStepComponent } from './steps/vetting-step.component';
 
 /** The onboarding flow: header with progress, the current step, footer. */
 @Component({
   selector: 'app-onboarding',
   standalone: true,
   imports: [
-    MatButtonModule,
-    MatIconModule,
-    MatProgressBarModule,
     AboutYouStepComponent,
     CreateProfileStepComponent,
     FooterComponent,
     HeaderComponent,
+    OnboardingProgressComponent,
+    OverviewStepComponent,
     PhotosStepComponent,
-    VettingStepComponent,
   ],
   providers: [OnboardingDraftStore],
   templateUrl: './onboarding.component.html',
@@ -36,7 +32,6 @@ export class OnboardingComponent {
 
   readonly draft = this.store.draft;
   readonly step = computed(() => this.draft().step);
-  readonly totalSteps = ONBOARDING_STEPS;
 
   constructor() {
     // Every step starts at the top.

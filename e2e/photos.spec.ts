@@ -56,8 +56,10 @@ async function imageSize(page: Page, bytes: Buffer) {
 
 test('a photo is cropped into a square thumbnail tile', async ({ page }) => {
   await goToPhotosStep(page);
-  const next = page.getByRole('button', { name: 'Continue' });
+  const next = page.getByRole('button', { name: 'Create profile' });
+  const hint = page.getByText('Add at least one photo to create your profile.');
   await expect(next).toBeDisabled();
+  await expect(hint).toBeVisible();
 
   await choosePhoto(page, 1600, 1200);
   await expect(dialog(page).getByRole('heading', { name: 'Crop photo' })).toBeVisible();
@@ -68,6 +70,7 @@ test('a photo is cropped into a square thumbnail tile', async ({ page }) => {
   await expect(tile).toBeVisible();
   await expect(page.getByText('Main', { exact: true })).toBeVisible();
   await expect(next).toBeEnabled();
+  await expect(hint).toBeHidden();
 
   // The tile shows the 600 px square thumbnail, fetched from storage (docs/photos.md).
   await expect(tile).toHaveJSProperty('naturalWidth', 600);
@@ -109,7 +112,7 @@ test('uploaded photos are still there after a reload', async ({ page }) => {
     .toBe(true);
   await page.reload();
   await expect(page.getByRole('img', { name: 'Photo 1' })).toHaveJSProperty('naturalWidth', 600);
-  await expect(page.getByRole('button', { name: 'Continue' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Create profile' })).toBeEnabled();
 });
 
 test('a draft photo whose file no longer exists is dropped', async ({ page }) => {
@@ -132,9 +135,9 @@ test('a draft photo whose file no longer exists is dropped', async ({ page }) =>
   await photoObject(`${dir}/thumb.jpg`, 'DELETE');
   await photoObject(`${dir}/full.jpg`, 'DELETE');
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Add photos' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Upload photos' })).toBeVisible();
   await expect(page.getByRole('img', { name: 'Photo 1' })).toBeHidden();
-  await expect(page.getByRole('button', { name: 'Continue' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Create profile' })).toBeDisabled();
 });
 
 test('a failed upload can be retried', async ({ page }) => {
@@ -218,9 +221,10 @@ test('photos stay when moving between steps', async ({ page }) => {
   await dialog(page).getByRole('button', { name: 'Use photo' }).click();
   await expect(page.getByRole('img', { name: 'Photo 1' })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(page.getByRole('heading', { name: 'Vetting' })).toBeVisible();
+  // Photos is the last step, so go back a step and forward again.
   await page.getByRole('button', { name: 'Back' }).click();
+  await expect(page.getByRole('heading', { name: 'Write about yourself' })).toBeVisible();
+  await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.getByRole('img', { name: 'Photo 1' })).toBeVisible();
 });
 

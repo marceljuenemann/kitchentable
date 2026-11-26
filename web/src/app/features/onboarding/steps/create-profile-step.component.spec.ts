@@ -40,6 +40,23 @@ describe('CreateProfileStepComponent', () => {
       expect(component.canContinue()).toBeTrue();
     });
 
+    it('says which required fields are still empty under the button', () => {
+      const hint = () => fixture.nativeElement.querySelector('#continue-hint')?.textContent.trim();
+      expect(hint()).toBe('Add your name and pronouns to continue.');
+
+      store.update({ location: '' });
+      fixture.detectChanges();
+      expect(hint()).toBe('Add your name, pronouns and location to continue.');
+
+      store.update({ name: 'Sam', location: 'London' });
+      fixture.detectChanges();
+      expect(hint()).toBe('Add your pronouns to continue.');
+
+      store.update({ pronouns: ['they/them'] });
+      fixture.detectChanges();
+      expect(hint()).toBeUndefined();
+    });
+
     it('does not accept a name of only spaces', () => {
       store.update({ name: '   ', pronouns: ['they/them'] });
 
@@ -55,6 +72,8 @@ describe('CreateProfileStepComponent', () => {
     });
 
     it('goes to step 2, but only when it can continue', () => {
+      // A new draft starts on the overview (step 0), which leads here.
+      store.update({ step: 1 });
       component.next();
       expect(store.draft().step).toBe(1);
 

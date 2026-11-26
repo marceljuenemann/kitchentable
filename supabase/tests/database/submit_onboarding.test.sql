@@ -48,8 +48,8 @@ select throws_ok($$ select public.test_submit(p_birth_year => 2000) $$, 'P0001',
 select throws_ok(
   $$ select public.test_submit(p_birth_year => extract(year from now())::int - 17, p_birth_month => 1) $$,
   'P0001', 'You must be at least 18.', 'someone who is still 17 is rejected');
-select throws_ok($$ select public.test_submit(p_vetting_answers => '{}') $$, 'P0001',
-  'The vetting questions must be answered.', 'vetting answers are required');
+select throws_ok($$ select public.test_submit(p_vetting_answers => '[]') $$, 'P0001',
+  'The vetting answers must be an object (it may be empty).', 'vetting answers must be an object');
 select throws_ok($$ select public.test_submit(p_photos => '{}') $$, 'P0001',
   'Add between 1 and 6 different photos.', 'at least one photo is required');
 select throws_ok(
@@ -81,7 +81,9 @@ select throws_ok($$ select public.test_submit() $$, '23505', 'You have already a
   'submitting twice is rejected');
 
 set local request.jwt.claim.sub = '99999999-9999-9999-9999-999999999999';
-select lives_ok($$ select public.test_submit() $$, 'someone who signed up without an invite code can submit');
+-- Onboarding no longer asks the vetting questions, so the app sends no answers.
+select lives_ok($$ select public.test_submit(p_vetting_answers => '{}') $$,
+  'someone without an invite code can submit without vetting answers');
 
 reset role;
 select is(
@@ -90,8 +92,8 @@ select is(
   'the vetting answers are stored together with the sign-up invite code');
 select is(
   (select vetting_answers from public.profiles where id = '99999999-9999-9999-9999-999999999999'),
-  '{"consent": "yes"}'::jsonb,
-  'without an invite code, only the answers are stored');
+  '{}'::jsonb,
+  'without answers or an invite code, nothing is stored');
 
 set local role anon;
 select throws_ok(

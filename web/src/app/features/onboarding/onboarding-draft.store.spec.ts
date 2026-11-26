@@ -32,14 +32,13 @@ describe('OnboardingDraftStore', () => {
   afterEach(() => jasmine.clock().uninstall());
 
   describe('starting state', () => {
-    it('is an empty draft on step 1, with London as the location', () => {
+    it('is an empty draft on the overview (step 0), with London as the location', () => {
       const store = createStore();
 
-      expect(store.draft().step).toBe(1);
+      expect(store.draft().step).toBe(0);
       expect(store.draft().name).toBe('');
       expect(store.draft().location).toBe('London');
       expect(store.draft().photos).toEqual([]);
-      expect(store.draft().vettingAnswers).toEqual({});
     });
 
     it('restores a saved draft', () => {
@@ -55,9 +54,9 @@ describe('OnboardingDraftStore', () => {
     it('keeps the step within range', () => {
       expect(createStore({ step: 99 }).draft().step).toBe(ONBOARDING_STEPS);
       TestBed.resetTestingModule();
-      expect(createStore({ step: 0 }).draft().step).toBe(1);
+      expect(createStore({ step: -1 }).draft().step).toBe(0);
       TestBed.resetTestingModule();
-      expect(createStore({ step: 'two' }).draft().step).toBe(1);
+      expect(createStore({ step: 'two' }).draft().step).toBe(0);
     });
 
     it('drops photo ids that are not strings and caps the list at six', () => {
@@ -66,11 +65,15 @@ describe('OnboardingDraftStore', () => {
       expect(store.draft().photos).toEqual(['a', 'b', 'c', 'd', 'e', 'f']);
     });
 
-    it('ignores photos or vetting answers of the wrong type', () => {
-      const store = createStore({ photos: 'not a list', vettingAnswers: 'nope' });
+    it('ignores photos of the wrong type', () => {
+      expect(createStore({ photos: 'not a list' }).draft().photos).toEqual([]);
+    });
 
-      expect(store.draft().photos).toEqual([]);
-      expect(store.draft().vettingAnswers).toEqual({});
+    it('drops the vetting answers of a draft saved when onboarding still asked for them', () => {
+      const store = createStore({ step: 3, name: 'Sam', vettingAnswers: { consent: 'x' } });
+
+      expect(store.draft().name).toBe('Sam');
+      expect(Object.keys(store.draft())).not.toContain('vettingAnswers');
     });
   });
 
@@ -167,7 +170,7 @@ describe('OnboardingDraftStore', () => {
 
 describe('toNewProfile', () => {
   const draft: OnboardingDraft = {
-    step: 4,
+    step: 3,
     name: '  Sam ',
     pronouns: ['they/them'],
     gender: ['Non-binary'],
@@ -179,7 +182,6 @@ describe('toNewProfile', () => {
     aboutText: '  About me  ',
     lookingFor: ['polyamory', 'Running buddies'],
     photos: ['a', 'b'],
-    vettingAnswers: { consent: 'x', guidelines: 'y' },
   };
 
   it('maps the draft to the fields of a profile, trimming the free text', () => {
@@ -195,7 +197,7 @@ describe('toNewProfile', () => {
       birth_month: 6,
       looking_for: ['polyamory', 'Running buddies'],
       photos: ['a', 'b'],
-      vetting_answers: { consent: 'x', guidelines: 'y' },
+      vetting_answers: {},
     });
   });
 

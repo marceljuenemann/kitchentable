@@ -39,6 +39,29 @@ describe('AboutYouStepComponent', () => {
       expect(component.canContinue()).toBeTrue();
     });
 
+    it('says what is still missing under the button, until nothing is', () => {
+      const hint = () => fixture.nativeElement.querySelector('#continue-hint')?.textContent.trim();
+      expect(hint()).toBe(
+        `Write ${ABOUT_MIN_LENGTH} more characters about yourself and pick what you're looking for to continue.`,
+      );
+
+      store.update({ aboutText: 'x'.repeat(ABOUT_MIN_LENGTH - 1) });
+      fixture.detectChanges();
+      expect(hint()).toBe(
+        "Write 1 more character about yourself and pick what you're looking for to continue.",
+      );
+
+      store.update({ aboutText: 'x'.repeat(ABOUT_MIN_LENGTH) });
+      fixture.detectChanges();
+      expect(hint()).toBe("Pick what you're looking for to continue.");
+      expect(continueButton().getAttribute('aria-describedby')).toBe('continue-hint');
+
+      store.update({ lookingFor: ['polyamory'] });
+      fixture.detectChanges();
+      expect(hint()).toBeUndefined();
+      expect(continueButton().getAttribute('aria-describedby')).toBeNull();
+    });
+
     it('counts the about text without surrounding spaces', () => {
       store.update({ aboutText: `  ${'x'.repeat(ABOUT_MIN_LENGTH - 1)}  `, lookingFor: ['x'] });
 

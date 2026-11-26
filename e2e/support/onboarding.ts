@@ -1,9 +1,17 @@
 import { expect, Page } from '@playwright/test';
 import { signInAs } from './admin';
 
+/** Signs in a fresh user and gets past the overview, onto step 1. Returns their address. */
+export async function startOnboarding(page: Page): Promise<string> {
+  const email = await signInAs(page, null);
+  await page.getByRole('button', { name: 'Get started' }).click();
+  await expect(page.getByRole('heading', { name: 'Add profile data' })).toBeVisible();
+  return email;
+}
+
 /** Gets a fresh user through steps 1 and 2 of onboarding, ending on the photos step. */
 export async function goToPhotosStep(page: Page) {
-  await signInAs(page, null);
+  await startOnboarding(page);
   await page.getByLabel('Name').fill('Sam');
   await page.getByRole('button', { name: /Pronouns/ }).click();
   await page.getByRole('option', { name: 'they/them' }).click();
@@ -12,7 +20,7 @@ export async function goToPhotosStep(page: Page) {
   await page.getByLabel('About you').fill('x'.repeat(250));
   await page.getByRole('option', { name: 'Polyamory' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(page.getByRole('heading', { name: 'Add photos' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Upload photos' })).toBeVisible();
 }
 
 /** The crop bottom sheet. */

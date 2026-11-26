@@ -61,4 +61,6 @@ export interface MyProfile extends Profile, Settings {
   search_filters: SavedSearchFilters | null;
   /** "Only show me to these genders" (only ever true with a Gender filter). */
   hide_by_gender: boolean;
+  /** When they passed the age check; null until then. */
+  age_verified_at: string | null;
 }
