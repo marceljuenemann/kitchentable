@@ -245,7 +245,9 @@ max_frequency = "1s"
 # Number of characters used in the email OTP.
 otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
-otp_expiry = 3600
+# 24 hours, Supabase's maximum: an hour made people anxious to click it in time. The sign-in email
+# says "for 24 hours", so keep the two in step. (Also used by staging and production.)
+otp_expiry = 86400
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
