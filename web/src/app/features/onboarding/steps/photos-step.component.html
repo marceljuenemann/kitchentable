@@ -1,5 +1,5 @@
 <p class="kt-step-eyebrow">Step 3 of {{ totalSteps }}</p>
-<h1 class="kt-step-title">Add photos</h1>
+<h1 class="kt-step-title">Upload photos</h1>
 <p class="kt-step-subtitle">Select up to six photos. Drag and drop to reorder.</p>
 
 <app-photo-grid
@@ -16,6 +16,18 @@
   </p>
 }
 
-<button mat-flat-button class="continue" type="button" [disabled]="!canSubmit()" (click)="submit()">
+<button
+  mat-flat-button
+  class="continue"
+  type="button"
+  [disabled]="!canSubmit()"
+  [attr.aria-describedby]="photoIds().length === 0 ? 'create-hint' : null"
+  (click)="submit()"
+>
   {{ submitting() ? 'Creating profile…' : 'Create profile' }}
 </button>
+@if (photoIds().length === 0) {
+  <p id="create-hint" class="kt-fine-print kt-missing-hint">
+    Add at least one photo to create your profile.
+  </p>
+}

@@ -20,7 +20,7 @@ export async function goToPhotosStep(page: Page) {
   await page.getByLabel('About you').fill('x'.repeat(250));
   await page.getByRole('option', { name: 'Polyamory' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(page.getByRole('heading', { name: 'Add photos' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Upload photos' })).toBeVisible();
 }
 
 /** The crop bottom sheet. */

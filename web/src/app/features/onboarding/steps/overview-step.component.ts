@@ -16,7 +16,12 @@ import { OnboardingDraftStore } from '../onboarding-draft.store';
 export class OverviewStepComponent {
   private readonly store = inject(OnboardingDraftStore);
 
-  readonly steps = ['Add profile data', 'Write about yourself', 'Add photos', 'Selfie age check'];
+  readonly steps = [
+    'Add profile data',
+    'Write about yourself',
+    'Upload photos',
+    'Selfie age check',
+  ];
 
   start() {
     this.store.update({ step: 1 });

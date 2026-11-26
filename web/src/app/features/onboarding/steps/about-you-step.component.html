@@ -55,6 +55,16 @@
   (added)="addOwn($event)"
 />
 
-<button mat-flat-button class="continue" type="button" [disabled]="!canContinue()" (click)="next()">
+<button
+  mat-flat-button
+  class="continue"
+  type="button"
+  [disabled]="!canContinue()"
+  [attr.aria-describedby]="hint() ? 'continue-hint' : null"
+  (click)="next()"
+>
   Continue
 </button>
+@if (hint()) {
+  <p id="continue-hint" class="kt-fine-print kt-missing-hint">{{ hint() }}</p>
+}

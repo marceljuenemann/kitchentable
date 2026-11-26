@@ -5,6 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { ageFrom } from '../../../core/age';
+import { andList } from '../../../core/and-list';
 import { AgeSheetComponent } from '../../../shared/profile-edit/age-sheet/age-sheet.component';
 import {
   LIST_FIELD_SHEETS,
@@ -80,10 +81,19 @@ export class CreateProfileStepComponent {
     ];
   });
 
-  readonly canContinue = computed(() => {
+  /** The required fields still empty, so the disabled button can say why. */
+  readonly missing = computed(() => {
     const draft = this.draft();
-    return draft.name.trim() !== '' && draft.pronouns.length > 0 && draft.location.trim() !== '';
+    return [
+      draft.name.trim() === '' && 'name',
+      draft.pronouns.length === 0 && 'pronouns',
+      draft.location.trim() === '' && 'location',
+    ].filter((field): field is string => !!field);
   });
+  readonly canContinue = computed(() => this.missing().length === 0);
+  readonly hint = computed(() =>
+    this.canContinue() ? '' : `Add your ${andList(this.missing())} to continue.`,
+  );
 
   setName(name: string) {
     this.store.update({ name });

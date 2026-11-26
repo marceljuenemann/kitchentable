@@ -12,7 +12,7 @@ test('the overview explains the steps, and step 1 leads back to it', async ({ pa
   await expect(page.getByRole('listitem')).toHaveText([
     /Add profile data/,
     /Write about yourself/,
-    /Add photos/,
+    /Upload photos/,
     /Selfie age check/,
   ]);
   await expect(page.getByText('Your progress is saved in this browser')).toBeVisible();
@@ -32,9 +32,12 @@ test('step 1 only continues once name, pronouns and location are filled in', asy
   await startOnboarding(page);
   const next = page.getByRole('button', { name: 'Continue' });
   await expect(next).toBeDisabled();
+  // The disabled button says what's missing.
+  await expect(next).toHaveAccessibleDescription('Add your name and pronouns to continue.');
 
   await page.getByLabel('Name').fill('Sam');
   await expect(next).toBeDisabled();
+  await expect(page.getByText('Add your pronouns to continue.')).toBeVisible();
 
   await page.getByRole('button', { name: /Pronouns/ }).click();
   await page.getByRole('option', { name: 'they/them' }).click();
@@ -150,7 +153,7 @@ test('step 2 needs an about text of 250 characters and something you are looking
   );
 
   await next.click();
-  await expect(page.getByRole('heading', { name: 'Add photos' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Upload photos' })).toBeVisible();
 });
 
 test('a draft saved on the vetting questions, which are gone, opens on the photos step', async ({
@@ -170,7 +173,7 @@ test('a draft saved on the vetting questions, which are gone, opens on the photo
   });
   await page.reload();
 
-  await expect(page.getByRole('heading', { name: 'Add photos' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Upload photos' })).toBeVisible();
   await expect(page.getByText('Step 3 of 4')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Create profile' })).toBeDisabled();
 });
